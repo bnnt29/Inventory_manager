@@ -1,8 +1,9 @@
 ﻿<!DOCTYPE html>
 
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+
 <head>
-    	<!-- Required meta tags -->
+    <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
@@ -12,12 +13,13 @@
     <link href="lightbox/dist/css/lightbox.css" rel="stylesheet" />
     <title>Tables</title>
 </head>
+
 <body>
     <div class="container-fluid">
-       <?php include "_inc/header.inc.php" ?>
+        <?php include "_inc/header.inc.php" ?>
         <div>
-        <h1> Tables </h1>
-    
+            <h1> Tables </h1>
+
         </div>
         <?php include "_inc/footer.inc.php" ?>
     </div>
@@ -27,4 +29,5 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
     <script src="lightbox/dist/js/lightbox-plus-jquery.js"></script>
 </body>
+
 </html>

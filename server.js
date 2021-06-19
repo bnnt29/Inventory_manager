@@ -1,6 +1,6 @@
 "use strict";
 const sqlite3 = require('sqlite3').verbose();
-const file ="C:/Users/Berni/Documents/inventory_manager/database/inventory.db";
+const file = "C:/Users/Berni/Documents/inventory_manager/database/inventory.db";
 var db;
 
 function createDb() {
@@ -39,10 +39,10 @@ function insertRows() {
 
 function readAllRows() {
     console.log("readAllRows item");
-    db.all("SELECT item_id AS id, name, size  FROM item", function(err, rows) {
-         rows.forEach(function (row) {
-             console.log(row.id + ": " + row.name+", "+ row.size);
-         });
+    db.all("SELECT item_id AS id, name, size  FROM item", function (err, rows) {
+        rows.forEach(function (row) {
+            console.log(row.id + ": " + row.name + ", " + row.size);
+        });
         closeDb();
     });
 }
@@ -59,7 +59,7 @@ function runExample() {
 runExample();
 
 var http = require('http');
-var _ = require('underscore'); var ip = _.chain(require('os').networkInterfaces()).values().flatten().filter(function(val){ return (val.family == 'IPv4' && val.internal == false) }).pluck('address').first().value();
+var _ = require('underscore'); var ip = _.chain(require('os').networkInterfaces()).values().flatten().filter(function (val) { return (val.family == 'IPv4' && val.internal == false) }).pluck('address').first().value();
 var server_port = process.env.PORT || 4466;
 var url = require('url');
 var fs = require('fs');
@@ -67,7 +67,7 @@ var server = http.createServer(function (req, res) {
     var path = url.parse(req.url).pathname;
     if (path == '' || path == '/') {
         path = '/index.php';
-        }
+    }
     switch (path) {
         case '/':
             res.writeHead(200, {
@@ -113,5 +113,5 @@ var server = http.createServer(function (req, res) {
             break;
     }
 });
-server.listen(server_port, ip); 
-console.log("Server is listening on "+ip+":"+server_port);
+server.listen(server_port, ip);
+console.log("Server is listening on " + ip + ":" + server_port);
