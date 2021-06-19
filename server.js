@@ -66,7 +66,7 @@ var fs = require('fs');
 var server = http.createServer(function (req, res) {
     var path = url.parse(req.url).pathname;
     if (path == '' || path == '/') {
-        path = '/index.php';
+        path = '/index.html';
     }
     switch (path) {
         case '/':
@@ -76,7 +76,7 @@ var server = http.createServer(function (req, res) {
             res.write("This is Test Message!");
             res.end();
             break;
-        case '/index.php':
+        case '/index.html':
             fs.readFile(__dirname + path, function (error, data) {
                 if (error) {
                     res.writeHead(404);
@@ -91,7 +91,7 @@ var server = http.createServer(function (req, res) {
                 }
             });
             break;
-        case '/sql_site.php':
+        case '/sql_site.html':
             fs.readFile(__dirname + path, function (error, data) {
                 if (error) {
                     res.writeHead(404);
