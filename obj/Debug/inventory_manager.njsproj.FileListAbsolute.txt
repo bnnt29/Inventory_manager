@@ -1,0 +1,3 @@
+C:\xampp\htdocs\inventory_manager\obj\Debug\inventory_manager.njsprojAssemblyReference.cache
+C:\xampp\htdocs\inventory_manager\obj\Debug\inventory_manager.njsproj.CoreCompileInputs.cache
+C:\xampp\htdocs\inventory_manager\bin\Microsoft.NodejsTools.WebRole.dll
