@@ -7,13 +7,10 @@ var pages = ["index.html", "inventory_setup.html", "sql_add_item.html", "setting
 
 function createDb(b) {
     console.log("createDb inventory");
-    
-    if(b){
-        db = new sqlite3.Database(file, insertPages);
-    }else{
+    if (b) {
         db = new sqlite3.Database(file, createTables);
-    }
-    }
+    } else {
+        db = new sqlite3.Database(file, insertPages);
     }
 }
 
@@ -42,22 +39,26 @@ function insertPages() {
         stmt.run(page_names[i], pages[i]);
     }
 
-    stmt.finalize(readAllRows());
+    stmt.finalize(closeDb(true));
 }
 
 function readAllRows() {
     console.log("readAllRows item");
-    db.all("SELECT item_id AS id, name, size  FROM item", function (err, rows) {
+    var stmt = db.all("SELECT item_id AS id, name, size  FROM item", function (err, rows) {
         rows.forEach(function (row) {
             console.log(row.id + ": " + row.name + ", " + row.size);
         });
-        closeDb();
+        closeDb(false);
     });
 }
 
-function closeDb() {
+function closeDb(b) {
     console.log("closeDb");
-    db.close();
+    if (b) {
+        db.close();
+    } else {
+        db.close(initDB(false));
+    }
 }
 
 function initDB(b) {
@@ -65,6 +66,14 @@ function initDB(b) {
 }
 
 initDB(true);
+
+function opendb() {
+    return new sqlite3.Database(file);
+}
+
+function closedb(db) {
+    db.close(function () { return true; });
+}
 
 var http = require('http');
 var _ = require('underscore'); var ip = _.chain(require('os').networkInterfaces()).values().flatten().filter(function (val) { return (val.family == 'IPv4' && val.internal == false) }).pluck('address').first().value();
