@@ -2,6 +2,8 @@
 const sqlite3 = require('sqlite3').verbose();
 const file = "C:/Users/Berni/Documents/inventory_manager/database/inventory.db";
 var db;
+var page_names = ["index", "inventory_setup", "sql_add_item", "settings"];
+var pages = ["index.html", "inventory_setup.html", "sql_add_item.html", "settings.html"];;
 
 function createDb() {
     console.log("createDb inventory");
@@ -11,30 +13,29 @@ function createDb() {
 function createTables() {
     console.log("Create Tables");
     //console.log("createTable box");
-    db.run("CREATE TABLE IF NOT EXISTS box (box_id INTEGER NOT NULL PRIMARY KEY UNIQUE, name STRING (200) NOT NULL, box_group_id INTEGER (100) REFERENCES box_group (box_group_id)  NOT NULL);");
+    db.run("CREATE TABLE IF NOT EXISTS box (box_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE, name STRING (200) NOT NULL, box_group_id INTEGER (100) REFERENCES box_group (box_group_id)  NOT NULL);");
     //console.log("createTable box_group");
-    db.run("CREATE TABLE IF NOT EXISTS box_group (box_group_id INTEGER NOT NULL PRIMARY KEY, name STRING (100) NOT NULL);");
-    //console.log("createTable HTML_pages");
-    db.run("CREATE TABLE IF NOT EXISTS HTML_pages (HTML_id INTEGER PRIMARY KEY UNIQUE NOT NULL, name STRING (100) NOT NULL, path STRING (200) NOT NULL);");
+    db.run("CREATE TABLE IF NOT EXISTS box_group (box_group_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE, name STRING (100) NOT NULL);");
     //console.log("createTable in_use");
-    db.run("CREATE TABLE IF NOT EXISTS in_use (item_id INTEGER PRIMARY KEY REFERENCES item (item_id) NOT NULL, box_id   INTEGER (100) NOT NULL REFERENCES box (box_id), quantity INTEGER (100) NOT NULL);");
+    db.run("CREATE TABLE IF NOT EXISTS in_use (item_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE REFERENCES item (item_id), box_id   INTEGER (100) NOT NULL REFERENCES box (box_id), quantity INTEGER (100) NOT NULL);");
     //console.log("createTable instructions");
-    db.run("CREATE TABLE IF NOT EXISTS instructions (instructions_id INTEGER NOT NULL PRIMARY KEY, name STRING (100) NOT NULL, document STRING (200));");
+    db.run("CREATE TABLE IF NOT EXISTS instructions (instructions_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE, name STRING (100) NOT NULL, document STRING (200));");
     //console.log("createTable item");
-    db.run("CREATE TABLE IF NOT EXISTS item (item_id INTEGER NOT NULL PRIMARY KEY UNIQUE, name STRING (100)  NOT NULL, instructions_id INTEGER (100) NOT NULL REFERENCES instructions (instructions_id),size INTEGER (100) NOT NULL);");
+    db.run("CREATE TABLE IF NOT EXISTS item (item_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE, name STRING (100)  NOT NULL, instructions_id INTEGER (100) NOT NULL REFERENCES instructions (instructions_id),size INTEGER (100) NOT NULL);");
     //console.log("createTable item_box");
-    db.run("CREATE TABLE IF NOT EXISTS item_box (item_id INTEGER PRIMARY KEY NOT NULL REFERENCES item (item_id),box_id INTEGER (100) REFERENCES box (box_id) NOT NULL,quantity INTEGER (100) NOT NULL);");
-    readAllRows();
+    db.run("CREATE TABLE IF NOT EXISTS item_box (item_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE REFERENCES item (item_id),box_id INTEGER (100) REFERENCES box (box_id) NOT NULL,quantity INTEGER (100) NOT NULL);");
+    //console.log("createTable HTML_pages");
+    db.run("CREATE TABLE IF NOT EXISTS HTML_pages (HTML_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE, name STRING (100) NOT NULL, path STRING (200) NOT NULL UNIQUE);", insertPages());
 }
-function insertRows() {
-    console.log("insertRows item i");
-    var stmt = db.prepare("INSERT INTO item VALUES (?)");
+function insertPages() {
+    console.log("Add Pages");
+    var stmt = db.prepare("INSERT OR IGNORE INTO HTML_pages (name, path) VALUES (?, ?)");
 
-    for (var i = 0; i < 10; i++) {
-        stmt.run("item " + i);
+    for (var i = 0; i < pages.length; i++) {
+        stmt.run(page_names[i], pages[i]);
     }
 
-    stmt.finalize(readAllRows);
+    stmt.finalize(readAllRows());
 }
 
 function readAllRows() {
@@ -65,7 +66,7 @@ var url = require('url');
 var fs = require('fs');
 var server = http.createServer(function (req, res) {
     var path = url.parse(req.url).pathname;
-    if (path == '' || path == '/') {
+    if (path == '' || path == '/' || page_names[0] || pages[0]) {
         path = '/index.html';
     }
     switch (path) {
