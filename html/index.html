@@ -12,6 +12,7 @@
   <!-- Bootstrap CSS -->
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
     integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
   <link rel="stylesheet" src="../_css/index.css" />
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
@@ -27,16 +28,15 @@
       <div class="row" style="padding-top: 1rem; padding-bottom: 1rem;">
         <div class="col">
           <ul id="nav_ul" class="nav justify-content-center">
-            <script type="text/javascript" >
-              var body = document.createElement("li");
-              body.classList.add('nav-item');
-              var htdb = recreateDb();
-              a();
+            <script type="text/javascript">
+              recreateDb();
               function a() {
-                // var stmt = htdb.all("SELECT * FROM HTML_pages", function (err, rows) {
-                // });
-                //   rows.forEach(function (row) {
-                    // document.write(row.id + ": " + row.name + ", " + row.path);
+                var body = document.createElement("li");
+                body.classList.add('nav-item');
+                console.log("1");
+                var stmt = htdb.all("SELECT * FROM HTML_pages", function (err, rows) {
+                  rows.forEach(function (row) {
+                    document.write(row.id + ": " + row.name + ", " + row.path);
                     let element = document.createElement("a");
                     element.classList.add('nav-link');
                     element.href = "row.path";
@@ -45,12 +45,12 @@
                     body.appendChild(element);
                     let append = document.getElementById("nav_ul");
                     append.appendChild(body);
-                //   });
-                //   if (err != null) {
-                //     document.write(err);
-                //   }
-                //   closeDb(true, db);
-                // });
+                  });
+                  if (err != null) {
+                    document.write(err);
+                  }
+                  closeDb(true, htdb);
+                });
               }
             </script>
           </ul>

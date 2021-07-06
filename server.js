@@ -19,6 +19,8 @@ function recreateDb() {
     return new sqlite3.Database(file);
 }
 
+
+
 function createTables() {
     console.log("Create Tables");
     //console.log("createTable box");
@@ -87,7 +89,7 @@ var server_port = process.env.PORT || 4466;
 var url = require('url');
 var fs = require('fs');
 var server = http.createServer(function (req, res) {
-var path = url.parse(req.url).pathname;
+    var path = url.parse(req.url).pathname;
     if (path != '') {
         let tmp = path.split('');
         tmp = tmp.slice(1, path.length);
