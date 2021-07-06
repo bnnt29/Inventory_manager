@@ -12,11 +12,11 @@
   <!-- Bootstrap CSS -->
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
     integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-  <link rel="stylesheet" href="_css/index.css" />
-  <link href="lightbox/dist/css/lightbox.css" rel="stylesheet" />
+  <link rel="stylesheet" src="../_css/index.css" />
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+  <script type="text/javascript" href="../server.js"></script>
   <title>Overview</title>
 </head>
 
@@ -26,19 +26,33 @@
     <div class="col-sm-12 col-lg-12" style="background-color: black;">
       <div class="row" style="padding-top: 1rem; padding-bottom: 1rem;">
         <div class="col">
-          <ul class="nav justify-content-center">
-            <li class="nav-item">
-              <a class="nav-link" href="/index.html" style="color: lightcyan;">Overview</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="/inventory_setup.html" style="color: lightcyan;">Inventory_Setup</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="/settings.html" style="color: lightcyan;">Settings</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link disabled" href="#" style="color: grey;">Disabled</a>
-            </li>
+          <ul id="nav_ul" class="nav justify-content-center">
+            <script type="text/javascript" >
+              var body = document.createElement("li");
+              body.classList.add('nav-item');
+              var htdb = recreateDb();
+              a();
+              function a() {
+                // var stmt = htdb.all("SELECT * FROM HTML_pages", function (err, rows) {
+                // });
+                //   rows.forEach(function (row) {
+                    // document.write(row.id + ": " + row.name + ", " + row.path);
+                    let element = document.createElement("a");
+                    element.classList.add('nav-link');
+                    element.href = "row.path";
+                    element.id = "row.name";
+                    element.innerText = "row.name";
+                    body.appendChild(element);
+                    let append = document.getElementById("nav_ul");
+                    append.appendChild(body);
+                //   });
+                //   if (err != null) {
+                //     document.write(err);
+                //   }
+                //   closeDb(true, db);
+                // });
+              }
+            </script>
           </ul>
         </div>
       </div>
@@ -55,9 +69,13 @@
       </div>
     </div>
     <!-- header -->
-
+    <div class="row">
+      <div class="col">
+        <h1>Hello</h1>
+      </div>
+    </div>
     <!-- footer -->
-    <div class="row" style="background-color: burlywood;">
+    <div class="row" style="background-color: burlywood; padding-bottom: 1rem;">
       <div class="col-lg-3">
       </div>
       <div class="col-lg-3">
@@ -80,7 +98,7 @@
         </div>
         <div class="row">
           <div class="col">
-            <a href="https://github.com/bnnt29/Inventory_manager">
+            <a href="https://github.com/bnnt29/Inventory_manager" target="_blank">
               <svg class="octicon octicon-mark-github v-align-middle" height="32" viewBox="0 0 16 16" version="1.1"
                 width="32" aria-hidden="true">
                 <path fill-rule="evenodd"
@@ -107,7 +125,6 @@
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
     integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
     crossorigin="anonymous"></script>
-  <script src="lightbox/dist/js/lightbox-plus-jquery.js"></script>
 </body>
 
 </html>

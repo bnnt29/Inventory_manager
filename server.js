@@ -3,7 +3,7 @@ const sqlite3 = require('sqlite3').verbose();
 const file = "C:/Users/Berni/Documents/inventory_manager/database/inventory.db";
 var db;
 var page_names = ["index", "inventory_setup", "sql_add_item", "settings"];
-var pages = ["index.html", "inventory_setup.html", "sql_add_item.html", "settings.html"];;
+var pages = ["index.html", "inventory_setup.html", "sql_add_item.html", "settings.html"];
 
 function createDb(b) {
     console.log("createDb inventory");
@@ -12,6 +12,11 @@ function createDb(b) {
     } else {
         db = new sqlite3.Database(file, insertPages);
     }
+}
+
+function recreateDb() {
+    console.log("recreateDb inventory");
+    return new sqlite3.Database(file);
 }
 
 function createTables() {
@@ -31,6 +36,7 @@ function createTables() {
     //console.log("createTable HTML_pages");
     db.run("CREATE TABLE IF NOT EXISTS HTML_pages (HTML_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE, name STRING (100) NOT NULL, path STRING (200) NOT NULL UNIQUE);", readAllRows);
 }
+
 function insertPages() {
     console.log("Add Pages");
     var stmt = db.prepare("INSERT OR IGNORE INTO HTML_pages (name, path) VALUES (?, ?)");
@@ -38,21 +44,20 @@ function insertPages() {
     for (var i = 0; i < pages.length; i++) {
         stmt.run(page_names[i], pages[i]);
     }
-
-    stmt.finalize(closeDb(true));
+    stmt.finalize(closeDb(true, db));
 }
 
 function readAllRows() {
-    console.log("readAllRows item");
-    var stmt = db.all("SELECT item_id AS id, name, size  FROM item", function (err, rows) {
+    console.log("readAllRows HTML_pages");
+    var stmt = db.all("SELECT * FROM HTML_pages", function (err, rows) {
         rows.forEach(function (row) {
-            console.log(row.id + ": " + row.name + ", " + row.size);
+            console.log(row.id + ": " + row.name + ", " + row.path);
         });
-        closeDb(false);
+        closeDb(false, db);
     });
 }
 
-function closeDb(b) {
+function closeDb(b, db) {
     console.log("closeDb");
     if (b) {
         db.close();
@@ -65,8 +70,6 @@ function initDB(b) {
     createDb(b);
 }
 
-initDB(true);
-
 function opendb() {
     return new sqlite3.Database(file);
 }
@@ -75,59 +78,56 @@ function closedb(db) {
     db.close(function () { return true; });
 }
 
+initDB(true);
+
 var http = require('http');
+var https = require('https');
 var _ = require('underscore'); var ip = _.chain(require('os').networkInterfaces()).values().flatten().filter(function (val) { return (val.family == 'IPv4' && val.internal == false) }).pluck('address').first().value();
 var server_port = process.env.PORT || 4466;
 var url = require('url');
 var fs = require('fs');
 var server = http.createServer(function (req, res) {
-    var path = url.parse(req.url).pathname;
-    if (path == '' || path == '/' || page_names[0] || pages[0]) {
-        path = '/index.html';
+var path = url.parse(req.url).pathname;
+    if (path != '') {
+        let tmp = path.split('');
+        tmp = tmp.slice(1, path.length);
+        path = tmp.join('');
     }
-    switch (path) {
-        case '/':
-            res.writeHead(200, {
-                'Content-Type': 'text/plain'
-            });
-            res.write("This is Test Message!");
-            res.end();
-            break;
-        case '/index.html':
-            fs.readFile(__dirname + path, function (error, data) {
-                if (error) {
-                    res.writeHead(404);
-                    res.write(error);
-                    res.end();
-                } else {
-                    res.writeHead(200, {
-                        'Content-Type': 'text/html'
-                    });
-                    res.write(data);
-                    res.end();
-                }
-            });
-            break;
-        case '/sql_site.html':
-            fs.readFile(__dirname + path, function (error, data) {
-                if (error) {
-                    res.writeHead(404);
-                    res.write(error);
-                    res.end();
-                } else {
-                    res.writeHead(200, {
-                        'Content-Type': 'text/html'
-                    });
-                    res.write(data);
-                    res.end();
-                }
-            });
-            break;
-        default:
+    if (path == '' || path == 'html') {
+        path = pages[0];
+    }
+    if (pages.includes(path) || page_names.includes(path)) {
+        let pageset = false;
+        for (var i = 0; i < pages.length; i++) {
+            let page = pages[i];
+            if (page != path && page_names[i] != path || pageset) {
+            } else {
+                pageset = true;
+                fs.readFile(__dirname + '/html/' + page, function (error, data) {
+                    if (error) {
+                        res.writeHead(404);
+                        res.write(error);
+                        res.end();
+                    } else {
+                        res.writeHead(200, {
+                            'Content-Type': 'text/html'
+                        });
+                        res.write(data);
+                        res.end();
+                    }
+                });
+            }
+        }
+        if (!pageset) {
             res.writeHead(404);
             res.write("opps this doesn't exist - 404");
             res.end();
-            break;
+        }
+        i += 1;
+    } else {
+        res.writeHead(404);
+        res.write("opps this doesn't exist - 404");
+        res.end();
     }
 });
 server.listen(server_port, ip);
