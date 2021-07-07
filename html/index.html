@@ -12,12 +12,12 @@
   <!-- Bootstrap CSS -->
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
     integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-
-  <link rel="stylesheet" src="../_css/index.css" />
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
-  <script type="text/javascript" href="../server.js"></script>
+  <link rel="stylesheet" src="../_css/index.css" />
+  <script type="text/javascript" href="../js/nav.js"></script>
+  <script type="text/javascript" href="../js/index.js"></script>
   <title>Overview</title>
 </head>
 
@@ -29,29 +29,7 @@
         <div class="col">
           <ul id="nav_ul" class="nav justify-content-center">
             <script type="text/javascript">
-              recreateDb();
-              function a() {
-                var body = document.createElement("li");
-                body.classList.add('nav-item');
-                console.log("1");
-                var stmt = htdb.all("SELECT * FROM HTML_pages", function (err, rows) {
-                  rows.forEach(function (row) {
-                    document.write(row.id + ": " + row.name + ", " + row.path);
-                    let element = document.createElement("a");
-                    element.classList.add('nav-link');
-                    element.href = "row.path";
-                    element.id = "row.name";
-                    element.innerText = "row.name";
-                    body.appendChild(element);
-                    let append = document.getElementById("nav_ul");
-                    append.appendChild(body);
-                  });
-                  if (err != null) {
-                    document.write(err);
-                  }
-                  closeDb(true, htdb);
-                });
-              }
+            document.onload(nav_links());
             </script>
           </ul>
         </div>
@@ -76,29 +54,28 @@
     </div>
     <!-- footer -->
     <div class="row" style="background-color: burlywood; padding-bottom: 1rem;">
-      <div class="col-lg-3">
-      </div>
-      <div class="col-lg-3">
+      <div class="col-lg-6">
         <div class="row">
           <div class="col">
-            <h4 style="text-align: left;">credits</h4>
+            <h4 style="text-align: center;">credits</h4>
           </div>
         </div>
         <div class="row">
           <div class="col">
-            <p style="text-align: left;">created by Bennet Richter</p>
+            <p style="text-align: center;">created by Bennet Richter</p>
           </div>
         </div>
       </div>
-      <div class="col-lg-3">
+      <div class="col-lg-6">
         <div class="row">
           <div class="col">
-            <h4 style="text-align: left;">help</h4>
+            <h4 style="text-align: center;">help</h4>
           </div>
         </div>
         <div class="row">
           <div class="col">
-            <a href="https://github.com/bnnt29/Inventory_manager" target="_blank">
+            <a href="https://github.com/bnnt29/Inventory_manager" target="_blank"
+              style="text-align: center; display: block;">
               <svg class="octicon octicon-mark-github v-align-middle" height="32" viewBox="0 0 16 16" version="1.1"
                 width="32" aria-hidden="true">
                 <path fill-rule="evenodd"
@@ -108,8 +85,6 @@
               Github</a>
           </div>
         </div>
-      </div>
-      <div class="col-lg-3">
       </div>
     </div>
     <!-- footer -->

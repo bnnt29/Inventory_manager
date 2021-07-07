@@ -2,7 +2,7 @@
   "name": "inventory_manager",
   "version": "1.0.0",
   "description": "inventory_manager",
-  "main": "server.js",
+  "main": "js/server.js",
   "author": {
     "name": "Bennet Richter"
   },
