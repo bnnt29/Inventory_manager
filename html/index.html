@@ -29,7 +29,12 @@
         <div class="col">
           <ul id="nav_ul" class="nav justify-content-center">
             <script type="text/javascript">
-            document.onload(nav_links());
+              var socket = io.connect('http://192.168.178.29:4466'); // connect to server
+              socket.on('ready', function (data) { // listen to news event raised by the server
+                console.log(data);
+                socket.emit('req', 'data' ); // raise an event on the server
+                socket.on('pages', function(data){console.log(data)});
+              });
             </script>
           </ul>
         </div>

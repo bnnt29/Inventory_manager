@@ -2,8 +2,7 @@
 const sqlite3 = require('sqlite3').verbose();
 const file = "C:/Users/Berni/Documents/inventory_manager/database/inventory.db";
 var db;
-var page_names = ["index", "inventory_setup", "sql_add_item", "settings"];
-var pages = ["index.html", "inventory_setup.html", "sql_add_item.html", "settings.html"];
+var pages;
 var i = 0;
 
 
@@ -16,9 +15,9 @@ function createDb(b) {
     }
 }
 
-function recreateDb() {
+function recreateDb(callback) {
     console.log("recreateDb inventory");
-    return new sqlite3.Database(file);
+    callback(new sqlite3.Database(file));
 }
 
 function createTables() {
@@ -44,7 +43,7 @@ function insertPages() {
     var stmt = db.prepare("INSERT OR IGNORE INTO HTML_pages (name, path) VALUES (?, ?)");
 
     for (var i = 0; i < pages.length; i++) {
-        stmt.run(page_names[i], pages[i]);
+        stmt.run(pages[i], pages[i] + '.html');
     }
     stmt.finalize(closeDb(true, db));
 }
@@ -76,10 +75,23 @@ function closedb(db) {
     db.close(function () { return true; });
 }
 
-module.exports = function(a, db){
+function setpages(p) {
+    pages = p;
+}
+
+function read(db, r, callback) {
+    var stmt = db.all(r, function (err, rows) {
+        callback(rows);
+        closeDb(false, db);
+    });
+}
+
+module.exports = function (p, a, db, callback) {
     var module = {};
-    module.initDB = function(a){initDB(a)};
-    module.recreateDb = function(){recreateDb()};
-    module.closedb = function(db){closedb(db)};
+    module.read = function (db, r, callback) { read(db, r, callback) }
+    module.setpages = function (p) { setpages(p) };
+    module.initDB = function (a) { initDB(a) };
+    module.recreateDb = function (callback) { recreateDb(callback) };
+    module.closedb = function (db) { closedb(db) };
     return module;
 };
