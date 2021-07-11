@@ -16,6 +16,7 @@
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
   <link rel="stylesheet" src="../_css/index.css" />
+  <script src="/socket.io/socket.io.js"></script>
   <script type="text/javascript" href="../js/nav.js"></script>
   <script type="text/javascript" href="../js/index.js"></script>
   <title>Overview</title>
@@ -28,13 +29,23 @@
       <div class="row" style="padding-top: 1rem; padding-bottom: 1rem;">
         <div class="col">
           <ul id="nav_ul" class="nav justify-content-center">
+            <script src="/socket.io/socket.io.js"></script>
             <script type="text/javascript">
-              var socket = io.connect('http://192.168.178.29:4466'); // connect to server
-              socket.on('ready', function (data) { // listen to news event raised by the server
-                console.log(data);
-                socket.emit('req', 'data' ); // raise an event on the server
-                socket.on('pages', function(data){console.log(data)});
+              var ip = location.host;
+              console.log("1 " + ip);
+              var socket = io('http://' + ip + ':4466', { transports: ["websocket"]}); // connect to server
+              console.log("2 " + socket);
+              socket.on('connect', () => {
+                console.log("3");
+                console.log('connected!');
+                socket.emit('ready', { message: 'hello' });
               });
+              socket.on('respond', (data) => {
+                console.log("4");
+                console.log(data);
+              })
+              //});
+              console.log("5");
             </script>
           </ul>
         </div>

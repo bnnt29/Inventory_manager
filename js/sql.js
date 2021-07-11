@@ -40,10 +40,10 @@ function createTables() {
 
 function insertPages() {
     console.log("Add Pages");
-    var stmt = db.prepare("INSERT OR IGNORE INTO HTML_pages (name, path) VALUES (?, ?)");
+    var stmt = db.prepare("INSERT OR IGNORE INTO HTML_pages (HTML_id, name, path) VALUES (?, ?, ?)");
 
     for (var i = 0; i < pages.length; i++) {
-        stmt.run(pages[i], pages[i] + '.html');
+        stmt.run(i, pages[i], pages[i] + '.html');
     }
     stmt.finalize(closeDb(true, db));
 }
@@ -58,12 +58,12 @@ function readAllRows() {
     });
 }
 
-function closeDb(b, db) {
+function closeDb(b, dbn) {
     console.log("closeDb");
     if (b) {
-        db.close();
+        dbn.close();
     } else {
-        db.close(initDB(false));
+        dbn.close(initDB(false));
     }
 }
 
@@ -71,22 +71,22 @@ function initDB(b) {
     createDb(b);
 }
 
-function closedb(db) {
-    db.close(function () { return true; });
+function closedb(dbn) {
+    dbn.close();
 }
 
 function setpages(p) {
     pages = p;
 }
 
-function read(db, r, callback) {
-    var stmt = db.all(r, function (err, rows) {
+function read(dbn, r, callback) {
+    var stmt = dbn.all(r, function (err, rows) {
+        closedb(dbn);
         callback(rows);
-        closeDb(false, db);
     });
 }
 
-module.exports = function (p, a, db, callback) {
+module.exports = function (p, a, db, callback, r) {
     var module = {};
     module.read = function (db, r, callback) { read(db, r, callback) }
     module.setpages = function (p) { setpages(p) };
