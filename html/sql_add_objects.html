@@ -59,11 +59,11 @@
                     <div class="col-lg-12">
                         <!-- Tab links -->
                         <div class="tab">
-                            <button class="tablinks" onclick="openCity(event, 'item')" id="defaultOpen">item</button>
-                            <button class="tablinks" onclick="openCity(event, 'box')">box</button>
-                            <button class="tablinks" onclick="openCity(event, 'box group')">box group</button>
-                            <button class="tablinks" onclick="openCity(event, 'instructions')">instructions</button>
-                            <button class="tablinks" onclick="openCity(event, 'in_use')">in_use</button>
+                            <button class="tablinks" onclick="opentab(event, 'item')" id="defaultOpen">item</button>
+                            <button class="tablinks" onclick="opentab(event, 'box')">box</button>
+                            <button class="tablinks" onclick="opentab(event, 'box group')">box group</button>
+                            <button class="tablinks" onclick="opentab(event, 'instructions')">instructions</button>
+                            <button class="tablinks" onclick="opentab(event, 'in_use')">in_use</button>
                         </div>
                     </div>
                 </div>
@@ -89,7 +89,7 @@
                                                 </div>
                                                 <div class="col-lg-6">
                                                     <form>
-                                                        <select id="cars" name="cars"
+                                                        <select id="instructions_select" name="instructions_select"
                                                             style="width: 16rem; height: 3rem;">
                                                             <option value="Choose">Choose instructions</option>
                                                             <option value="1">1</option>
@@ -109,7 +109,7 @@
                                                     <p>Size:</p>
                                                 </div>
                                                 <div class="col-lg-3">
-                                                    <textarea id="item_name"
+                                                    <textarea id="item_size"
                                                         style="width: 16rem; height: 3rem;"></textarea>
                                                 </div>
                                                 <div class="col-lg-3">
@@ -132,7 +132,7 @@
                                                 <div class="col-lg-4"></div>
                                                 <div class="col-lg-4">
                                                     <button id="save_item" onclick=""
-                                                        style="width: 16rem; height: 3rem;">save</button>
+                                                        style="width: 16rem; height: 3rem;">Add item</button>
                                                 </div>
                                                 <div class="col-lg-4"></div>
                                             </div>
@@ -141,25 +141,156 @@
                                 </div>
                             </div>
                         </div>
-
                         <div id="box" class="tabcontent">
-                            <h3>Paris</h3>
-                            <p>Paris is the capital of France.</p>
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <div class="row">
+                                        <div class="col-lg-6">
+                                            <p>Name:</p>
+                                        </div>
+                                        <div class="col-lg-6">
+                                            <textarea id="box_name" style="width: 16rem; height: 3rem;"></textarea>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-lg-12">
+                                            <div class="row">
+                                                <div class="col-lg-6">
+                                                    <p>Box group:</p>
+                                                </div>
+                                                <div class="col-lg-6">
+                                                    <form>
+                                                        <select id="box_group" name="box_group"
+                                                            style="width: 16rem; height: 3rem;">
+                                                            <option value="Choose">Choose Box group</option>
+                                                            <option value="1">1</option>
+                                                            <option value="2">2</option>
+                                                            <option value="3">3</option>
+                                                            <option value="4">4</option>
+                                                        </select>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-lg-12">
+                                            <div class="row">
+                                                <div class="col-lg-4"></div>
+                                                <div class="col-lg-4">
+                                                    <button id="save_box" onclick=""
+                                                        style="width: 16rem; height: 3rem;">Add box</button>
+                                                </div>
+                                                <div class="col-lg-4"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-
                         <div id="box group" class="tabcontent">
-                            <h3>Tokyo</h3>
-                            <p>Tokyo is the capital of Japan.</p>
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <div class="row">
+                                        <div class="col-lg-6">
+                                            <p>Name:</p>
+                                        </div>
+                                        <div class="col-lg-6">
+                                            <textarea id="box_group_name"
+                                                style="width: 16rem; height: 3rem;"></textarea>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-lg-6">
+                                            <p>Location :</p>
+                                        </div>
+                                        <div class="col-lg-6">
+                                            <textarea id="location_name" style="width: 16rem; height: 3rem;"></textarea>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-lg-12">
+                                            <div class="row">
+                                                <div class="col-lg-4"></div>
+                                                <div class="col-lg-4">
+                                                    <button id="save_box_group" onclick=""
+                                                        style="width: 16rem; height: 3rem;">Add box group</button>
+                                                </div>
+                                                <div class="col-lg-4"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-
                         <div id="instructions" class="tabcontent">
-                            <h3>Tokyo</h3>
-                            <p>Tokyo is the capital of Japan.</p>
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <div class="row">
+                                        <div class="col-lg-6">
+                                            <p>Name:</p>
+                                        </div>
+                                        <div class="col-lg-6">
+                                            <textarea id="instructions_name"
+                                                style="width: 16rem; height: 3rem;"></textarea>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-lg-6">
+                                            <p>File location :</p>
+                                        </div>
+                                        <div class="col-lg-6">
+                                            <textarea id="file_location" style="width: 16rem; height: 3rem;"></textarea>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-lg-12">
+                                            <div class="row">
+                                                <div class="col-lg-4"></div>
+                                                <div class="col-lg-4">
+                                                    <button id="save_instructions" onclick=""
+                                                        style="width: 16rem; height: 3rem;">Add instructions</button>
+                                                </div>
+                                                <div class="col-lg-4"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-
                         <div id="in_use" class="tabcontent">
-                            <h3>Tokyo</h3>
-                            <p>Tokyo is the capital of Japan.</p>
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <div class="row">
+                                        <div class="col-lg-6">
+                                            <p>Quantity:</p>
+                                        </div>
+                                        <div class="col-lg-6">
+                                            <textarea id="qunatity" style="width: 16rem; height: 3rem;"></textarea>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-lg-6">
+                                            <p>Notes:</p>
+                                        </div>
+                                        <div class="col-lg-6">
+                                            <textarea id="notes" style="width: 16rem; height: 3rem;"></textarea>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-lg-12">
+                                            <div class="row">
+                                                <div class="col-lg-4"></div>
+                                                <div class="col-lg-4">
+                                                    <button id="save_in_use" onclick=""
+                                                        style="width: 16rem; height: 3rem;">Add item_use</button>
+                                                </div>
+                                                <div class="col-lg-4"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
