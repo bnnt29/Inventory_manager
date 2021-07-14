@@ -16,9 +16,9 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
-    <link rel="stylesheet" src="../_settings.css" />
-    <script type="text/javascript" src="settings.js"></script>
-    <title>Settings</title>
+    <link rel="stylesheet" src="../_css/sql_add_objects.css" type="text/css"/>
+    <script type="text/javascript" src="sql_add_objects.js"></script>
+    <title>Tables</title>
 </head>
 
 <body>
@@ -50,96 +50,58 @@
                             width: 100,
                             height: 100
                         });
-                        qrcode.makeCode('http://' + location.host + '/settings');
+                        qrcode.makeCode('http://' + location.host + '/sql_add_objects');
                     </script>
                 </div>
             </div>
-            <div class="col-lg-8">
-                <div class="row" style="margin-top: 1rem; margin-bottom: 1rem;">
+            <div class="col-lg-8" style="margin-top: 2rem; margin-bottom: 2rem;">
+                <div class="row">
                     <div class="col-lg-12">
-                        <div class="row">
-                            <div class="col-lg-4">
-                                <h4>local Database location:</h4>
-                            </div>
-                            <div class="col-lg-8">
-                                <textarea id="database_location" style="width: 16rem; height: 3rem;"></textarea>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-lg-4">
-                                <h4>Server 1 IP:</h4>
-                                <p>(0.0.0.0 is standart for system ip)</p>
-                            </div>
-                            <div class="col-lg-3">
-                                <textarea id="server_1_ip" style="width: 16rem; height: 3rem;"></textarea>
-                            </div>
-                            <div class="col-lg-5">
-                                <p>Note: many ip-confugurations will fail <abbr
-                                        title="Change this may result in a fatal error. The ip then has to be configured manually at: [file_location]">?</abbr>
-                                </p>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-lg-4">
-                                <h4>Server 1 Port:</h4>
-                            </div>
-                            <div class="col-lg-8">
-                                <textarea id="server_1_port" style="width: 16rem; height: 3rem;"></textarea>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-lg-4">
-                                <h4>Server 2 Use:</h4>
-                            </div>
-                            <div class="col-lg-8">
-                                <input name="collapseGroup" type="radio" value="true" id="server_2_use_true"
-                                    style="margin-right: 0.5rem;" onclick="toggle(true)" />enabled
-                                <input name="collapseGroup" type="radio" value="false" id="server_2_use_false"
-                                    style="margin-right: 0.5rem; margin-left: 1rem;" onclick="toggle(false)" />disabled
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-lg-12">
-                                <div id="collapseOne">
-                                    <div class="row">
-                                        <div class="col-lg-4">
-                                            <h4>Server 2 IP:</h4>
-                                        </div>
-                                        <div class="col-lg-3">
-                                            <textarea id="server_2_ip" style="width: 16rem; height: 3rem;"></textarea>
-                                        </div>
-                                        <div class="col-lg-5">
-                                            <p>Note: many ip-confugurations will fail <abbr
-                                                    title="Change this may result in a fatal error. The ip then has to be configured manually at: [file_location]">?</abbr>
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-lg-4">
-                                            <h4>Server 2 Port:</h4>
-                                        </div>
-                                        <div class="col-lg-8">
-                                            <textarea id="server_2_port" style="width: 16rem; height: 3rem;"></textarea>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-lg-4"></div>
-                            <div class="col-lg-8">
-                                <button id="save_settings" onclick="setsettings()" style="width: 16rem; height: 3rem;"
-                                    disabled>save</button>
-                            </div>
-                            <script type="text/javascript">
-                                window.onload = getsettings();
-                            </script>
+                        <!-- Tab links -->
+                        <div class="tab">
+                            <button class="tablinks" onclick="openCity(event, 'item')" id="defaultOpen">item</button>
+                            <button class="tablinks" onclick="openCity(event, 'box')">box</button>
+                            <button class="tablinks" onclick="openCity(event, 'box group')">box group</button>
+                            <button class="tablinks" onclick="openCity(event, 'instructions')">instructions</button>
+                            <button class="tablinks" onclick="openCity(event, 'in_use')">in_use</button>
                         </div>
                     </div>
                 </div>
+                <div class="row">
+                    <div class="col-lg-12">
+                        <!-- Tab content -->
+                        <div id="item" class="tabcontent">
+                            <h3>London</h3>
+                            <p>London is the capital city of England.</p>
+                        </div>
+
+                        <div id="box" class="tabcontent">
+                            <h3>Paris</h3>
+                            <p>Paris is the capital of France.</p>
+                        </div>
+
+                        <div id="box group" class="tabcontent">
+                            <h3>Tokyo</h3>
+                            <p>Tokyo is the capital of Japan.</p>
+                        </div>
+
+                        <div id="instructions" class="tabcontent">
+                            <h3>Tokyo</h3>
+                            <p>Tokyo is the capital of Japan.</p>
+                        </div>
+
+                        <div id="in_use" class="tabcontent">
+                            <h3>Tokyo</h3>
+                            <p>Tokyo is the capital of Japan.</p>
+                        </div>
+                    </div>
+                </div>
+                <script type="text/javascript">
+                    // Get the element with id="defaultOpen" and click on it
+                    document.getElementById("defaultOpen").click();
+                </script>
             </div>
             <div class="col-lg-2">
-
             </div>
         </div>
     </div>
@@ -179,6 +141,7 @@
         </div>
     </div>
     <!-- footer -->
+
     </div>
     <!--Bootstrap JS-->
     <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
