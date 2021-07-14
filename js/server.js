@@ -1,6 +1,8 @@
 "use strict";
 var pages = ["index", "inventory_setup", "sql_add_objects", "settings"];
 
+var ip_connections = [];
+
 var sql = require("./sql")();
 var fs = require('fs');
 
@@ -101,7 +103,7 @@ function fserverhandler(req, res) {
     }
 
     if (req.url.indexOf('.css') != -1) { //req.url has the pathname, check if it conatins '.css'
-        fs.readFile(__dirname + '/../css/' + path, function (err, data) {
+        fs.readFile(__dirname + '/../_css/' + path, function (err, data) {
             if (err) console.log(err);
             res.writeHead(200, { 'Content-Type': 'text/css' });
             res.write(data);
@@ -148,7 +150,10 @@ sql.recreateDb(function (data) {
 
 function iohandle(socket) {
     var address = socket.handshake.address;
-    console.log('connected client!; ip: ' + address);
+    if (!ip_connections.includes(address)) {
+        console.log('connected client!; ip: ' + address);
+        ip_connections += address;
+    }
     socket.emit('rows', rows);
     socket.emit('stats', stats);
     socket.emit('getsettings', file);
