@@ -3,6 +3,7 @@ setting password
 setting custom units
 settings save file created
 setting change names (like item, box group, etc.) 
+setting note "?" set file path
 
 add item picture
 add instructions choose file
@@ -19,3 +20,6 @@ inventory setup
     topnav (box group)
         expandable list (box)
             clickable list (item)
+
+rename sql_ad_objects to add / create objects 
+    generell rename of html etc. files
