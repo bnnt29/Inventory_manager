@@ -18,7 +18,7 @@ function stats() {
                     row.appendChild(col_name);
                     col_id.appendChild(id);
                     col_name.appendChild(name);
-                    id.innerHTML = value.HTML_id;
+                    id.innerHTML = value.id;
                     name.innerHTML = value.name;
                 });
                 table_set = true;

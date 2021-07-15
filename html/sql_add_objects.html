@@ -78,7 +78,8 @@
                                             <p>Name:</p>
                                         </div>
                                         <div class="col-lg-6">
-                                            <textarea id="item_name" style="width: 16rem; height: 3rem;"></textarea>
+                                            <textarea id="item_name" style="width: 16rem; height: 3rem;"
+                                                title="item name" placeholder="name"></textarea>
                                         </div>
                                     </div>
                                     <div class="row">
@@ -90,12 +91,9 @@
                                                 <div class="col-lg-6">
                                                     <form>
                                                         <select id="instructions_select" name="instructions_select"
-                                                            style="width: 16rem; height: 3rem;">
+                                                            style="width: 16rem; height: 3rem;"
+                                                            title="choose instruction">
                                                             <option value="Choose">Choose instructions</option>
-                                                            <option value="1">1</option>
-                                                            <option value="2">2</option>
-                                                            <option value="3">3</option>
-                                                            <option value="4">4</option>
                                                         </select>
                                                     </form>
                                                 </div>
@@ -109,34 +107,32 @@
                                                     <p>Size:</p>
                                                 </div>
                                                 <div class="col-lg-3">
-                                                    <textarea id="item_size"
-                                                        style="width: 16rem; height: 3rem;"></textarea>
+                                                    <textarea id="item_size" style="width: 16rem; height: 3rem;"
+                                                        title="item size" placeholder="size"></textarea>
                                                 </div>
                                                 <div class="col-lg-3">
                                                     <form>
                                                         <label for="unit"> in </label>
                                                         <select id="unit" name="unit"
                                                             style="width: 5rem; height: 3rem;">
-                                                            <option value="m">m</option>
-                                                            <option value="cm" selected>cm</option>
-                                                            <option value="mm">mm</option>
                                                         </select>
                                                     </form>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="row">
-                                        <div class="col-lg-12">
-                                            <div class="row">
-                                                <div class="col-lg-4"></div>
-                                                <div class="col-lg-4">
-                                                    <button id="save_item" onclick=""
-                                                        style="width: 16rem; height: 3rem;">Add item</button>
-                                                </div>
-                                                <div class="col-lg-4"></div>
-                                            </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <div class="row" style="margin-top: 1rem; margin-bottom: 1rem;">
+                                        <div class="col-lg-4"></div>
+                                        <div class="col-lg-4">
+                                            <button id="save_item" onclick="additem()"
+                                                style="width: 16rem; height: 3rem;">Add
+                                                item</button>
                                         </div>
+                                        <div class="col-lg-4"></div>
                                     </div>
                                 </div>
                             </div>
@@ -149,7 +145,8 @@
                                             <p>Name:</p>
                                         </div>
                                         <div class="col-lg-6">
-                                            <textarea id="box_name" style="width: 16rem; height: 3rem;"></textarea>
+                                            <textarea id="box_name" style="width: 16rem; height: 3rem;" title="box name"
+                                                placeholder="name"></textarea>
                                         </div>
                                     </div>
                                     <div class="row">
@@ -161,25 +158,30 @@
                                                 <div class="col-lg-6">
                                                     <form>
                                                         <select id="box_group" name="box_group"
-                                                            style="width: 16rem; height: 3rem;">
+                                                            style="width: 16rem; height: 3rem;" title="choose box">
                                                             <option value="Choose">Choose Box group</option>
-                                                            <option value="1">1</option>
-                                                            <option value="2">2</option>
-                                                            <option value="3">3</option>
-                                                            <option value="4">4</option>
                                                         </select>
                                                     </form>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
+                                    <div class="row" style="margin-top: 1rem;">
+                                        <div class="col-lg-12">
+                                            <button type="button" class="collapsible item">items</button>
+                                            <div class="content" id="item_container">
+
+                                            </div>
+                                        </div>
+                                    </div>
                                     <div class="row">
                                         <div class="col-lg-12">
-                                            <div class="row">
+                                            <div class="row" style="margin-top: 1rem; margin-bottom: 1rem;">
                                                 <div class="col-lg-4"></div>
                                                 <div class="col-lg-4">
                                                     <button id="save_box" onclick=""
-                                                        style="width: 16rem; height: 3rem;">Add box</button>
+                                                        style="width: 16rem; height: 3rem;">Add
+                                                        box</button>
                                                 </div>
                                                 <div class="col-lg-4"></div>
                                             </div>
@@ -196,8 +198,8 @@
                                             <p>Name:</p>
                                         </div>
                                         <div class="col-lg-6">
-                                            <textarea id="box_group_name"
-                                                style="width: 16rem; height: 3rem;"></textarea>
+                                            <textarea id="box_group_name" style="width: 16rem; height: 3rem;"
+                                                title="box group name" placeholder="name"></textarea>
                                         </div>
                                     </div>
                                     <div class="row">
@@ -205,12 +207,13 @@
                                             <p>Location :</p>
                                         </div>
                                         <div class="col-lg-6">
-                                            <textarea id="location_name" style="width: 16rem; height: 3rem;"></textarea>
+                                            <textarea id="location_name" style="width: 16rem; height: 3rem;"
+                                                title="location" placeholder="location notes"></textarea>
                                         </div>
                                     </div>
                                     <div class="row">
                                         <div class="col-lg-12">
-                                            <div class="row">
+                                            <div class="row" style="margin-top: 1rem; margin-bottom: 1rem;">
                                                 <div class="col-lg-4"></div>
                                                 <div class="col-lg-4">
                                                     <button id="save_box_group" onclick=""
@@ -231,25 +234,29 @@
                                             <p>Name:</p>
                                         </div>
                                         <div class="col-lg-6">
-                                            <textarea id="instructions_name"
-                                                style="width: 16rem; height: 3rem;"></textarea>
+                                            <textarea id="instructions_name" style="width: 16rem; height: 3rem;"
+                                                title="instruction name" placeholder="name"></textarea>
                                         </div>
                                     </div>
                                     <div class="row">
                                         <div class="col-lg-6">
-                                            <p>File location :</p>
+                                            <p>File:</p>
                                         </div>
                                         <div class="col-lg-6">
-                                            <textarea id="file_location" style="width: 16rem; height: 3rem;"></textarea>
+                                            <form>
+                                                <label for="myfile"></label>
+                                                <input type="file" id="myfile" name="myfile" accept=".txt">
+                                            </form>
                                         </div>
                                     </div>
                                     <div class="row">
                                         <div class="col-lg-12">
-                                            <div class="row">
+                                            <div class="row" style="margin-top: 1rem; margin-bottom: 1rem;">
                                                 <div class="col-lg-4"></div>
                                                 <div class="col-lg-4">
                                                     <button id="save_instructions" onclick=""
-                                                        style="width: 16rem; height: 3rem;">Add instructions</button>
+                                                        style="width: 16rem; height: 3rem;">Add
+                                                        instructions</button>
                                                 </div>
                                                 <div class="col-lg-4"></div>
                                             </div>
@@ -263,23 +270,30 @@
                                 <div class="col-lg-12">
                                     <div class="row">
                                         <div class="col-lg-6">
-                                            <p>Quantity:</p>
-                                        </div>
-                                        <div class="col-lg-6">
-                                            <textarea id="qunatity" style="width: 16rem; height: 3rem;"></textarea>
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-lg-6">
                                             <p>Notes:</p>
                                         </div>
                                         <div class="col-lg-6">
-                                            <textarea id="notes" style="width: 16rem; height: 3rem;"></textarea>
+                                            <textarea id="notes" style="width: 16rem; height: 3rem;"
+                                                title="in use notes" placeholder="notes"></textarea>
+                                        </div>
+                                    </div>
+                                    <div class="row" style="margin-top: 1rem;">
+                                        <div class="col-lg-12">
+                                            <button type="button" class="collapsible item">items</button>
+                                            <div class="content" id="item_container2">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row" style="margin-top: 1rem;">
+                                        <div class="col-lg-12">
+                                            <button type="button" class="collapsible box">box</button>
+                                            <div class="content" id="box_container1">
+                                            </div>
                                         </div>
                                     </div>
                                     <div class="row">
                                         <div class="col-lg-12">
-                                            <div class="row">
+                                            <div class="row" style="margin-top: 1rem; margin-bottom: 1rem;">
                                                 <div class="col-lg-4"></div>
                                                 <div class="col-lg-4">
                                                     <button id="save_in_use" onclick=""
@@ -294,13 +308,26 @@
                         </div>
                     </div>
                 </div>
-                <script type="text/javascript">
-                    // Get the element with id="defaultOpen" and click on it
-                    document.getElementById("defaultOpen").click();
-                </script>
             </div>
-            <div class="col-lg-1">
+            <div class="col-lg-1" style="margin-top: 2rem; margin-bottom: 2rem;">
+                <button onClick="refresh()" style="background-color: transparent; border: none;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                        <path
+                            d="M20.944 12.979c-.489 4.509-4.306 8.021-8.944 8.021-2.698 0-5.112-1.194-6.763-3.075l1.245-1.633c1.283 1.645 3.276 2.708 5.518 2.708 3.526 0 6.444-2.624 6.923-6.021h-2.923l4-5.25 4 5.25h-3.056zm-15.864-1.979c.487-3.387 3.4-6 6.92-6 2.237 0 4.228 1.059 5.51 2.698l1.244-1.632c-1.65-1.876-4.061-3.066-6.754-3.066-4.632 0-8.443 3.501-8.941 8h-3.059l4 5.25 4-5.25h-2.92z" />
+                    </svg>
+                </button>
             </div>
+            <script type="text/javascript">
+                // Get the element with id="defaultOpen" and click on it
+                document.getElementById("defaultOpen").click();
+                init_collapse();
+                getitem_node("item_container", 'unused_getitem');
+                getUnit();
+                getbox();
+                getinstructions();
+                getitem_node("item_container2", 'getitem');
+                getitem_node("box_container1", 'getbox');
+            </script>
         </div>
     </div>
     <!-- footer -->
