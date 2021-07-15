@@ -157,7 +157,7 @@
                                                 </div>
                                                 <div class="col-lg-6">
                                                     <form>
-                                                        <select id="box_group" name="box_group"
+                                                        <select id="box_group_select" name="box_group"
                                                             style="width: 16rem; height: 3rem;" title="choose box">
                                                             <option value="Choose">Choose Box group</option>
                                                         </select>
@@ -179,7 +179,7 @@
                                             <div class="row" style="margin-top: 1rem; margin-bottom: 1rem;">
                                                 <div class="col-lg-4"></div>
                                                 <div class="col-lg-4">
-                                                    <button id="save_box" onclick=""
+                                                    <button id="save_box" onclick="addbox('box')"
                                                         style="width: 16rem; height: 3rem;">Add
                                                         box</button>
                                                 </div>
@@ -209,6 +209,13 @@
                                         <div class="col-lg-6">
                                             <textarea id="location_name" style="width: 16rem; height: 3rem;"
                                                 title="location" placeholder="location notes"></textarea>
+                                        </div>
+                                    </div>
+                                    <div class="row" style="margin-top: 1rem;">
+                                        <div class="col-lg-12">
+                                            <button type="button" class="collapsible box">box</button>
+                                            <div class="content" id="box_container1">
+                                            </div>
                                         </div>
                                     </div>
                                     <div class="row">
@@ -287,7 +294,7 @@
                                     <div class="row" style="margin-top: 1rem;">
                                         <div class="col-lg-12">
                                             <button type="button" class="collapsible box">box</button>
-                                            <div class="content" id="box_container1">
+                                            <div class="content" id="box_container2">
                                             </div>
                                         </div>
                                     </div>
@@ -322,11 +329,12 @@
                 document.getElementById("defaultOpen").click();
                 init_collapse();
                 getitem_node("item_container", 'unused_getitem');
+                getitem_node("box_container1", 'unused_getbox');
                 getUnit();
                 getbox();
                 getinstructions();
                 getitem_node("item_container2", 'getitem');
-                getitem_node("box_container1", 'getbox');
+                getitem_node("box_container2", 'getbox');
             </script>
         </div>
     </div>

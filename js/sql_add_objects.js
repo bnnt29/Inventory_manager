@@ -195,22 +195,57 @@ function additem() {
     document.getElementById("item_size").value = "";
     var unit = document.getElementById("unit").value;
     document.getElementById("unit").value = "mm";
-    console.log("1");
-    if (name != "") { }
-    var ip = location.host;
-    var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
-    socket.on('connect', () => {
-        socket.on('getUnit', (data) => {
-            console.log(data);
-            data.forEach(function (values) {
-                console.log("3 " + unit + " === " + values.name);
-                if (unit === values.name) {
-                    size = size * parseFloat(values.multiplicator);
-                    console.log("4 " + size + ", " + values.name);
-                    socket.emit('item_data', [name, instructions, size]);
-                    location.reload();
-                }
-            });
-        })
+    if (name != "") {
+        var ip = location.host;
+        var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
+        socket.on('connect', () => {
+            socket.on('getUnit', (data) => {
+                data.forEach(function (values) {
+                    if (unit === values.name) {
+                        size = size * parseFloat(values.multiplicator);
+                        socket.emit('item_data', [name, instructions, size]);
+                        location.reload();
+                    }
+                });
+            })
+        });
+    }
+}
+
+function addbox(a) {
+    var name = document.getElementById("box_name").value;
+    document.getElementById("box_name").value = "";
+    var box_group = parseInt(document.getElementById("box_group_select").value);
+    document.getElementById("box_group_select").value = "Choose";
+    var items;
+    var parent = document.getElementById(a);
+    let el = document.getElementsByClassName("field")
+    Array.prototype.forEach.call(el, (data) => {
+        if (parent.contains(data)) {
+            items += data;
+        }
     });
+    console.log(items);
+    var itemlist;
+    if (name != "" && items.length > 0) {
+        Array.prototype.forEach.call(items, function (values) {
+            console.log(values);
+            let value = values.value;
+            values.value = 0;
+            let id = values.getAttribute("data-id");
+            let min = values.getAttribute("data-min");
+            let max = values.getAttribute("data-max");
+            if ((min != "" && parseInt(min) <= value) && (max != "" && parseInt(max) >= value)) {
+                itemlist += [id, value];
+            }
+        });
+        if ((min != "" && parseInt(min) <= value) && (max != "" && parseInt(max) >= value)) {
+            var ip = location.host;
+            var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
+            socket.on('connect', () => {
+                socket.emit('box_data', [name, box_group, itemlist]);
+                location.reload();
+            });
+        }
+    }
 }

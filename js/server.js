@@ -182,14 +182,14 @@ function reload_data() {
 
 
     sql.recreateDb(function (data) {
-        sql.read(data, "SELECT * FROM item", function (data) {
+        sql.read(data, "SELECT * FROM item ORDER BY name ASC", function (data) {
             console.log(data);
             item = data;
         });
     });
 
     sql.recreateDb(function (data) {
-        sql.read(data, "SELECT * FROM unit", function (data) {
+        sql.read(data, "SELECT * FROM unit ORDER BY id ASC", function (data) {
             unit = data;
         });
     });
@@ -210,6 +210,7 @@ function iohandle(socket) {
     socket.emit('stats', stats);
     socket.emit('getsettings', file);
     socket.emit('getUnit', unit);
+    socket.on('box_data', (data) => { addbox(data); });
     socket.on('item_data', (data) => { additem(data); });
     socket.on('refresh', (data) => { reload_data(); socket.emit('reloaded', data); });
     socket.on('setsettings', (data) => { setsettings(data); });
@@ -217,8 +218,25 @@ function iohandle(socket) {
     });
 }
 
+function addbox(data) {
+    let d;
+    d += data[0];
+    d += data[1];
+    sql.insert("INSERT OR IGNORE INTO box (name, box_group_id) VALUES (?, ?)", d, () => {
+        sql.read(data, "SELECT * FROM box WHERE name =" + data[0] + " AND box_group_id =" + data[1] + "", function (da) {
+            console.log(da);
+            for (let i = 0; i < data[2]; i += 2) {
+                let dat;
+                dat += data[2][i]
+                dat += da.id;
+                dat += data[2][i + 1];
+                sql.insert("INSERT OR IGNORE INTO item (item_id, box_id, quantity) VALUES (?, ?, ?)", dat, reload_data());
+            }
+        });
+    });
+}
+
 function additem(data) {
-    console.log("5");
     sql.insert("INSERT OR IGNORE INTO item (name, instructions_id, size) VALUES (?, ?, ?)", data, reload_data());
 }
 
