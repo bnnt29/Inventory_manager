@@ -19,13 +19,11 @@ function opentab(evt, tabName) {
     evt.currentTarget.className += " active";
 }
 function init_collapse() {
-    var coll = document.getElementsByClassName("collapsible");
-    var i;
+    let coll = document.getElementsByClassName("collapsible");
 
-    for (i = 0; i < coll.length; i++) {
+    for (let i = 0; i < coll.length; i++) {
         coll[i].addEventListener("click", function () {
-            this.classList.toggle("active");
-            var content = this.nextElementSibling;
+            let content = this.nextElementSibling;
             if (content.style.display === "block") {
                 content.style.display = "none";
             } else {
@@ -60,10 +58,10 @@ function getbox() {
     var ip = location.host;
     var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
     socket.on('connect', () => {
-        socket.on('getbox', (data) => {
+        socket.on('getboxgroup', (data) => {
             if (!box_get) {
                 data.forEach(function (values) {
-                    let parent = document.getElementById("box_group");
+                    let parent = document.getElementById("box_group_select");
                     let option = document.createElement("option");
                     parent.appendChild(option);
                     option.value = values.id;
@@ -75,12 +73,15 @@ function getbox() {
     });
 }
 
-function getitem_node(a, b, c) {
-    var item_getnode = false;
+function getitem_node(a, b) {
+    let item_getnode = false;
     var ip = location.host;
     var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
     socket.on('connect', () => {
-        socket.on(b, (data) => {
+        if (a == b) {
+            socket.emit("in_use_box_node", b);
+        }
+        socket.on("" + b, (data) => {
             if (!item_getnode) {
                 data.forEach(function (values) {
                     let container = document.getElementById(a);
@@ -143,9 +144,40 @@ function getitem_node(a, b, c) {
                     input.style.height = "3rem";
                     input.style.alignSelf = "center";
                     col_lg_6.appendChild(input);
-
                 });
                 item_getnode = true;
+            }
+        })
+    });
+}
+
+function getbox_node(a, b) {
+    let box_getnode = false;
+    var ip = location.host;
+    var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
+    socket.on('connect', () => {
+        socket.on(b, (data) => {
+            if (!box_getnode) {
+                data.forEach((values) => {
+                    let parent = document.getElementById(a);
+                    let div = document.createElement("div");
+                    div.classList.add("col-lg-12");
+                    parent.appendChild(div);
+                    let button = document.createElement("button");
+                    button.type = "button";
+                    button.classList.add("collapsible");
+                    button.classList.add("boxes");
+                    button.innerHTML = values.name;
+                    div.appendChild(button);
+                    let div2 = document.createElement("div");
+                    div2.classList.add("content");
+                    div2.id = values.id;
+                    div2.style.display = "none";
+                    div.appendChild(div2);
+                    getitem_node(values.id, values.id);
+                });
+                box_getnode = true;
+                init_collapse();
             }
         })
     });
@@ -219,33 +251,46 @@ function addbox(a) {
     document.getElementById("box_group_select").value = "Choose";
     var items;
     var parent = document.getElementById(a);
-    let el = document.getElementsByClassName("field")
-    Array.prototype.forEach.call(el, (data) => {
-        if (parent.contains(data)) {
-            items += data;
-        }
-    });
-    console.log(items);
-    var itemlist;
+    items = parent.getElementsByClassName("field");
+    var itemlist = [];
     if (name != "" && items.length > 0) {
         Array.prototype.forEach.call(items, function (values) {
-            console.log(values);
             let value = values.value;
             values.value = 0;
             let id = values.getAttribute("data-id");
             let min = values.getAttribute("data-min");
             let max = values.getAttribute("data-max");
-            if ((min != "" && parseInt(min) <= value) && (max != "" && parseInt(max) >= value)) {
-                itemlist += [id, value];
+            var b = false;
+            if (min != "") {
+                if (parseInt(min) <= value) {
+                    if (max != "") {
+                        if (parseInt(max) >= value) {
+                            b = true;
+                        }
+                    } else {
+                        b = true;
+                    }
+                }
+            } else if (max != "") {
+                if (parseInt(max) >= value) {
+                    b = true;
+                }
+            } else {
+                b = true;
+            }
+            if (b) {
+                if (itemlist == "") {
+                    itemlist = [id, value];
+                } else {
+                    itemlist = [...itemlist, id, value];
+                }
             }
         });
-        if ((min != "" && parseInt(min) <= value) && (max != "" && parseInt(max) >= value)) {
-            var ip = location.host;
-            var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
-            socket.on('connect', () => {
-                socket.emit('box_data', [name, box_group, itemlist]);
-                location.reload();
-            });
-        }
+        var ip = location.host;
+        var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
+        socket.on('connect', () => {
+            socket.emit('box_data', [name, box_group, itemlist]);
+            location.reload();
+        });
     }
 }

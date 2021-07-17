@@ -95,7 +95,7 @@ function fserverhandler(req, res) {
 
     if (req.url.indexOf('.js') != -1) { //req.url has the pathname, check if it conatins '.js'
         fs.readFile(__dirname + '/' + path, function (err, data) {
-            if (err) console.log(err);
+            // if (err) console.log(err);
             res.writeHead(200, { 'Content-Type': 'text/javascript' });
             res.write(data);
             res.end();
@@ -104,12 +104,11 @@ function fserverhandler(req, res) {
 
     if (req.url.indexOf('.css') != -1) { //req.url has the pathname, check if it conatins '.css'
         fs.readFile(__dirname + '/../_css/' + path, function (err, data) {
-            if (err) console.log(err);
+            //if (err) console.log(err);
             res.writeHead(200, { 'Content-Type': 'text/css' });
             res.write(data);
             res.end();
         });
-
     }
 }
 
@@ -131,10 +130,6 @@ if (file[3] === 'true') {
         iohandle(data);
     });
 }
-
-sql.setdata(pages, unitlist);
-sql.initDB(true);
-
 var rows;
 var stats;
 var instructions;
@@ -143,9 +138,17 @@ var item;
 var unit
 var unused_item;
 var unused_box;
-reload_data();
+var boxgroup;
+
+sql.setdata(pages, unitlist);
+sql.initDB(true, () => { reload_data(); });
 
 function reload_data() {
+    sql.recreateDb(function (data) {
+        sql.read(data, "SELECT * FROM box_group", function (data) {
+            boxgroup = data;
+        });
+    });
 
     sql.recreateDb(function (data) {
         sql.read(data, "SELECT * FROM item WHERE id NOT IN(SELECT item_id FROM item_box) ORDER BY name ASC", function (data) {
@@ -183,7 +186,6 @@ function reload_data() {
 
     sql.recreateDb(function (data) {
         sql.read(data, "SELECT * FROM item ORDER BY name ASC", function (data) {
-            console.log(data);
             item = data;
         });
     });
@@ -194,6 +196,7 @@ function reload_data() {
         });
     });
 }
+var in_use_box_node_data = [];
 
 function iohandle(socket) {
     var address = socket.handshake.address;
@@ -203,6 +206,7 @@ function iohandle(socket) {
     }
     socket.emit('getitem', item);
     socket.emit('getbox', box);
+    socket.emit('getboxgroup', boxgroup);
     socket.emit('unused_getitem', unused_item);
     socket.emit('unused_getbox', unused_box);
     socket.emit('getinstructions', instructions);
@@ -210,6 +214,7 @@ function iohandle(socket) {
     socket.emit('stats', stats);
     socket.emit('getsettings', file);
     socket.emit('getUnit', unit);
+    socket.on("in_use_box_node", (data) => { in_use_box_node_data = [...in_use_box_node_data, data]; in_use_box_node_data.forEach((values) => { getbox_node_items(values, socket); }); });
     socket.on('box_data', (data) => { addbox(data); });
     socket.on('item_data', (data) => { additem(data); });
     socket.on('refresh', (data) => { reload_data(); socket.emit('reloaded', data); });
@@ -218,26 +223,38 @@ function iohandle(socket) {
     });
 }
 
+function getbox_node_items(values, socket) {
+    sql.recreateDb(function (data) {
+        sql.read(data, "SELECT * FROM item_box ib LEFT JOIN item i ON ib.item_id = i.id WHERE ib.box_id='" + values + "' ORDER BY i.name ASC", function (data) {
+            socket.emit("" + values, data);
+        });
+    });
+}
+
 function addbox(data) {
-    let d;
-    d += data[0];
-    d += data[1];
-    sql.insert("INSERT OR IGNORE INTO box (name, box_group_id) VALUES (?, ?)", d, () => {
-        sql.read(data, "SELECT * FROM box WHERE name =" + data[0] + " AND box_group_id =" + data[1] + "", function (da) {
-            console.log(da);
-            for (let i = 0; i < data[2]; i += 2) {
-                let dat;
-                dat += data[2][i]
-                dat += da.id;
-                dat += data[2][i + 1];
-                sql.insert("INSERT OR IGNORE INTO item (item_id, box_id, quantity) VALUES (?, ?, ?)", dat, reload_data());
-            }
+    let d = [data[0], data[1]];
+    sql.insert("INSERT OR IGNORE INTO box (name, box_group_id) VALUES (?, ?)", d, (callback) => {
+        sql.recreateDb((db) => {
+            sql.read(db, "SELECT * FROM box WHERE name = '" + data[0] + "'", (da) => {
+                var b = false;
+                da.forEach((values) => {
+                    if (!b) {
+                        for (let i = 0; i < data[2].length; i += 2) {
+                            let dat = [data[2][i], parseInt(values.id), data[2][i + 1]];
+                            sql.insert("INSERT OR IGNORE INTO item_box (item_id, box_id, quantity) VALUES (?, ?, ?)", dat, (callback) => {
+                                reload_data();
+                            });
+                        }
+                        b = true;
+                    }
+                });
+            });
         });
     });
 }
 
 function additem(data) {
-    sql.insert("INSERT OR IGNORE INTO item (name, instructions_id, size) VALUES (?, ?, ?)", data, reload_data());
+    sql.insert("INSERT OR IGNORE INTO item (name, instructions_id, size) VALUES (?, ?, ?)", data, (data) => { reload_data(); });
 }
 
 function setsettings(data) {
