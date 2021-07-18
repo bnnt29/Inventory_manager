@@ -18,7 +18,7 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
     <link rel="stylesheet" href="sql_add_objects.css" type="text/css" />
     <script type="text/javascript" src="sql_add_objects.js"></script>
-    <title>Tables</title>
+    <title>Add_Objects</title>
 </head>
 
 <body>
@@ -78,8 +78,8 @@
                                             <p>Name:</p>
                                         </div>
                                         <div class="col-lg-6">
-                                            <textarea id="item_name" style="width: 16rem; height: 3rem;"
-                                                title="item name" placeholder="name"></textarea>
+                                            <input id="item_name" style="width: 16rem; height: 3rem;" title="item name"
+                                                placeholder="name" type="text"></input>
                                         </div>
                                     </div>
                                     <div class="row">
@@ -107,8 +107,8 @@
                                                     <p>Size:</p>
                                                 </div>
                                                 <div class="col-lg-3">
-                                                    <textarea id="item_size" style="width: 16rem; height: 3rem;"
-                                                        title="item size" placeholder="size"></textarea>
+                                                    <input id="item_size" style="width: 16rem; height: 3rem;"
+                                                        title="item size" placeholder="0" type="number"></input>
                                                 </div>
                                                 <div class="col-lg-3">
                                                     <form>
@@ -117,6 +117,19 @@
                                                             style="width: 5rem; height: 3rem;">
                                                         </select>
                                                     </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-lg-12">
+                                            <div class="row">
+                                                <div class="col-lg-6">
+                                                    <p>Quantity:</p>
+                                                </div>
+                                                <div class="col-lg-3">
+                                                    <input id="item_quantity" style="width: 16rem; height: 3rem;"
+                                                        title="item_quantity" placeholder="0" type="number"></input>
                                                 </div>
                                             </div>
                                         </div>
@@ -145,8 +158,8 @@
                                             <p>Name:</p>
                                         </div>
                                         <div class="col-lg-6">
-                                            <textarea id="box_name" style="width: 16rem; height: 3rem;" title="box name"
-                                                placeholder="name"></textarea>
+                                            <input id="box_name" style="width: 16rem; height: 3rem;" title="box name"
+                                                placeholder="name" type="text"></input>
                                         </div>
                                     </div>
                                     <div class="row">
@@ -198,8 +211,8 @@
                                             <p>Name:</p>
                                         </div>
                                         <div class="col-lg-6">
-                                            <textarea id="box_group_name" style="width: 16rem; height: 3rem;"
-                                                title="box group name" placeholder="name"></textarea>
+                                            <input id="box_group_name" style="width: 16rem; height: 3rem;"
+                                                title="box group name" placeholder="name" type="text"></input>
                                         </div>
                                     </div>
                                     <div class="row">
@@ -207,8 +220,8 @@
                                             <p>Location :</p>
                                         </div>
                                         <div class="col-lg-6">
-                                            <textarea id="location_name" style="width: 16rem; height: 3rem;"
-                                                title="location" placeholder="location notes"></textarea>
+                                            <input id="location_name" style="width: 16rem; height: 3rem;"
+                                                title="location" placeholder="location notes" type="text"></input>
                                         </div>
                                     </div>
                                     <div class="row" style="margin-top: 1rem;">
@@ -223,7 +236,7 @@
                                             <div class="row" style="margin-top: 1rem; margin-bottom: 1rem;">
                                                 <div class="col-lg-4"></div>
                                                 <div class="col-lg-4">
-                                                    <button id="save_box_group" onclick=""
+                                                    <button id="save_box_group" onclick="addboxgroup('box group')"
                                                         style="width: 16rem; height: 3rem;">Add box group</button>
                                                 </div>
                                                 <div class="col-lg-4"></div>
@@ -241,8 +254,8 @@
                                             <p>Name:</p>
                                         </div>
                                         <div class="col-lg-6">
-                                            <textarea id="instructions_name" style="width: 16rem; height: 3rem;"
-                                                title="instruction name" placeholder="name"></textarea>
+                                            <input id="instructions_name" style="width: 16rem; height: 3rem;"
+                                                title="instruction name" placeholder="name" type="text"></input>
                                         </div>
                                     </div>
                                     <div class="row">
@@ -280,8 +293,8 @@
                                             <p>Notes:</p>
                                         </div>
                                         <div class="col-lg-6">
-                                            <textarea id="notes" style="width: 16rem; height: 3rem;"
-                                                title="in use notes" placeholder="notes"></textarea>
+                                            <input id="notes" style="width: 16rem; height: 3rem;" title="in use notes"
+                                                placeholder="notes" type="text"></input>
                                         </div>
                                     </div>
                                     <div class="row" style="margin-top: 1rem;" id="box_container2">
@@ -320,7 +333,7 @@
         document.getElementById("defaultOpen").click();
         getitem_node("item_container1", 'unused_getitem');
         getitem_node("box_container1", 'unused_getbox');
-        //ervery node creation with collapse must be before the following of mus have init_collapse()
+        //ervery node creation with collapse must be before the following or must have init_collapse()
         getbox_node("box_container2", 'getbox');
         getUnit();
         getbox();

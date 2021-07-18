@@ -24,31 +24,26 @@ function recreateDb(callback) {
 
 function createTables() {
     //console.log("createTable box");
-    db.run("CREATE TABLE IF NOT EXISTS box (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE, name STRING (200) NOT NULL UNIQUE, box_group_id INTEGER (100) REFERENCES box_group (id));");
-    db.run("CREATE TABLE IF NOT EXISTS box_group (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE, name STRING (100) NOT NULL UNIQUE, location STRING (100));");
-    db.run("CREATE TABLE IF NOT EXISTS in_use (item_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE REFERENCES item (id), box_id   INTEGER (100) NOT NULL REFERENCES box (id), quantity INTEGER (100) NOT NULL, notes STRING (100));");
+    db.run("CREATE TABLE IF NOT EXISTS box (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE, name STRING (200) NOT NULL UNIQUE, box_group_id INTEGER (100) REFERENCES box_group (id), color STRING (200), picture STRING (200));");
+    db.run("CREATE TABLE IF NOT EXISTS box_group (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE, name STRING (100) NOT NULL UNIQUE, location STRING (100), color STRING (200), picture STRING (200));");
+    db.run("CREATE TABLE IF NOT EXISTS in_use (item_id INTEGER  NOT NULL REFERENCES item (id), box_id   INTEGER (100) NOT NULL REFERENCES box (id), quantity INTEGER (100) NOT NULL, notes STRING (100));");
     db.run("CREATE TABLE IF NOT EXISTS instructions (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE, name STRING (100) NOT NULL, document STRING (200));");
-    db.run("CREATE TABLE IF NOT EXISTS item (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE, name STRING (100) NOT NULL UNIQUE, instructions_id INTEGER (100) REFERENCES instructions (id), size INTEGER (100));");
-    db.run("CREATE TABLE IF NOT EXISTS item_box (item_id INTEGER PRIMARY KEY NOT NULL REFERENCES item (id), box_id INTEGER (100) REFERENCES box (id) NOT NULL,quantity INTEGER (100) NOT NULL);");
-    db.run("CREATE TABLE IF NOT EXISTS event (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE, item_id INTEGER KEY  NOT NULL UNIQUE REFERENCES item (id), quantity INTEGER (100) NOT NULL);");
-    db.run("CREATE TABLE IF NOT EXISTS HTML_pages (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE, name STRING (100) NOT NULL UNIQUE, path STRING (200) NOT NULL UNIQUE);", insertPages);
-    db.run("CREATE TABLE IF NOT EXISTS unit (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE, name STRING (100) NOT NULL UNIQUE, multiplicator INTEGER (100) NOT NULL);", insertunit);
+    db.run("CREATE TABLE IF NOT EXISTS item (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE, name STRING (100) NOT NULL UNIQUE, instructions_id INTEGER (100) REFERENCES instructions (id), size INTEGER (100), total_quantity INTEGER (100) NOT NULL, color STRING (200), picture STRING (200));");
+    db.run("CREATE TABLE IF NOT EXISTS item_box (item_id INTEGER NOT NULL REFERENCES item (id), box_id INTEGER (100) REFERENCES box (id) NOT NULL, quantity INTEGER (100) NOT NULL);");
+    db.run("CREATE TABLE IF NOT EXISTS event (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE, item_id INTEGER NOT NULL REFERENCES item (id), quantity INTEGER (100) NOT NULL);");
+    db.run("CREATE TABLE IF NOT EXISTS HTML_pages (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE, name STRING (100) NOT NULL UNIQUE, path STRING (200) NOT NULL UNIQUE, position INTEGER (100)  NOT NULL);");
+    db.run("CREATE TABLE IF NOT EXISTS unit (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE, name STRING (100) NOT NULL UNIQUE, multiplicator INTEGER (100) NOT NULL);", closeDb(false, db));
 }
-
-function insertPages(callback) {
-    var stmt = db.prepare("INSERT OR IGNORE INTO HTML_pages (name, path) VALUES (?, ?)");
-    for (var i = 0; i < pages.length; i++) {
-        stmt.run(pages[i], pages[i] + '.html');
-    }
-    stmt.finalize(() => { callback; });
-}
-
 function insertunit() {
-    var stmt = db.prepare("INSERT OR IGNORE INTO unit (name, multiplicator) VALUES (?, ?)");
     for (var i = 0; i < unit.length; i += 2) {
-        stmt.run(unit[i], unit[i + 1]);
+        recreateDb(function (db) {
+            var stmt = db.prepare("INSERT OR IGNORE INTO unit (name, multiplicator) VALUES (?, ?)");
+            stmt.run(unit[i], unit[i + 1]);
+            stmt.finalize(() => {
+                closedb(db);
+            });
+        });
     }
-    stmt.finalize(closedb(bd));
 }
 
 function insert(r, data, callback) {
@@ -59,6 +54,17 @@ function insert(r, data, callback) {
     });
 }
 
+function readAllRows(bool) {
+    var stmt = db.all("SELECT * FROM HTML_pages", function (err, rows) {
+        if (bool) {
+            rows.forEach(function (row) {
+                console.log(row.HTML_id + ": " + row.name + ", " + row.path);
+            });
+        }
+        closedb(false, db);
+    });
+}
+
 function initDB(b, callback) {
     createDb(b);
     callback;
@@ -66,6 +72,14 @@ function initDB(b, callback) {
 
 function closedb(dbn) {
     dbn.close();
+}
+
+function closeDb(b, dbn) {
+    if (b) {
+        dbn.close();
+    } else {
+        dbn.close(() => { let i = 0; pages.forEach((values) => { insert("INSERT OR IGNORE INTO HTML_pages (name, path, position) VALUES (?, ?, ?)", [values, values + '.html', i], () => { }); i += 1; }); insertunit(); });
+    }
 }
 
 function closedbcall(dbn, callback) {

@@ -129,21 +129,39 @@ function getitem_node(a, b) {
                     col_lg_6.classList.add("col-lg-6");
                     row3.appendChild(col_lg_6);
 
-                    input = document.createElement("input");
-                    input.classList.add("input-group-field");
-                    input.classList.add("field");
-                    input.type = "number";
-                    input.name = values.name;
-                    input.value = "0";
-                    input.placeholder = "0";
-                    input.title = "value";
-                    input.setAttribute("data-max", "");
-                    input.setAttribute("data-min", "");
-                    input.setAttribute("data-id", values.id);
-                    input.style.width = "16rem";
-                    input.style.height = "3rem";
-                    input.style.alignSelf = "center";
-                    col_lg_6.appendChild(input);
+                    if (a != "box_container1") {
+                        input = document.createElement("input");
+                        input.classList.add("input-group-field");
+                        input.classList.add("field");
+                        input.type = "number";
+                        input.name = values.name;
+                        input.value = "0";
+                        input.placeholder = "0";
+                        input.title = "value";
+                        if (a == "item_container1") {
+                            var max = values.total_quantity;
+                            socket.emit("sql_read", "SELECT * FROM item_box WHERE item_id='" + values.id + "'");
+                            socket.on("SELECT * FROM item_box WHERE item_id='" + values.id + "'", (data) => { data.forEach((dat) => { max -= parseInt(dat.quantity); }); });
+                            input.setAttribute("data-max", max);
+                            input.setAttribute("data-min", "");
+                            input.addEventListener('change', () => { if (parseInt(input.value) > max) { input.value = max;/* console.log("Not enough items left");*/ } });
+                        }
+                        input.setAttribute("data-id", values.id);
+                        input.style.width = "16rem";
+                        input.style.height = "3rem";
+                        input.style.alignSelf = "center";
+                        col_lg_6.appendChild(input);
+                    } else {
+                        input = document.createElement("input");
+                        input.classList.add("field");
+                        input.setAttribute("data-id", values.id);
+                        input.type = "checkbox";
+                        input.id = values.id;
+                        input.value = values.name;
+                        input.name = values.name;
+                        input.checked = false;
+                        col_lg_6.appendChild(input);
+                    }
                 });
                 item_getnode = true;
             }
@@ -227,6 +245,8 @@ function additem() {
     document.getElementById("item_size").value = "";
     var unit = document.getElementById("unit").value;
     document.getElementById("unit").value = "mm";
+    var quantity = parseFloat(document.getElementById("item_quantity").value);
+    document.getElementById("item_quantity").value = "";
     if (name != "") {
         var ip = location.host;
         var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
@@ -235,7 +255,7 @@ function additem() {
                 data.forEach(function (values) {
                     if (unit === values.name) {
                         size = size * parseFloat(values.multiplicator);
-                        socket.emit('item_data', [name, instructions, size]);
+                        socket.emit('item_data', [name, instructions, size, quantity]);
                         location.reload();
                     }
                 });
@@ -279,17 +299,43 @@ function addbox(a) {
                 b = true;
             }
             if (b) {
-                if (itemlist == "") {
-                    itemlist = [id, value];
-                } else {
-                    itemlist = [...itemlist, id, value];
-                }
+                itemlist = [...itemlist, id, value];
             }
         });
         var ip = location.host;
         var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
         socket.on('connect', () => {
             socket.emit('box_data', [name, box_group, itemlist]);
+            location.reload();
+        });
+    }
+}
+
+function addboxgroup(a) {
+    var name = document.getElementById("box_group_name").value;
+    document.getElementById("box_group_name").value = "";
+    var location_n = document.getElementById("location_name").value;
+    document.getElementById("location_name").value = "";
+
+    var items;
+    var parent = document.getElementById(a);
+    items = parent.getElementsByClassName("field");
+
+    var itemlist = [];
+    if (name != "" && items.length > 0) {
+        Array.prototype.forEach.call(items, function (values) {
+            let checked = values.checked;
+            values.checked = false;
+            if (checked) {
+                let id = values.getAttribute("data-id");
+                itemlist = [...itemlist, id];
+            }
+        });
+        console.log(name + "," + location_n + "," + itemlist);
+        var ip = location.host;
+        var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
+        socket.on('connect', () => {
+            socket.emit('box_group_data', [name, location_n, itemlist]);
             location.reload();
         });
     }
