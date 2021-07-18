@@ -247,16 +247,20 @@ function additem() {
     document.getElementById("unit").value = "mm";
     var quantity = parseFloat(document.getElementById("item_quantity").value);
     document.getElementById("item_quantity").value = "";
+    var color = document.getElementById("item_color").value;
+    document.getElementById("item_color").value = "#FFFFFF";
+    var pic = document.getElementById("item_pic").files;
+    document.getElementById("item_pic").files = null;
     if (name != "") {
         var ip = location.host;
         var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
         socket.on('connect', () => {
             socket.on('getUnit', (data) => {
-                data.forEach(function (values) {
+                data.forEach((values) => {
                     if (unit === values.name) {
                         size = size * parseFloat(values.multiplicator);
-                        socket.emit('item_data', [name, instructions, size, quantity]);
-                        location.reload();
+                        socket.emit('item_data', [name, instructions, size, color, pic, quantity]);
+                        //location.reload();
                     }
                 });
             })
