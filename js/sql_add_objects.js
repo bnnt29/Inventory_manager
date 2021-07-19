@@ -250,7 +250,6 @@ function additem() {
     var color = document.getElementById("item_color").value;
     document.getElementById("item_color").value = "#FFFFFF";
     var pic = document.getElementById("item_pic").files;
-    document.getElementById("item_pic").files = null;
     if (name != "") {
         var ip = location.host;
         var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
@@ -259,8 +258,8 @@ function additem() {
                 data.forEach((values) => {
                     if (unit === values.name) {
                         size = size * parseFloat(values.multiplicator);
-                        socket.emit('item_data', [name, instructions, size, color, pic, quantity]);
-                        //location.reload();
+                        socket.emit('item_data', [name, instructions, size, color, pic, quantity, pic.length]);
+                        socket.on("successi", (data) => { document.getElementById("item_pic_f").reset(); location.reload(); });
                     }
                 });
             })
@@ -276,6 +275,9 @@ function addbox(a) {
     var items;
     var parent = document.getElementById(a);
     items = parent.getElementsByClassName("field");
+    var color = document.getElementById("box_color").value;
+    document.getElementById("box_color").value = "#FFFFFF";
+    var pic = document.getElementById("box_pic").files;
     var itemlist = [];
     if (name != "" && items.length > 0) {
         Array.prototype.forEach.call(items, function (values) {
@@ -309,8 +311,8 @@ function addbox(a) {
         var ip = location.host;
         var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
         socket.on('connect', () => {
-            socket.emit('box_data', [name, box_group, itemlist]);
-            location.reload();
+            socket.emit('box_data', [name, box_group, itemlist, color, pic, pic.length]);
+            socket.on("successb", (data) => { document.getElementById("box_pic_f").reset(); location.reload(); });
         });
     }
 }
@@ -320,7 +322,9 @@ function addboxgroup(a) {
     document.getElementById("box_group_name").value = "";
     var location_n = document.getElementById("location_name").value;
     document.getElementById("location_name").value = "";
-
+    var color = document.getElementById("bg_color").value;
+    document.getElementById("bg_color").value = "#FFFFFF";
+    var pic = document.getElementById("bg_pic").files;
     var items;
     var parent = document.getElementById(a);
     items = parent.getElementsByClassName("field");
@@ -339,8 +343,8 @@ function addboxgroup(a) {
         var ip = location.host;
         var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
         socket.on('connect', () => {
-            socket.emit('box_group_data', [name, location_n, itemlist]);
-            location.reload();
+            socket.emit('box_group_data', [name, location_n, itemlist, color, pic, pic.length]);
+            socket.on("successbg", (data) => { document.getElementById("bg_pic_f").reset(); location.reload(); });
         });
     }
 }

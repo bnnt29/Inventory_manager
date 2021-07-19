@@ -255,9 +255,9 @@ function iohandle(socket) {
     socket.on('getItem_data', (data) => { sql.recreateDb((db) => { sql.read(db, "SELECT i.name item_name, instructions_id, i.size, i.total_quantity, ib.box_id, b.name box_name, b.box_group_id, bg.name bg_name, bg.location bg_location, b.color box_color, i.color color, i.picture picture, bg.color bg_color, ib.quantity quantity FROM item i LEFT JOIN (item_box ib LEFT JOIN (box b LEFT JOIN box_group bg ON b.box_group_id=bg.id) ON ib.box_id = b.id) ON i.id = ib.item_id WHERE i.id='" + data + "'", (dat) => { socket.emit(data, dat); }); }); });
     socket.on("sql_read", (data) => { sql.recreateDb((db) => { sql.read(db, data, (dat) => { socket.emit(data, dat); }); }); });
     socket.on("in_use_box_node", (data) => { in_use_box_node_data = [...in_use_box_node_data, data]; in_use_box_node_data.forEach((values) => { getbox_node_items(values, socket); }); });
-    socket.on('box_data', (data) => { addbox(data); });
-    socket.on('box_group_data', (data) => { addboxgroup(data); });
-    socket.on('item_data', (data) => { additem(data); });
+    socket.on('box_data', (data) => { addbox(data); socket.emit("successb", true); });
+    socket.on('box_group_data', (data) => { addboxgroup(data); socket.emit("successbg", true); });
+    socket.on('item_data', (data) => { additem(data); socket.emit("successi", true); });
     socket.on('refresh', (data) => { reload_data(); socket.emit('reloaded', data); });
     socket.on('setsettings', (data) => { setsettings(data); });
     socket.on('disconnect', function () {
@@ -273,8 +273,9 @@ function getbox_node_items(values, socket) {
 }
 
 function addbox(data) {
-    let d = [data[0], data[1]];
-    sql.insert("INSERT OR IGNORE INTO box (name, box_group_id) VALUES (?, ?)", d, (callback) => {
+    console.log("true");
+    let d = [data[0], data[1], data[3]];
+    sql.insert("INSERT OR IGNORE INTO box (name, box_group_id, color) VALUES (?, ?, ?)", d, (callback) => {
         sql.recreateDb((db) => {
             sql.read(db, "SELECT * FROM box WHERE name = '" + data[0] + "'", (da) => {
                 var b = false;
@@ -290,6 +291,13 @@ function addbox(data) {
                         }
                         b = true;
                     }
+                    if (data[5] != 0) {
+                        fs.writeFile(__dirname + "/../_img/" + values.id + ".jpg", Buffer.from(data[4][0]), function (err) {
+                            if (err) throw err;
+                            let da = [];
+                            sql.insert("UPDATE box SET picture ='" + values.id + ".jpg" + "' WHERE id = '" + values.id + "'", da, (w) => { });
+                        });
+                    }
                 });
             });
         });
@@ -297,8 +305,8 @@ function addbox(data) {
 }
 
 function addboxgroup(data) {
-    let d = [data[0], data[1]];
-    sql.insert("INSERT OR IGNORE INTO box_group (name, location) VALUES (?, ?)", d, (callback) => {
+    let d = [data[0], data[1], data[3]];
+    sql.insert("INSERT OR IGNORE INTO box_group (name, location, color) VALUES (?, ?, ?)", d, (callback) => {
         sql.recreateDb((db) => {
             sql.read(db, "SELECT * FROM box_group WHERE name = '" + data[0] + "'", (da) => {
                 var b = false;
@@ -306,13 +314,18 @@ function addboxgroup(data) {
                     if (!b) {
                         for (let i = 0; i < data[2].length; i++) {
                             let dat = [];
-                            sql.recreateDb((db) => {
-                                sql.insert(db, "UPDATE box SET box_group_id ='" + values.id + "' WHERE id = '" + parseInt(data[2][i]) + "'", dat, (callback) => {
-                                    reload_data();
-                                });
+                            sql.insert("UPDATE box SET box_group_id ='" + values.id + "' WHERE id = '" + parseInt(data[2][i]) + "'", dat, (callback) => {
+                                reload_data();
                             });
                         }
                         b = true;
+                    }
+                    if (data[5] != 0) {
+                        fs.writeFile(__dirname + "/../_img/" + values.id + ".jpg", Buffer.from(data[4][0]), function (err) {
+                            if (err) throw err;
+                            let da = [];
+                            sql.insert("UPDATE box SET picture ='" + values.id + ".jpg" + "' WHERE id = '" + values.id + "'", da, (w) => { });
+                        });
                     }
                 });
             });
@@ -321,30 +334,22 @@ function addboxgroup(data) {
 }
 
 function additem(data) {
-    console.log(data);
     let dat = [data[0], data[1], data[2], data[5], data[3]];
-    console.log(dat);
     sql.insert("INSERT OR IGNORE INTO item (name, instructions_id, size, total_quantity, color) VALUES (?, ?, ?, ?, ?)", dat, (q) => {
         reload_data();
-        sql.recreateDb((db) => {
-            console.log(q);
-            sql.read(db, "SELECT * FROM item WHERE name ='" + data[0] + "'", (datas) => {
-                console.log(datas);
-                console.log(data[4]);
-                datas.forEach((values) => {
-                    console.log(values);
-                    fs.writeFile(__dirname + "/../_img/" + values.id + ".jpg", Buffer.from(data[4][0]), function (err) {
-                        if (err) throw err;
-                        console.log('Saved!');
-                        let da = [];
-                        sql.recreateDb((db) => {
-                            console.log(values.id);
-                            sql.insert(db, "UPDATE item SET picture ='" + values.id + ".jpg" + "' WHERE id = '" + values.id + "'", da, (w) => { console.log(w); });
+        if (data[6] != 0) {
+            sql.recreateDb((db) => {
+                sql.read(db, "SELECT * FROM item WHERE name ='" + data[0] + "'", (datas) => {
+                    datas.forEach((values) => {
+                        fs.writeFile(__dirname + "/../_img/" + values.id + ".jpg", Buffer.from(data[4][0]), function (err) {
+                            if (err) throw err;
+                            let da = [];
+                            sql.insert("UPDATE item SET picture ='" + values.id + ".jpg" + "' WHERE id = '" + values.id + "'", da, (w) => { });
                         });
                     });
                 });
             });
-        });
+        }
     });
 }
 
