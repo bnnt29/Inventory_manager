@@ -10,12 +10,8 @@ var unit;
 var i = 0;
 
 
-function createDb(b) {
-    if (b) {
-        db = new sqlite3.Database(file, createTables);
-    } else {
-        db = new sqlite3.Database(file, insertPages);
-    }
+function createDb() {
+    db = new sqlite3.Database(file, createTables);
 }
 
 function recreateDb(callback) {
@@ -44,6 +40,15 @@ function insertunit() {
             });
         });
     }
+    insertdefaults();
+}
+
+function insertdefaults() {
+    insert("INSERT OR IGNORE INTO box_group (id, name, location, color) VALUES (?, ?, ?, ?)", [1, "default", "somewhere", "#FFFFFF"], (values) => {
+        insert("INSERT OR IGNORE INTO box (id, name, box_group_id, color) VALUES (?, ?, ?, ?)", [1, "default", 1, "#FFFFFF"], (values) => {
+            return;
+        });
+    });
 }
 
 function insert(r, data, callback) {
@@ -65,8 +70,8 @@ function readAllRows(bool) {
     });
 }
 
-function initDB(b, callback) {
-    createDb(b);
+function initDB(callback) {
+    createDb();
     callback;
 }
 
@@ -102,7 +107,7 @@ module.exports = function (p, a, db, callback, r) {
     var module = {};
     module.read = function (db, r, callback) { read(db, r, callback) }
     module.setdata = function (p, a) { setdata(p, a) };
-    module.initDB = function (a, callback) { initDB(a, callback) };
+    module.initDB = function (callback) { initDB(callback) };
     module.recreateDb = function (callback) { recreateDb(callback) };
     module.closedb = function (db) { closedb(db) };
     module.insert = function (p, a, callback) { insert(p, a, callback) };

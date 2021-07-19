@@ -1,60 +1,92 @@
-function init() {
-    let url = document.URL;
+var url = document.URL;
+var id = -1;
+function getid(url) {
     if (url.indexOf("&") != -1) {
         if (!isNaN(url.substring(url.indexOf("&") + 1, url.length))) {
             ids = url.substring(url.indexOf("&") + 1, url.length);
             id = parseInt(ids);
-            if (id >= 1) {
-                var ip = location.host;
-                var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
-                socket.on('connect', () => {
-                    socket.emit('getItem_data', id);
-                    socket.on('getUnit', (dat) => {
-                        socket.on(id, (data) => {
-                            if (data.length != 0) {
-                                console.log(data);
-                                data.forEach((values) => {
-                                    document.getElementById("item_id").innerHTML = id;
-                                    document.getElementById("item_name").innerHTML = values.item_name;
-                                    document.getElementById("total_quantity").innerHTML = values.total_quantity;
-                                    document.getElementById("item_img").alt = values.item_name;
-                                    let i = values.size;
-                                    let shortest = [];
-                                    let units = [];
-                                    dat.forEach((val) => {
-                                        shortest = [...shortest, "" + i * parseFloat(val.multiplicator)];
-                                        units = [...units, val];
-                                    });
-                                    let unit = 0;
-                                    for (let i = 0; i < shortest.length; i++) {
-                                        if (shortest[unit].length > shortest[i].length) {
-                                            unit = i;
-                                        }
-                                    }
-                                    document.getElementById("item_size").innerHTML = (dat[unit].multiplicator * i);
-                                    document.getElementById("item_unit").innerHTML = dat[unit].name;
-                                    if (values.picture != null) {
-                                        document.getElementById("item_img").src = values.picture;
-                                    }
-                                    if (values.color != null) {
-                                        document.getElementById("color_row").style.backgroundColor = values.color;
-                                    }
-                                });
-                                init_tab_links(data);
-                            } else {
-                                console.log("none");
-                                document.getElementById("body").style.display = "none";
-                                document.getElementById("html").innerHTML = "The item with the id: " + id + " doesn't exist";
-                            }
-                        });
-                    });
-                });
-            }
+            init_f(id);
+            return id;
         }
+    } else if (url.indexOf("+") != -1) {
+        var ip = location.host;
+        var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
+        socket.on('connect', () => {
+            let dat = url.substring(url.indexOf("+") + 1, url.length);
+            dat = "SELECT * FROM item WHERE name='" + dat + "'";
+            socket.emit('sql_read', dat);
+            socket.on(dat, (data) => {
+                console.log("4");
+                console.log(data);
+                data.forEach((values) => {
+                    console.log("3");
+                    console.log(values);
+                    if (values.name == url.substring(url.indexOf("+") + 1, url.length)) {
+                        id = values.id;
+                        init_f(id);
+                        return id;
+                    }
+                });
+            });
+        });
     } else {
         nofile();
+        return -1;
     }
 }
+function init() {
+    url = document.URL;
+    getid(url);
+    init_picture();
+}
+function init_f(id) {
+    if (id >= 1) {
+        var ip = location.host;
+        var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
+        socket.on('connect', () => {
+            socket.emit('getItem_data', id);
+            socket.on('getUnit', (dat) => {
+                socket.on(id, (data) => {
+                    if (data.length != 0) {
+                        data.forEach((values) => {
+                            document.getElementById("item_id").innerHTML = id;
+                            document.getElementById("item_name").innerHTML = values.item_name;
+                            document.getElementById("total_quantity").innerHTML = values.total_quantity;
+                            document.getElementById("item_img").alt = values.item_name;
+                            let i = parseFloat(values.size);
+                            let shortest = [];
+                            let units = [];
+                            dat.forEach((val) => {
+                                shortest = [...shortest, "" + i / parseFloat(val.multiplicator)];
+                                units = [...units, val];
+                            });
+                            let unit = 0;
+                            for (let i = 0; i < shortest.length; i++) {
+                                if (shortest[unit].length > shortest[i].length) {
+                                    unit = i;
+                                }
+                            }
+                            document.getElementById("item_size").innerHTML = parseFloat(values.size) / (parseFloat(dat[unit].multiplicator));
+                            document.getElementById("item_unit").innerHTML = dat[unit].name;
+                            if (values.picture != null) {
+                                document.getElementById("item_img").src = values.picture;
+                            }
+                            if (values.color != null) {
+                                document.getElementById("color_row").style.backgroundColor = values.color;
+                            }
+                        });
+                        init_tab_links(data);
+                    } else {
+                        console.log("none");
+                        document.getElementById("body").style.display = "none";
+                        document.getElementById("html").innerHTML = "The item with the id: " + id + " doesn't exist";
+                    }
+                });
+            });
+        });
+    }
+}
+
 
 function nofile() {
     document.write("opps this doesn't exist - 404  -  (tipp: use /item&[item_id])");
@@ -86,33 +118,40 @@ function init_picture() {
 function init_tab_links(data) {
     let button;
     let b = false;
+    let bd_ids = [];
+    let tabc;
     data.forEach((values) => {
-        if (values.box_id != null) {
-            document.getElementById("setup").style.display = "block";
+        if (bd_ids.includes(values.box_group_id)) {
+            init_box_coll(tabc, values);
         } else {
-            document.getElementById("setup").style.display = "none";
-        }
-        let parent = document.getElementById("tablinks_div");
-        button = document.createElement("button");
-        button.classList.add("tablinks");
-        button.setAttribute("data-id", values.box_group_id);
-        button.innerHTML = values.bg_name;
-        button.onclick = () => { opentab(event, values.box_group_id); };
-        if (values.bg_color != null) {
-            button.style.backgroundColor = values.bg_color;
-        } else {
-            button.style.backgroundColor = "#FFFFFF";
-        }
-        let def = document.getElementById("default");
-        parent.appendChild(button);
-        b = true;
+            bd_ids = [...bd_ids, parseInt(values.box_group_id)];
+            if (values.box_id != null) {
+                document.getElementById("setup").style.display = "block";
+            } else {
+                document.getElementById("setup").style.display = "none";
+            }
+            let parent = document.getElementById("tablinks_div");
+            button = document.createElement("button");
+            button.classList.add("tablinks");
+            button.setAttribute("data-id", values.box_group_id);
+            button.innerHTML = values.bg_name;
+            button.onclick = () => { opentab(event, values.box_group_id); };
+            if (values.bg_color != null) {
+                button.style.backgroundColor = values.bg_color;
+            } else {
+                button.style.backgroundColor = "#FFFFFF";
+            }
+            let def = document.getElementById("default");
+            parent.appendChild(button);
+            b = true;
 
-        let col_lg_12 = document.getElementById("tabs");
-        let tabc = document.createElement("div");
-        tabc.classList.add("tabcontent");
-        tabc.id = values.box_group_id;
-        col_lg_12.appendChild(tabc);
-        init_box_coll(tabc, values);
+            let col_lg_12 = document.getElementById("tabs");
+            tabc = document.createElement("div");
+            tabc.classList.add("tabcontent");
+            tabc.id = values.box_group_id;
+            col_lg_12.appendChild(tabc);
+            init_box_coll(tabc, values);
+        }
     });
 }
 
@@ -138,7 +177,6 @@ function init_box_coll(tabc, values) {
 }
 
 function init_item_row(content, values) {
-    let id = parseInt(document.URL.substring(document.URL.indexOf("&") + 1, document.URL.length));
 
     let row = document.createElement("div");
     row.classList.add("row");
@@ -150,11 +188,7 @@ function init_item_row(content, values) {
     row = document.createElement("div");
     row.classList.add("row");
     row.style.marginTop = "1rem";
-    if (values.color != null) {
-        row.style.backgroundColor = values.color;
-    } else {
-        row.style.backgroundColor = "#FFFFFF";
-    }
+
     col_lg_12.appendChild(row);
     let col_lg_6 = document.createElement("div");
     col_lg_6.classList.add("col-lg-6");
@@ -188,7 +222,6 @@ function opentab(evt, tabName) {
     }
 
     // Show the current tab, and add an "active" class to the button that opened the tab
-    console.log(tabName + ", " + document.getElementById(tabName).style.display);
     document.getElementById(tabName).style.display = "block";
     evt.currentTarget.className += " active";
 
@@ -219,3 +252,148 @@ function refresh() {
         }
     });
 }
+
+function change_item_name(a) {
+    if (a === 'true') {
+        var name = document.getElementById("item_name_edit").value;
+        document.getElementById("item_name").value = name;
+        document.getElementById("item_name_edit").value = name;
+        if (name != "") {
+            var ip = location.host;
+            var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
+            socket.on('connect', () => {
+                socket.emit("sql_read", "SELECT * FROM item WHERE name='" + name + "'");
+                socket.on("SELECT * FROM item WHERE name='" + name + "'", (data) => {
+                    if (data.length <= 0) {
+                        let dat = [];
+                        dat = ["UPDATE item SET name ='" + name + "' WHERE id = '" + id + "'", dat];
+                        socket.emit("sql_insert", dat);
+                        socket.on(dat, (data) => { location.reload(); });
+                    } else {
+                        console.log("Name already exist");
+                    }
+                });
+            });
+        } else {
+            location.reload();
+        }
+    } else {
+        document.getElementById("edit_pen_name").disabled = true;
+        document.getElementById("edit_pen_name").style.display = "none";
+        document.getElementById("edit_save_name").style.display = "block";
+        document.getElementById("edit_save_name").disabled = true;
+        let input = document.createElement("input");
+        input.type = "text";
+        input.id = "item_name_edit"
+        input.style.width = "16rem";
+        input.style.height = "3rem";
+        input.title = "item name";
+        input.placeholder = "name";
+        document.getElementById("item_name").style.display = "none";
+        document.getElementById("item_name").parentElement.appendChild(input);
+    }
+}
+
+function change_item_quantity(a) {
+    if (a === 'true') {
+        var quantity = document.getElementById("total_quantity_edit").value;
+        document.getElementById("total_quantity").value = quantity;
+        document.getElementById("total_quantity_edit").value = quantity;
+        if (quantity != "") {
+            var ip = location.host;
+            var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
+            socket.on('connect', () => {
+                let dat = [];
+                dat = ["UPDATE item SET total_quantity ='" + quantity + "' WHERE id = '" + id + "'", dat];
+                socket.emit("sql_insert", dat);
+                socket.on(dat, (data) => { location.reload(); });
+            });
+        } else {
+            location.reload();
+        }
+    } else {
+        document.getElementById("edit_pen_quantity").disabled = true;
+        document.getElementById("edit_pen_quantity").style.display = "none";
+        document.getElementById("edit_save_quantity").style.display = "block";
+        document.getElementById("edit_save_quantity").disabled = false;
+        let input = document.createElement("input");
+        input.type = "number";
+        input.id = "total_quantity_edit"
+        input.style.width = "16rem";
+        input.style.height = "3rem";
+        input.title = "total quantity";
+        input.placeholder = "0";
+        document.getElementById("total_quantity").style.display = "none";
+        document.getElementById("total_quantity").parentElement.appendChild(input);
+    }
+}
+
+function change_item_size(a) {
+    if (a === 'true') {
+        var size = document.getElementById("item_size_edit").value;
+        document.getElementById("item_size").value = size;
+        document.getElementById("item_size_edit").value = size;
+        var unit = document.getElementById("unit").value;
+        document.getElementById("unit").value = "mm";
+        if (size != "") {
+            var ip = location.host;
+            var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
+            socket.on('connect', () => {
+                socket.on('getUnit', (data) => {
+                    data.forEach((values) => {
+                        if (unit === values.name) {
+                            size = size * parseFloat(values.multiplicator);
+                            size = ~~(size * 1000);
+                            let dat = [];
+                            dat = ["UPDATE item SET size ='" + size + "' WHERE id = '" + id + "'", dat];
+                            socket.emit("sql_insert", dat);
+                            socket.on(dat, (data) => { location.reload(); });
+                        }
+                    });
+                })
+            });
+        } else {
+            location.reload();
+        }
+    } else {
+        document.getElementById("edit_pen_size").disabled = true;
+        document.getElementById("edit_pen_size").style.display = "none";
+        document.getElementById("edit_save_size").style.display = "block";
+        document.getElementById("edit_save_size").disabled = false;
+        let input = document.createElement("input");
+        input.type = "number";
+        input.id = "item_size_edit"
+        input.style.width = "16rem";
+        input.style.height = "3rem";
+        input.title = "item size";
+        input.placeholder = "0";
+        document.getElementById("item_size").style.display = "none";
+        document.getElementById("item_size").parentElement.appendChild(input);
+        var ip = location.host;
+        var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
+        socket.on('connect', () => {
+            socket.on('getUnit', (data) => {
+                let form = document.createElement("form");
+                form.id = "item_unit_edit";
+                let label = document.createElement("label");
+                label.htmlFor = "unit";
+                form.appendChild(label);
+                let select = document.createElement("select");
+                select.id = "unit";
+                select.name = "unit";
+                select.style.width = "5rem";
+                select.style.height = "3rem";
+                label.appendChild(select);
+                data.forEach((values) => {
+                    let option = document.createElement("option");
+                    select.appendChild(option);
+                    option.value = values.name;
+                    option.innerHTML = values.name;
+                });
+                document.getElementById("item_unit").style.display = "none";
+                document.getElementById("item_unit").parentElement.appendChild(form);
+            });
+        });
+    }
+}
+

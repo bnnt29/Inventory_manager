@@ -141,9 +141,9 @@ function getitem_node(a, b) {
                         if (a == "item_container1") {
                             var max = values.total_quantity;
                             socket.emit("sql_read", "SELECT * FROM item_box WHERE item_id='" + values.id + "'");
-                            socket.on("SELECT * FROM item_box WHERE item_id='" + values.id + "'", (data) => { data.forEach((dat) => { max -= parseInt(dat.quantity); }); });
+                            socket.on("SELECT * FROM item_box WHERE item_id='" + values.id + "' AND NOT box_id='1'", (data) => { data.forEach((dat) => { max -= parseInt(dat.quantity); }); });
                             input.setAttribute("data-max", max);
-                            input.setAttribute("data-min", "");
+                            input.setAttribute("data-min", 0);
                             input.addEventListener('change', () => { if (parseInt(input.value) > max) { input.value = max;/* console.log("Not enough items left");*/ } });
                         }
                         input.setAttribute("data-id", values.id);
@@ -272,6 +272,9 @@ function addbox(a) {
     document.getElementById("box_name").value = "";
     var box_group = parseInt(document.getElementById("box_group_select").value);
     document.getElementById("box_group_select").value = "Choose";
+    if (box_group == "Choose" || box_group == null) {
+        box_group = 1;
+    }
     var items;
     var parent = document.getElementById(a);
     items = parent.getElementsByClassName("field");
@@ -361,7 +364,7 @@ function additem() {
     document.getElementById("item_quantity").value = "";
     var color = document.getElementById("item_color").value;
     document.getElementById("item_color").value = "#FFFFFF";
-    var pic = document.getElementById("item_pic").files;
+    var pic = document.getElementById("item_pic").files
     if (name != "") {
         var ip = location.host;
         var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
@@ -370,6 +373,7 @@ function additem() {
                 data.forEach((values) => {
                     if (unit === values.name) {
                         size = size * parseFloat(values.multiplicator);
+                        size = ~~(size * 1000);
                         socket.emit('item_data', [name, instructions, size, color, pic, quantity, pic.length]);
                         socket.on("successi", (data) => { document.getElementById("item_pic_f").reset(); location.reload(); });
                     }

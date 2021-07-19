@@ -16,7 +16,6 @@ function opentab(evt, tabName) {
     }
 
     // Show the current tab, and add an "active" class to the button that opened the tab
-    console.log(tabName + ", " + document.getElementById(tabName).style.display);
     document.getElementById(tabName).style.display = "block";
     evt.currentTarget.className += " active";
 

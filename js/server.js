@@ -103,7 +103,26 @@ function fserverhandler(req, res) {
         res.writeHead(202, {
             'Content-Type': 'image/jpg'
         });
-        fs.readFile(__dirname + "/../_img/" + path, function (err, data) {
+
+        if (path.indexOf('default') == -1) {
+            fs.readFile(__dirname + "/../_img/" + path, function (err, data) {
+                res.write(data);
+                res.end();
+            });
+        } else {
+            fs.readFile(__dirname + "/../" + path, function (err, data) {
+                res.write(data);
+                res.end();
+            });
+        }
+    }
+
+    if (path.indexOf('.txt') != -1 && !used) {
+        used = true;
+        res.writeHead(202, {
+            'Content-Type': 'text/txt'
+        });
+        fs.readFile(__dirname + "/../_txt/" + path, function (err, data) {
             res.write(data);
             res.end();
         });
@@ -177,9 +196,10 @@ var boxgroup;
 var boxgroupname;
 
 sql.setdata(pages, unitlist);
-sql.initDB(true, () => { reload_data(); });
+sql.initDB(() => { reload_data(); });
 
 function reload_data() {
+
     sql.recreateDb(function (data) {
         sql.read(data, "SELECT * FROM box_group", function (data) {
             boxgroup = data;
@@ -193,13 +213,13 @@ function reload_data() {
     });
 
     sql.recreateDb(function (data) {
-        sql.read(data, "SELECT * FROM item " + /*"WHERE id NOT IN(SELECT item_id FROM item_box)" + */"ORDER BY name ASC", function (data) {
+        sql.read(data, "SELECT * FROM item ORDER BY name ASC", function (data) {
             unused_item = data;
         });
     });
 
     sql.recreateDb(function (data) {
-        sql.read(data, "SELECT * FROM box " + "WHERE box_group_id IS NULL" + " ORDER BY name ASC", function (data) {
+        sql.read(data, "SELECT * FROM box WHERE box_group_id IS NULL OR box_group_id='1' ORDER BY name ASC", function (data) {
             unused_box = data;
         });
     });
@@ -258,7 +278,7 @@ function iohandle(socket) {
     socket.emit('getsettings', file);
     socket.emit('getUnit', unit);
     socket.on('getinstructions', (data) => { sql.recreateDb((db) => { sql.read(db, "SELECT * FROM instructions WHERE id='" + data + "'", (dat) => { socket.emit(data, dat); }); }); });
-    socket.on('getItem_data', (data) => { sql.recreateDb((db) => { sql.read(db, "SELECT i.name item_name, instructions_id, i.size, i.total_quantity, ib.box_id, b.name box_name, b.box_group_id, bg.name bg_name, bg.location bg_location, b.color box_color, i.color color, i.picture picture, bg.color bg_color, ib.quantity quantity FROM item i LEFT JOIN (item_box ib LEFT JOIN (box b LEFT JOIN box_group bg ON b.box_group_id=bg.id) ON ib.box_id = b.id) ON i.id = ib.item_id WHERE i.id='" + data + "'", (dat) => { socket.emit(data, dat); }); }); });
+    socket.on('getItem_data', (data) => { sql.recreateDb((db) => { sql.read(db, "SELECT i.name item_name, instructions_id, i.size, i.total_quantity, ib.box_id, b.name box_name, b.box_group_id, bg.name bg_name, bg.location bg_location, b.color box_color, i.color color, i.picture picture, bg.color bg_color, ib.quantity quantity FROM item i LEFT JOIN (item_box ib LEFT JOIN (box b LEFT JOIN box_group bg ON b.box_group_id=bg.id) ON ib.box_id = b.id) ON i.id = ib.item_id WHERE i.id='" + data + "' ORDER BY b.box_group_id ASC", (dat) => { socket.emit(data, dat); }); }); });
     socket.on("sql_read", (data) => { sql.recreateDb((db) => { sql.read(db, data, (dat) => { socket.emit(data, dat); }); }); });
     socket.on("sql_insert", (data) => { sql.insert(data[0], data[1], () => { reload_data(); socket.emit(data, true); }); });
     socket.on("in_use_box_node", (data) => { in_use_box_node_data = [...in_use_box_node_data, data]; in_use_box_node_data.forEach((values) => { getbox_node_items(values, socket); }); });
@@ -281,7 +301,6 @@ function getbox_node_items(values, socket) {
 }
 
 function addbox(data) {
-    console.log("true");
     let d = [data[0], data[1], data[3]];
     sql.insert("INSERT OR IGNORE INTO box (name, box_group_id, color) VALUES (?, ?, ?)", d, (callback) => {
         sql.recreateDb((db) => {
@@ -292,9 +311,17 @@ function addbox(data) {
                         for (let i = 0; i < data[2].length; i += 2) {
                             let dat = [data[2][i], parseInt(values.id), data[2][i + 1]];
                             if (dat[2] != 0) {
-                                sql.insert("INSERT OR IGNORE INTO item_box (item_id, box_id, quantity) VALUES (?, ?, ?)", dat, (callback) => {
-                                    reload_data();
-                                });
+                                sql.recreateDb((db) => {
+                                    sql.read(db, "SELECT * FROM item_box WHERE item_id='" + data[2][i] + "' AND box_id='1'", (datas) => {
+                                        sql.insert("INSERT OR IGNORE INTO item_box (item_id, box_id, quantity) VALUES (?, ?, ?)", dat, (callback) => {
+                                            let da = [];
+                                            sql.insert("UPDATE item_box SET quantity='" + (datas[0].quantity - data[2][i + 1]) + "' WHERE item_id='" + data[2][i] + "' AND box_id='1'", da, (w) => {
+                                                reload_data();
+                                            });
+                                        });
+
+                                    });
+                                })
                             }
                         }
                         b = true;
@@ -358,7 +385,7 @@ function addinstruction(data) {
                         b = true;
                     }
                     if (data[3] != 0) {
-                        fs.writeFile(__dirname + "/../_img/" + values.id + ".txt", Buffer.from(data[2][0]), function (err) {
+                        fs.writeFile(__dirname + "/../_txt/" + values.id + ".txt", Buffer.from(data[2][0]), function (err) {
                             if (err) throw err;
                             let da = [];
                             sql.insert("UPDATE instructions SET document ='" + values.id + ".txt" + "' WHERE id = '" + values.id + "'", da, (w) => { });
@@ -387,6 +414,16 @@ function additem(data) {
                 });
             });
         }
+        sql.recreateDb((db) => {
+            sql.read(db, "SELECT * FROM item WHERE name ='" + data[0] + "'", (datas) => {
+                datas.forEach((values) => {
+                    let dat = [values.id, 1, data[5]];
+                    sql.insert("INSERT OR IGNORE INTO item_box (item_id, box_id, quantity) VALUES (?, ?, ?)", dat, (callback) => {
+                        reload_data();
+                    });
+                });
+            });
+        });
     });
 }
 
