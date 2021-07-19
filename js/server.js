@@ -139,6 +139,11 @@ function fserverhandler(req, res) {
             res.end();
         });
     }
+    if (!used) {
+        res.writeHead(404);
+        res.write("opps this doesn't exist - 404");
+        res.end();
+    }
 }
 
 var server1 = http.createServer(fserverhandler);
@@ -252,12 +257,15 @@ function iohandle(socket) {
     socket.emit('stats', stats);
     socket.emit('getsettings', file);
     socket.emit('getUnit', unit);
+    socket.on('getinstructions', (data) => { sql.recreateDb((db) => { sql.read(db, "SELECT * FROM instructions WHERE id='" + data + "'", (dat) => { socket.emit(data, dat); }); }); });
     socket.on('getItem_data', (data) => { sql.recreateDb((db) => { sql.read(db, "SELECT i.name item_name, instructions_id, i.size, i.total_quantity, ib.box_id, b.name box_name, b.box_group_id, bg.name bg_name, bg.location bg_location, b.color box_color, i.color color, i.picture picture, bg.color bg_color, ib.quantity quantity FROM item i LEFT JOIN (item_box ib LEFT JOIN (box b LEFT JOIN box_group bg ON b.box_group_id=bg.id) ON ib.box_id = b.id) ON i.id = ib.item_id WHERE i.id='" + data + "'", (dat) => { socket.emit(data, dat); }); }); });
     socket.on("sql_read", (data) => { sql.recreateDb((db) => { sql.read(db, data, (dat) => { socket.emit(data, dat); }); }); });
+    socket.on("sql_insert", (data) => { sql.insert(data[0], data[1], () => { reload_data(); socket.emit(data, true); }); });
     socket.on("in_use_box_node", (data) => { in_use_box_node_data = [...in_use_box_node_data, data]; in_use_box_node_data.forEach((values) => { getbox_node_items(values, socket); }); });
     socket.on('box_data', (data) => { addbox(data); socket.emit("successb", true); });
     socket.on('box_group_data', (data) => { addboxgroup(data); socket.emit("successbg", true); });
     socket.on('item_data', (data) => { additem(data); socket.emit("successi", true); });
+    socket.on('instruction_data', (data) => { addinstruction(data); socket.emit("successinst", true); });
     socket.on('refresh', (data) => { reload_data(); socket.emit('reloaded', data); });
     socket.on('setsettings', (data) => { setsettings(data); });
     socket.on('disconnect', function () {
@@ -325,6 +333,35 @@ function addboxgroup(data) {
                             if (err) throw err;
                             let da = [];
                             sql.insert("UPDATE box SET picture ='" + values.id + ".jpg" + "' WHERE id = '" + values.id + "'", da, (w) => { });
+                        });
+                    }
+                });
+            });
+        });
+    });
+}
+
+function addinstruction(data) {
+    let d = [data[0]];
+    sql.insert("INSERT OR IGNORE INTO instructions (name) VALUES (?)", d, (callback) => {
+        sql.recreateDb((db) => {
+            sql.read(db, "SELECT * FROM instructions WHERE name = '" + data[0] + "'", (da) => {
+                var b = false;
+                da.forEach((values) => {
+                    if (!b) {
+                        for (let i = 0; i < data[2].length; i++) {
+                            let dat = [];
+                            sql.insert("UPDATE item SET instructions_id ='" + values.id + "' WHERE id = '" + parseInt(data[1][i]) + "'", dat, (callback) => {
+                                reload_data();
+                            });
+                        }
+                        b = true;
+                    }
+                    if (data[3] != 0) {
+                        fs.writeFile(__dirname + "/../_img/" + values.id + ".txt", Buffer.from(data[2][0]), function (err) {
+                            if (err) throw err;
+                            let da = [];
+                            sql.insert("UPDATE instructions SET document ='" + values.id + ".txt" + "' WHERE id = '" + values.id + "'", da, (w) => { });
                         });
                     }
                 });

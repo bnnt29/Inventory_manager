@@ -128,8 +128,8 @@ function getitem_node(a, b) {
                     col_lg_6 = document.createElement("div");
                     col_lg_6.classList.add("col-lg-6");
                     row3.appendChild(col_lg_6);
-
-                    if (a != "box_container1") {
+                    let conts = "box_container1" + " " + "item_container2";
+                    if (conts.indexOf(a) == -1) {
                         input = document.createElement("input");
                         input.classList.add("input-group-field");
                         input.classList.add("field");
@@ -339,12 +339,69 @@ function addboxgroup(a) {
                 itemlist = [...itemlist, id];
             }
         });
-        console.log(name + "," + location_n + "," + itemlist);
         var ip = location.host;
         var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
         socket.on('connect', () => {
             socket.emit('box_group_data', [name, location_n, itemlist, color, pic, pic.length]);
             socket.on("successbg", (data) => { document.getElementById("bg_pic_f").reset(); location.reload(); });
+        });
+    }
+}
+
+function additem() {
+    var name = document.getElementById("item_name").value;
+    document.getElementById("item_name").value = "";
+    var instructions = parseInt(document.getElementById("instructions_select").value);
+    document.getElementById("instructions_select").value = "Choose";
+    var size = parseFloat(document.getElementById("item_size").value);
+    document.getElementById("item_size").value = "";
+    var unit = document.getElementById("unit").value;
+    document.getElementById("unit").value = "mm";
+    var quantity = parseFloat(document.getElementById("item_quantity").value);
+    document.getElementById("item_quantity").value = "";
+    var color = document.getElementById("item_color").value;
+    document.getElementById("item_color").value = "#FFFFFF";
+    var pic = document.getElementById("item_pic").files;
+    if (name != "") {
+        var ip = location.host;
+        var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
+        socket.on('connect', () => {
+            socket.on('getUnit', (data) => {
+                data.forEach((values) => {
+                    if (unit === values.name) {
+                        size = size * parseFloat(values.multiplicator);
+                        socket.emit('item_data', [name, instructions, size, color, pic, quantity, pic.length]);
+                        socket.on("successi", (data) => { document.getElementById("item_pic_f").reset(); location.reload(); });
+                    }
+                });
+            })
+        });
+    }
+}
+
+function addinstructions(a) {
+    var name = document.getElementById("instructions_name").value;
+    document.getElementById("instructions_name").value = "";
+    var file = document.getElementById("instruction_file").files;
+    var items;
+    var parent = document.getElementById(a);
+    items = parent.getElementsByClassName("field");
+
+    var itemlist = [];
+    if (name != "" && items.length > 0) {
+        Array.prototype.forEach.call(items, function (values) {
+            let checked = values.checked;
+            values.checked = false;
+            if (checked) {
+                let id = values.getAttribute("data-id");
+                itemlist = [...itemlist, id];
+            }
+        });
+        var ip = location.host;
+        var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
+        socket.on('connect', () => {
+            socket.emit('instruction_data', [name, itemlist, file, file.length]);
+            socket.on("successinst", (data) => { document.getElementById("instructions_f").reset(); location.reload(); });
         });
     }
 }

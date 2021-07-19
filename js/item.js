@@ -11,34 +11,41 @@ function init() {
                     socket.emit('getItem_data', id);
                     socket.on('getUnit', (dat) => {
                         socket.on(id, (data) => {
-                            data.forEach((values) => {
-                                console.log(values);
-                                document.getElementById("item_id").innerHTML = id;
-                                document.getElementById("item_name").innerHTML = values.item_name;
-                                document.getElementById("total_quantity").innerHTML = values.total_quantity;
-                                let i = values.size;
-                                let shortest = [];
-                                let units = [];
-                                dat.forEach((val) => {
-                                    shortest = [...shortest, "" + i * parseFloat(val.multiplicator)];
-                                    units = [...units, val];
-                                });
-                                let unit = 0;
-                                for (let i = 0; i < shortest.length; i++) {
-                                    if (shortest[unit].length > shortest[i].length) {
-                                        unit = i;
+                            if (data.length != 0) {
+                                console.log(data);
+                                data.forEach((values) => {
+                                    document.getElementById("item_id").innerHTML = id;
+                                    document.getElementById("item_name").innerHTML = values.item_name;
+                                    document.getElementById("total_quantity").innerHTML = values.total_quantity;
+                                    document.getElementById("item_img").alt = values.item_name;
+                                    let i = values.size;
+                                    let shortest = [];
+                                    let units = [];
+                                    dat.forEach((val) => {
+                                        shortest = [...shortest, "" + i * parseFloat(val.multiplicator)];
+                                        units = [...units, val];
+                                    });
+                                    let unit = 0;
+                                    for (let i = 0; i < shortest.length; i++) {
+                                        if (shortest[unit].length > shortest[i].length) {
+                                            unit = i;
+                                        }
                                     }
-                                }
-                                document.getElementById("item_size").innerHTML = (dat[unit].multiplicator * i);
-                                document.getElementById("item_unit").innerHTML = dat[unit].name;
-                                if (values.picture != null) {
-                                    document.getElementById("item_img").src = values.picture;
-                                }
-                                if (values.color != null) {
-                                    document.getElementById("color_row").style.backgroundColor = values.color;
-                                }
-                            });
-                            init_tab_links(data);
+                                    document.getElementById("item_size").innerHTML = (dat[unit].multiplicator * i);
+                                    document.getElementById("item_unit").innerHTML = dat[unit].name;
+                                    if (values.picture != null) {
+                                        document.getElementById("item_img").src = values.picture;
+                                    }
+                                    if (values.color != null) {
+                                        document.getElementById("color_row").style.backgroundColor = values.color;
+                                    }
+                                });
+                                init_tab_links(data);
+                            } else {
+                                console.log("none");
+                                document.getElementById("body").style.display = "none";
+                                document.getElementById("html").innerHTML = "The item with the id: " + id + " doesn't exist";
+                            }
                         });
                     });
                 });
