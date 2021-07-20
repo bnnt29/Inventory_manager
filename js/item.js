@@ -52,6 +52,7 @@ function init_f(id) {
                             let i = parseFloat(values.size);
                             let shortest = [];
                             let units = [];
+                            console.log(dat);
                             dat.forEach((val) => {
                                 shortest = [...shortest, "" + i / parseFloat(val.multiplicator)];
                                 units = [...units, val];
@@ -72,12 +73,13 @@ function init_f(id) {
                             }
                             socket.emit("sql_read", "SELECT * FROM instructions WHERE id ='" + parseInt(values.instructions_id) + "'");
                             socket.on("SELECT * FROM instructions WHERE id ='" + parseInt(values.instructions_id) + "'", (data) => {
-                                console.log(data);
                                 data.forEach((values) => {
                                     document.getElementById("text").innerHTML = values.name;
                                     socket.emit('getfile', "/../_txt/" + values.document);
                                     socket.on("/../_txt/" + values.document, (dat) => {
                                         document.getElementById("textarea").value = dat;
+                                        document.getElementById("textarea").setAttribute("data-path", values.document);
+                                        document.getElementById("textarea").setAttribute("data-or", dat);
                                         document.getElementById("textarea").style.display = "block";
                                     });
                                 });
@@ -404,48 +406,143 @@ function change_item_size(a) {
     }
 }
 
-
-function change_item_txt(a) {
+function change_item_inst(a) {
     if (a === 'true') {
-        var txt = document.getElementById("txt_edit").value;
-        document.getElementById("text").value = document.getElementById("txt_edit").value;
-        document.getElementById("txt_edit").value = document.getElementById("txt_edit").value;
-        if (txt != "") {
+        var txt = document.getElementById("textarea").value;
+        document.getElementById("textarea").value = txt;
+        document.getElementById("textarea").readOnly = true;
+        var inst = document.getElementById("inst_edit_form").value;
+        document.getElementById("text").value = txt;
+        document.getElementById("inst_edit_form").value = txt;
+        var name = document.getElementById("inst_edit").value;
+        document.getElementById("text").value = name;
+        document.getElementById("inst_edit").value = name;
+        console.log("1");
+        console.log(txt);
+        console.log(document.getElementById("textarea").getAttribute("data-or"));
+        if (txt != document.getElementById("textarea").getAttribute("data-or")) {
+            console.log("10");
             var ip = location.host;
             var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
             socket.on('connect', () => {
-                let dat = [];
-                socket.emit("sql_read", "SELECT * FROM instructions WHERE name ='" + txt + "'");
-                socket.on("SELECT * FROM instructions WHERE name ='" + txt + "'", (data) => {
-                    data.forEach((values) => {
-                        console.log(values);
-                        dat = ["UPDATE item SET instructions_id ='" + values.id + "' WHERE id = '" + id + "'", dat];
-                        socket.emit("sql_insert", dat);
-                        socket.on(dat, (data) => { location.reload(); });
-                    });
+                socket.on('getdocuments', (data) => {
+                    let b = false;
+                    for (let i = 0; i < data; i + 2) {
+                        let values = [data[i], data[i + 1]];
+                        if (values[0] == txt) {
+                            console.log("txt already exist");
+                            let datas = [];
+                            datas = ["UPDATE item SET instructions_id ='" + values[1] + "' WHERE id = '" + id + "'", datas];
+                            b = true;
+                            socket.emit("sql_insert", datas);
+                            socket.on(datas, (data) => { location.reload(); });
+                        }
+                    }
+                    if (!b) {
+                        if (name != "") {
+                            console.log("5");
+                            console.log(txt);
+                            let datas;
+                            datas = [name, [id], txt, txt.length];
+                            console.log(datas);
+                            b = true;
+                            socket.emit('instruction_data', datas);
+                            socket.on("successinst", (data) => { /*location.reload();*/ });
+                        } else {
+                            if (inst == document.getElementById("text").innerHTML) {
+                                let datas = [document.getElementById("textarea").getAttribute("data-path"), txt];
+                                b = true;
+                                socket.emit('setfile', datas);
+                                socket.on(datas, (data) => { location.reload(); });
+                            } else {
+                                socket.emit("sql_read", "SELECT * FROM instructions WHERE name='" + document.getElementById("text").innerHTML + "'");
+                                socket.on("SELECT * FROM instructions WHERE name='" + document.getElementById("text").innerHTML + "'", (data) => {
+                                    data.forEach((values) => {
+                                        let datas = [];
+                                        datas = ["UPDATE item SET instructions_id ='" + values.id + "' WHERE id = '" + id + "'", datas];
+                                        b = true;
+                                        socket.emit("sql_insert", datas);
+                                        socket.on(datas, (data) => { location.reload(); });
+                                    });
+                                });
+                            }
+                        }
+                    } else {
+                        console.log("maybe an error occured");
+                    }
                 });
             });
         } else {
-            location.reload();
+            console.log(name);
+            if (name != "") {
+                console.log("checked");
+                console.log("4");
+                var ip = location.host;
+                var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
+                socket.on('connect', () => {
+                    socket.emit("sql_read", "SELECT * FROM instructions WHERE name ='" + inst + "'");
+                    socket.on("SELECT * FROM instructions WHERE name ='" + inst + "'", (data) => {
+                        console.log(data);
+                        data.forEach((values) => {
+                            let dat = [];
+                            dat = ["UPDATE instructions SET name ='" + name + "' WHERE id = '" + values.id + "'", dat];
+                            console.log(dat);
+                            socket.emit("sql_insert", dat);
+                            socket.on(dat, (data) => { location.reload(); });
+                        });
+                    });
+                });
+            } else {
+                console.log("2");
+                console.log(inst);
+                console.log(document.getElementById("text").innerHTML);
+                if (inst != document.getElementById("text").innerHTML) {
+                    let datas;
+                    datas = ["Instructions for:" + id, [id], txt, txt.length];
+                    b = true;
+                    socket.emit('instruction_data', datas);
+                    socket.on("successinst", (data) => { location.reload(); });
+                } else {
+                    console.log("checked");
+                    console.log("3");
+                    var ip = location.host;
+                    var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
+                    socket.on('connect', () => {
+                        socket.emit("sql_read", "SELECT * FROM instructions WHERE name ='" + inst + "'");
+                        socket.on("SELECT * FROM instructions WHERE name ='" + inst + "'", (data) => {
+                            console.log(data);
+                            data.forEach((values) => {
+                                let dat = [];
+                                dat = ["UPDATE item SET instructions_id ='" + values.id + "' WHERE id = '" + id + "'", dat];
+                                console.log(dat);
+                                socket.emit("sql_insert", dat);
+                                socket.on(dat, (data) => { location.reload(); });
+                            });
+                        });
+                    });
+                }
+            }
         }
     } else {
-        document.getElementById("edit_pen_txt").disabled = true;
-        document.getElementById("edit_pen_txt").style.display = "none";
-        document.getElementById("edit_save_txt").style.display = "block";
-        document.getElementById("edit_save_txt").disabled = false;
+        document.getElementById("edit_pen_inst").disabled = true;
+        document.getElementById("edit_pen_inst").style.display = "none";
+        document.getElementById("edit_save_inst").style.display = "block";
+        document.getElementById("edit_save_inst").disabled = false;
+        document.getElementById("textarea").style.display = "block";
+        document.getElementById("textarea").readOnly = false;
 
         var ip = location.host;
         var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
         socket.on('connect', () => {
             socket.on('getinstructions', (data) => {
                 let form = document.createElement("form");
-                form.id = "item_txt_edit";
+                form.id = "item_inst_edit";
                 let label = document.createElement("label");
-                label.htmlFor = "txt";
+                label.htmlFor = "inst";
                 form.appendChild(label);
                 let select = document.createElement("select");
-                select.id = "txt_edit";
-                select.name = "txt_edit";
+                select.id = "inst_edit_form";
+                select.name = "inst_edit";
                 select.style.width = "5rem";
                 select.style.height = "3rem";
                 select.onchange = () => { txtchange(); };
@@ -459,14 +556,23 @@ function change_item_txt(a) {
                     option.id = values.id;
                     option.innerHTML = values.name;
                 });
+                let input = document.createElement("input");
+                input.type = "text";
+                input.id = "inst_edit"
+                input.style.width = "16rem";
+                input.style.height = "3rem";
+                input.title = "instruction name";
+                input.placeholder = "name";
+                document.getElementById("text").parentElement.appendChild(input);
                 select.value = document.getElementById("text").innerHTML;
             });
         });
     }
 }
 
+
 function txtchange() {
-    let select = document.getElementById("txt_edit");
+    let select = document.getElementById("inst_edit_form");
     var ip = location.host;
     var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
     socket.on('connect', () => {
@@ -477,6 +583,8 @@ function txtchange() {
                 socket.emit('getfile', "/../_txt/" + values.document);
                 socket.on("/../_txt/" + values.document, (dat) => {
                     document.getElementById("textarea").value = dat;
+                    document.getElementById("textarea").setAttribute("data-path", values.document);
+                    document.getElementById("textarea").setAttribute("data-or", dat);
                     document.getElementById("textarea").style.display = "block";
                 });
             });

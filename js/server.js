@@ -194,6 +194,7 @@ var unused_item;
 var unused_box;
 var boxgroup;
 var boxgroupname;
+var documents = [];
 
 sql.setdata(pages, unitlist);
 sql.initDB(() => { reload_data(); });
@@ -235,6 +236,12 @@ function reload_data() {
     sql.recreateDb(function (data) {
         sql.read(data, "SELECT * FROM instructions ORDER BY name ASC", function (data) {
             instructions = data;
+            instructions.forEach((values) => {
+                if (values.document == "") {
+                    let a = fs.readFileSync(__dirname + "/../_txt/" + values.document).toString();
+                    documents = [...documents, a, values.id];
+                }
+            });
         });
     });
 
@@ -277,7 +284,13 @@ function iohandle(socket) {
     socket.emit('stats', stats);
     socket.emit('getsettings', file);
     socket.emit('getUnit', unit);
-    socket.on('getfile', (data) => { fs.readFile(__dirname + data, (err, values) => { socket.emit(data, values.toString('utf8')); }); });
+    socket.emit('getdocuments', documents);
+    socket.on('setfile', (data) => {
+        fs.writeFile(__dirname + "/../_txt/" + data[0], Buffer.from(data[1]), function (err) {
+            if (err) throw err;
+        });
+    });
+    socket.on('getfile', (data) => { let a = fs.readFileSync(__dirname + data).toString(); socket.emit(data, a); });
     socket.on('getinstructions', (data) => { sql.recreateDb((db) => { sql.read(db, "SELECT * FROM instructions WHERE id='" + data + "'", (dat) => { socket.emit(data, dat); }); }); });
     socket.on('getItem_data', (data) => { sql.recreateDb((db) => { sql.read(db, "SELECT i.name item_name, instructions_id, i.size, i.total_quantity, ib.box_id, b.name box_name, b.box_group_id, bg.name bg_name, bg.location bg_location, b.color box_color, i.color color, i.picture picture, bg.color bg_color, ib.quantity quantity FROM item i LEFT JOIN (item_box ib LEFT JOIN (box b LEFT JOIN box_group bg ON b.box_group_id=bg.id) ON ib.box_id = b.id) ON i.id = ib.item_id WHERE i.id='" + data + "' ORDER BY b.box_group_id ASC", (dat) => { socket.emit(data, dat); }); }); });
     socket.on("sql_read", (data) => { sql.recreateDb((db) => { sql.read(db, data, (dat) => { socket.emit(data, dat); }); }); });
