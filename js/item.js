@@ -16,11 +16,7 @@ function getid(url) {
             dat = "SELECT * FROM item WHERE name='" + dat + "'";
             socket.emit('sql_read', dat);
             socket.on(dat, (data) => {
-                console.log("4");
-                console.log(data);
                 data.forEach((values) => {
-                    console.log("3");
-                    console.log(values);
                     if (values.name == url.substring(url.indexOf("+") + 1, url.length)) {
                         id = values.id;
                         init_f(id);
@@ -74,10 +70,21 @@ function init_f(id) {
                             if (values.color != null) {
                                 document.getElementById("color_row").style.backgroundColor = values.color;
                             }
+                            socket.emit("sql_read", "SELECT * FROM instructions WHERE id ='" + parseInt(values.instructions_id) + "'");
+                            socket.on("SELECT * FROM instructions WHERE id ='" + parseInt(values.instructions_id) + "'", (data) => {
+                                console.log(data);
+                                data.forEach((values) => {
+                                    document.getElementById("text").innerHTML = values.name;
+                                    socket.emit('getfile', "/../_txt/" + values.document);
+                                    socket.on("/../_txt/" + values.document, (dat) => {
+                                        document.getElementById("textarea").value = dat;
+                                        document.getElementById("textarea").style.display = "block";
+                                    });
+                                });
+                            });
                         });
                         init_tab_links(data);
                     } else {
-                        console.log("none");
                         document.getElementById("body").style.display = "none";
                         document.getElementById("html").innerHTML = "The item with the id: " + id + " doesn't exist";
                     }
@@ -395,5 +402,85 @@ function change_item_size(a) {
             });
         });
     }
+}
+
+
+function change_item_txt(a) {
+    if (a === 'true') {
+        var txt = document.getElementById("txt_edit").value;
+        document.getElementById("text").value = document.getElementById("txt_edit").value;
+        document.getElementById("txt_edit").value = document.getElementById("txt_edit").value;
+        if (txt != "") {
+            var ip = location.host;
+            var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
+            socket.on('connect', () => {
+                let dat = [];
+                socket.emit("sql_read", "SELECT * FROM instructions WHERE name ='" + txt + "'");
+                socket.on("SELECT * FROM instructions WHERE name ='" + txt + "'", (data) => {
+                    data.forEach((values) => {
+                        console.log(values);
+                        dat = ["UPDATE item SET instructions_id ='" + values.id + "' WHERE id = '" + id + "'", dat];
+                        socket.emit("sql_insert", dat);
+                        socket.on(dat, (data) => { location.reload(); });
+                    });
+                });
+            });
+        } else {
+            location.reload();
+        }
+    } else {
+        document.getElementById("edit_pen_txt").disabled = true;
+        document.getElementById("edit_pen_txt").style.display = "none";
+        document.getElementById("edit_save_txt").style.display = "block";
+        document.getElementById("edit_save_txt").disabled = false;
+
+        var ip = location.host;
+        var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
+        socket.on('connect', () => {
+            socket.on('getinstructions', (data) => {
+                let form = document.createElement("form");
+                form.id = "item_txt_edit";
+                let label = document.createElement("label");
+                label.htmlFor = "txt";
+                form.appendChild(label);
+                let select = document.createElement("select");
+                select.id = "txt_edit";
+                select.name = "txt_edit";
+                select.style.width = "5rem";
+                select.style.height = "3rem";
+                select.onchange = () => { txtchange(); };
+                label.appendChild(select);
+                document.getElementById("text").style.display = "none";
+                document.getElementById("text").parentElement.appendChild(form);
+                data.forEach((values) => {
+                    let option = document.createElement("option");
+                    select.appendChild(option);
+                    option.value = values.name;
+                    option.id = values.id;
+                    option.innerHTML = values.name;
+                });
+                select.value = document.getElementById("text").innerHTML;
+            });
+        });
+    }
+}
+
+function txtchange() {
+    let select = document.getElementById("txt_edit");
+    var ip = location.host;
+    var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
+    socket.on('connect', () => {
+        socket.emit("sql_read", "SELECT * FROM instructions WHERE name ='" + select.value + "'");
+        socket.on("SELECT * FROM instructions WHERE name ='" + select.value + "'", (data) => {
+            data.forEach((values) => {
+                document.getElementById("text").innerHTML = values.name;
+                socket.emit('getfile', "/../_txt/" + values.document);
+                socket.on("/../_txt/" + values.document, (dat) => {
+                    document.getElementById("textarea").value = dat;
+                    document.getElementById("textarea").style.display = "block";
+                });
+            });
+        });
+    });
 }
 
