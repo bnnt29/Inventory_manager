@@ -140,11 +140,12 @@ function getitem_node(a, b) {
                         input.title = "value";
                         if (a == "item_container1") {
                             var max = values.total_quantity;
+                            var min = 0;
                             socket.emit("sql_read", "SELECT * FROM item_box WHERE item_id='" + values.id + "'");
                             socket.on("SELECT * FROM item_box WHERE item_id='" + values.id + "' AND NOT box_id='1'", (data) => { data.forEach((dat) => { max -= parseInt(dat.quantity); }); });
                             input.setAttribute("data-max", max);
-                            input.setAttribute("data-min", 0);
-                            input.addEventListener('change', () => { if (parseInt(input.value) > max) { input.value = max;/* console.log("Not enough items left");*/ } });
+                            input.setAttribute("data-min", min);
+                            input.addEventListener('change', () => { if (parseInt(input.value) > max) { input.value = max } if (parseInt(input.value) < min) { input.value = min } });
                         }
                         input.setAttribute("data-id", values.id);
                         input.style.width = "16rem";

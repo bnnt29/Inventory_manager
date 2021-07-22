@@ -4,7 +4,7 @@ function nav_items() {
     var ip = location.host;
     var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
     socket.on('connect', () => {
-        socket.on('rows', (data) => {
+        socket.on('html', (data) => {
             if (data != null) {
                 if (!nav_set) {
                     data.forEach(function (row) {
@@ -22,10 +22,9 @@ function nav_items() {
                     nav_set = true;
                 }
             } else {
-                // console.log("SQL Request was Null -> reloaded");
                 socket.emit('refresh', "nav");
                 socket.on('reloaded', () => {
-                    socket.on('rows', (data) => { data != null ? nav_items() : () => {/*console.log("reload not successfull");*/ } });
+                    socket.on('html', (data) => { data != null ? nav_items() : () => {/*console.log("reload not successfull");*/ } });
                 });
             }
         });

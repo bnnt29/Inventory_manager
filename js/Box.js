@@ -13,7 +13,7 @@ function getid(url) {
         var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
         socket.on('connect', () => {
             let dat = url.substring(url.indexOf("+") + 1, url.length);
-            dat = "SELECT * FROM item WHERE name='" + dat + "'";
+            dat = "SELECT * FROM Box WHERE name='" + dat + "'";
             socket.emit('sql_read', dat);
             socket.on(dat, (data) => {
                 data.forEach((values) => {
@@ -35,89 +35,40 @@ function init() {
     getid(url);
     init_picture();
 }
+var l = 0;
 function init_f(id) {
+    console.log(l);
+    l += 1;
     if (id >= 1) {
         var ip = location.host;
         var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
         socket.on('connect', () => {
-            socket.emit('getItem_data', id);
-            socket.on('getUnit', (dat) => {
-                socket.on(id, (data) => {
-                    if (data.length != 0) {
-                        data.forEach((values) => {
-                            document.getElementById("title").innerHTML = values.item_name;
-                            document.getElementById("item_id").innerHTML = id;
-                            document.getElementById("item_name").innerHTML = values.item_name;
-                            document.getElementById("total_quantity").innerHTML = values.total_quantity;
-                            document.getElementById("item_img").alt = values.item_name;
-                            let i = parseFloat(values.size);
-                            let shortest = [];
-                            let units = [];
-                            let b = false;
-                            if (dat != null) {
-                                dat.forEach((val) => {
-                                    shortest = [...shortest, "" + i / parseFloat(val.multiplicator)];
-                                    units = [...units, val];
-                                    b = true;
-                                });
-                            } else {
-                                socket.emit('refresh', true);
-                                socket.on('reloaded', (a) => {
-                                    socket.on('getUnit', (dat) => {
-                                        if (dat != null) {
-                                            dat.forEach((val) => {
-                                                shortest = [...shortest, "" + i / parseFloat(val.multiplicator)];
-                                                units = [...units, val];
-                                                b = true;
-                                            });
-                                        }
-                                    });
-                                });
-                            }
-                            if (b) {
-                                console.log(shortest);
-                                let unit = 0;
-                                for (let i = 0; i < shortest.length; i++) {
-                                    if (shortest[unit].length > shortest[i].length) {
-                                        unit = i;
-                                    }
-                                }
-                                console.log(i);
-                                console.log(dat[unit].multiplicator);
-                                console.log(dat[unit].name);
-                                document.getElementById("item_size").innerHTML = i / (parseFloat(dat[unit].multiplicator));
-                                document.getElementById("item_unit").innerHTML = dat[unit].name;
-                            } else {
-                                console.log("Unit konnte nicht geladen werden.")
-                                document.getElementById("item_size").innerHTML = values.size;
-                                document.getElementById("item_unit").innerHTML = "cm";
-                            }
-                            if (values.picture != null) {
-                                document.getElementById("item_img").src = values.picture;
-                            }
-                            if (values.color != null) {
-                                document.getElementById("color_row").style.backgroundColor = values.color;
-                            }
-                            socket.emit("sql_read", "SELECT * FROM instructions WHERE id ='" + parseInt(values.instructions_id) + "'");
-                            socket.on("SELECT * FROM instructions WHERE id ='" + parseInt(values.instructions_id) + "'", (data) => {
-                                data.forEach((values) => {
-                                    document.getElementById("text").innerHTML = values.name;
-                                    socket.emit('getfile', "/../_txt/" + values.document);
-                                    socket.on("/../_txt/" + values.document, (dat) => {
-                                        document.getElementById("textarea").value = dat;
-                                        document.getElementById("textarea").setAttribute("data-path", values.document);
-                                        document.getElementById("textarea").setAttribute("data-or", dat);
-                                        document.getElementById("textarea").style.display = "block";
-                                    });
-                                });
-                            });
+            socket.emit('getBox_data', id);
+            socket.on(id, (data) => {
+                if (data.length != 0) {
+                    console.log(data);
+                    data.forEach((values) => {
+                        console.log(values);
+                        document.getElementById("box_id").innerHTML = values.b_id;
+                        document.getElementById("box_name").innerHTML = values.b_name;
+                        document.getElementById("box_img").alt = values.b_name;
+                        //socket.emit('getBoxgroup_data', values.bg_id);
+                        socket.on(values.bg_id, (datas) => {
+                            document.getElementById("box_group").innerHTML = datas[0].bg_name;
                         });
-                        init_tab_links(data);
-                    } else {
-                        document.getElementById("body").style.display = "none";
-                        document.getElementById("html").innerHTML = "The item with the id: " + id + " doesn't exist";
-                    }
-                });
+                        document.getElementById("box_group").alt = values.b_name;
+                        if (values.picture != null) {
+                            document.getElementById("item_img").src = values.b_picture;
+                        }
+                        if (values.color != null) {
+                            document.getElementById("color_row").style.backgroundColor = values.b_color;
+                        }
+                    });
+                    //init_tab_links(data);
+                } else {
+                    document.getElementById("body").style.display = "none";
+                    document.getElementById("html").innerHTML = "The item with the id: " + id + " doesn't exist";
+                }
             });
         });
     }
@@ -133,7 +84,7 @@ function init_picture() {
     var modal = document.getElementById("myModal");
 
     // Get the image and insert it inside the modal - use its "alt" text as a caption
-    var img = document.getElementById("item_img");
+    var img = document.getElementById("box_img");
     var modalImg = document.getElementById("img01");
     var captionText = document.getElementById("caption");
     img.onclick = function () {
@@ -380,7 +331,6 @@ function change_item_size(a) {
                         if (unit === values.name) {
                             size = size * parseFloat(values.multiplicator);
                             size = ~~(size * 1000);
-                            size = (size / 1000);
                             let dat = [];
                             dat = ["UPDATE item SET size ='" + size + "' WHERE id = '" + id + "'", dat];
                             socket.emit("sql_insert", dat);

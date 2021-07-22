@@ -89,9 +89,9 @@ function fserverhandler(req, res) {
         used = true;
         if (path == 'favicon.ico') {
             res.writeHead(202, {
-                'Content-Type': 'image/png'
+                'Content-Type': 'image/icon'
             });
-            fs.readFile(__dirname + "/../favicon.png", function (err, data) {
+            fs.readFile(__dirname + "/../favicon.ico", function (err, data) {
                 res.write(data);
                 res.end();
             });
@@ -158,6 +158,18 @@ function fserverhandler(req, res) {
             res.end();
         });
     }
+
+    if (path.indexOf("box") != -1 && !used) {
+        used = true;
+        fs.readFile(__dirname + '/../html/box.html', function (error, data) {
+            if (error) console.error(error);
+            res.writeHead(200, {
+                'Content-Type': 'text/html'
+            });
+            res.write(data);
+            res.end();
+        });
+    }
     if (!used) {
         res.writeHead(404);
         res.write("opps this doesn't exist - 404");
@@ -184,8 +196,8 @@ if (file[3] === 'true') {
         iohandle(data);
     });
 }
-var rows;
-var stats;
+
+var html;
 var instructions;
 var box;
 var item;
@@ -227,8 +239,7 @@ function reload_data() {
 
     sql.recreateDb(function (data) {
         sql.read(data, "SELECT * FROM HTML_pages ORDER BY position ASC", function (data) {
-            rows = data;
-            stats = data;
+            html = data;
         });
     });
 
@@ -280,19 +291,16 @@ function iohandle(socket) {
     socket.emit('unused_getitem', unused_item);
     socket.emit('unused_getbox', unused_box);
     socket.emit('getinstructions', instructions);
-    socket.emit('rows', rows);
-    socket.emit('stats', stats);
+    socket.emit('html', html);
     socket.emit('getsettings', file);
     socket.emit('getUnit', unit);
     socket.emit('getdocuments', documents);
-    socket.on('setfile', (data) => {
-        fs.writeFile(__dirname + "/../_txt/" + data[0], Buffer.from(data[1]), function (err) {
-            if (err) throw err;
-        });
-    });
+    socket.on('setfile', (data) => { fs.writeFile(__dirname + "/../_txt/" + data[0], Buffer.from(data[1]), function (err) { if (err) throw err; socket.emit(data, true); }); });
     socket.on('getfile', (data) => { let a = fs.readFileSync(__dirname + data).toString(); socket.emit(data, a); });
     socket.on('getinstructions', (data) => { sql.recreateDb((db) => { sql.read(db, "SELECT * FROM instructions WHERE id='" + data + "'", (dat) => { socket.emit(data, dat); }); }); });
     socket.on('getItem_data', (data) => { sql.recreateDb((db) => { sql.read(db, "SELECT i.name item_name, instructions_id, i.size, i.total_quantity, ib.box_id, b.name box_name, b.box_group_id, bg.name bg_name, bg.location bg_location, b.color box_color, i.color color, i.picture picture, bg.color bg_color, ib.quantity quantity FROM item i LEFT JOIN (item_box ib LEFT JOIN (box b LEFT JOIN box_group bg ON b.box_group_id=bg.id) ON ib.box_id = b.id) ON i.id = ib.item_id WHERE i.id='" + data + "' ORDER BY b.box_group_id ASC", (dat) => { socket.emit(data, dat); }); }); });
+    socket.on('getBox_data', (data) => { sql.recreateDb((db) => { sql.read(db, "SELECT b.id b_id, b.name b_name, b.box_group_id bg_id, b.color b_color, b.picture b_picture, ib.item_id ib_item_id, ib.quantity ib_quantity, i.id i_id, i.name i_name, i.color i_color, i.picture i_picture FROM Box b LEFT JOIN (item_box ib LEFT JOIN item i ON ib.item_id = i.id) ON b.id = ib.box_id WHERE b.id='" + data + "' ORDER BY b.box_group_id ASC", (dat) => { socket.emit(data, dat); }); }); });
+    socket.on('getBoxgroup_data', (data) => { sql.recreateDb((db) => { sql.read(db, "SELECT bg.id bg_id, bg.name bg_name, bg.color bg_color, bg.picture bg_picture, b.id b_id, b.name b_name, b.color b_color, b.picture b_picture, ib.item_id ib_item_id, ib.quantity ib_quantity, i.id i_id, i.name i_name, i.color i_color, i.picture i_picture FROM box_group bg LEFT JOIN (box b LEFT JOIN (item_box ib LEFT JOIN item i ON ib.item_id=i.id) ON b.id = ib.box_id) ON bg.id = b.box_group_id WHERE bg.id='" + data + "' ORDER BY b.id ASC", (dat) => { console.log(dat); socket.emit(data, dat); }); }); });
     socket.on("sql_read", (data) => { sql.recreateDb((db) => { sql.read(db, data, (dat) => { socket.emit(data, dat); }); }); });
     socket.on("sql_insert", (data) => { sql.insert(data[0], data[1], () => { reload_data(); socket.emit(data, true); }); });
     socket.on("in_use_box_node", (data) => { in_use_box_node_data = [...in_use_box_node_data, data]; in_use_box_node_data.forEach((values) => { getbox_node_items(values, socket); }); });
@@ -399,7 +407,7 @@ function addinstruction(data) {
                         b = true;
                     }
                     if (data[3] != 0) {
-                        fs.writeFile(__dirname + "/../_txt/" + values.id + ".txt", Buffer.from(data[2][0]), function (err) {
+                        fs.writeFile(__dirname + "/../_txt/" + values.id + ".txt", Buffer.from(data[2]), function (err) {
                             if (err) throw err;
                             let da = [];
                             sql.insert("UPDATE instructions SET document ='" + values.id + ".txt" + "' WHERE id = '" + values.id + "'", da, (w) => { });

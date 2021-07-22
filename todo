@@ -6,17 +6,23 @@ setting change names (like item, box group, etc.)
 setting note "?" set file path
 
 add / item, etc edit save with enter
-add item picture
 add item only possible counts
-add instructions choose file
-add box expand item choose
 add box_group expand box choose
 add in_use item / box chooser
+
+item change counts
+
+item change picture / color
+
+folder for user content
+settings chenge folder path instead if db path
 
 german language support
     settings
 
 create event page
+
+put styles in css
 
 inventory setup
     topnav (box group)
