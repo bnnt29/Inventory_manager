@@ -7,7 +7,7 @@ var ip_connections = [];
 var sql = require("./sql")();
 var fs = require('fs');
 
-var file = preparefile(__dirname + '/../settings.txt');
+var file = preparefile(__dirname + '/../user_data/' + 'settings.txt');
 
 if (file[1] != "0.0.0.0") {
     var ip = file[1]
@@ -24,11 +24,15 @@ var url = require('url');
 
 function preparefile(file) {
     let settings_file = fs.readFileSync(file, "utf-8").toString().split(/\r?\n/);
-    settings_file.forEach(function (s) {
-        if (s.startsWith("//")) remove(settings_file, s);
-    });
-    remove(settings_file, "");
-    return settings_file;
+    if (settings_file != null) {
+        settings_file.forEach(function (s) {
+            if (s.startsWith("//")) remove(settings_file, s);
+        });
+        remove(settings_file, "");
+        return settings_file;
+    } else {
+        console.log("Settings file has to be created manually");
+    }
 }
 
 function remove(arr, what) {
@@ -105,7 +109,7 @@ function fserverhandler(req, res) {
         });
 
         if (path.indexOf('default') == -1) {
-            fs.readFile(__dirname + "/../_img/" + path, function (err, data) {
+            fs.readFile(__dirname + '/../user_data/_img/' + path, function (err, data) {
                 res.write(data);
                 res.end();
             });
@@ -122,7 +126,7 @@ function fserverhandler(req, res) {
         res.writeHead(202, {
             'Content-Type': 'text/txt'
         });
-        fs.readFile(__dirname + "/../_txt/" + path, function (err, data) {
+        fs.readFile(__dirname + "/../user_data/_txt/" + path, function (err, data) {
             res.write(data);
             res.end();
         });
@@ -249,7 +253,7 @@ function reload_data() {
             instructions = data;
             instructions.forEach((values) => {
                 if (values.document == "") {
-                    let a = fs.readFileSync(__dirname + "/../_txt/" + values.document).toString();
+                    let a = fs.readFileSync(__dirname + "/../user_data/_txt/" + values.document).toString();
                     documents = [...documents, a, values.id];
                 }
             });
@@ -294,8 +298,8 @@ function iohandle(socket) {
     socket.emit('getsettings', file);
     socket.emit('getUnit', unit);
     socket.emit('getdocuments', documents);
-    socket.on('setpicture', (data) => {fs.writeFile(__dirname + "/../_img/" + data[0], Buffer.from(data[1]), function (err) {if (err) throw err; socket.emit("set_p" + data, true); }); });
-    socket.on('setfile', (data) => { fs.writeFile(__dirname + "/../_txt/" + data[0], Buffer.from(data[1]), function (err) { if (err) throw err; socket.emit("set_f" + data, true); }); });
+    socket.on('setpicture', (data) => { fs.writeFile(__dirname + "/../user_data/_img/" + data[0], Buffer.from(data[1]), function (err) { if (err) throw err; socket.emit("set_p" + data, true); }); });
+    socket.on('setfile', (data) => { fs.writeFile(__dirname + "/../user_data/_txt/" + data[0], Buffer.from(data[1]), function (err) { if (err) throw err; socket.emit("set_f" + data, true); }); });
     socket.on('getfile', (data) => { let a = fs.readFileSync(__dirname + data).toString(); socket.emit("get_f" + data, a); });
     socket.on('getinstructions', (data) => { sql.recreateDb((db) => { sql.read(db, "SELECT * FROM instructions WHERE id='" + data + "'", (dat) => { socket.emit("get_inst" + data, dat); }); }); });
     socket.on('getItem_data', (data) => { sql.recreateDb((db) => { sql.read(db, "SELECT i.name item_name, instructions_id, i.size, i.total_quantity, ib.box_id, b.name box_name, b.box_group_id, bg.name bg_name, bg.location bg_location, b.color box_color, i.color color, i.picture picture, bg.color bg_color, ib.quantity quantity FROM item i LEFT JOIN (item_box ib LEFT JOIN (box b LEFT JOIN box_group bg ON b.box_group_id=bg.id) ON ib.box_id = b.id) ON i.id = ib.item_id WHERE i.id='" + data + "' ORDER BY b.box_group_id ASC", (dat) => { socket.emit("item" + data, dat); }); }); });
@@ -349,10 +353,10 @@ function addbox(data) {
                         b = true;
                     }
                     if (data[5] != 0) {
-                        fs.writeFile(__dirname + "/../_img/" + values.id + ".jpg", Buffer.from(data[4][0]), function (err) {
+                        fs.writeFile(__dirname + "/../user_data/_img/" + "box&" + values.id + ".jpg", Buffer.from(data[4][0]), function (err) {
                             if (err) throw err;
                             let da = [];
-                            sql.insert("UPDATE box SET picture ='" + values.id + ".jpg" + "' WHERE id = '" + values.id + "'", da, (w) => { });
+                            sql.insert("UPDATE box SET picture ='" + "box&" + values.id + ".jpg" + "' WHERE id = '" + values.id + "'", da, (w) => { });
                         });
                     }
                 });
@@ -378,10 +382,10 @@ function addboxgroup(data) {
                         b = true;
                     }
                     if (data[5] != 0) {
-                        fs.writeFile(__dirname + "/../_img/" + values.id + ".jpg", Buffer.from(data[4][0]), function (err) {
+                        fs.writeFile(__dirname + "/../user_data/_img/" + "boxgroup&" + values.id + ".jpg", Buffer.from(data[4][0]), function (err) {
                             if (err) throw err;
                             let da = [];
-                            sql.insert("UPDATE box SET picture ='" + values.id + ".jpg" + "' WHERE id = '" + values.id + "'", da, (w) => { });
+                            sql.insert("UPDATE box SET picture ='" + "boxgroup&" + values.id + ".jpg" + "' WHERE id = '" + values.id + "'", da, (w) => { });
                         });
                     }
                 });
@@ -407,7 +411,7 @@ function addinstruction(data) {
                         b = true;
                     }
                     if (data[3] != 0) {
-                        fs.writeFile(__dirname + "/../_txt/" + values.id + ".txt", Buffer.from(data[2]), function (err) {
+                        fs.writeFile(__dirname + "/../user_data/_txt/" + values.id + ".txt", Buffer.from(data[2]), function (err) {
                             if (err) throw err;
                             let da = [];
                             sql.insert("UPDATE instructions SET document ='" + values.id + ".txt" + "' WHERE id = '" + values.id + "'", da, (w) => { });
@@ -427,10 +431,10 @@ function additem(data) {
             sql.recreateDb((db) => {
                 sql.read(db, "SELECT * FROM item WHERE name ='" + data[0] + "'", (datas) => {
                     datas.forEach((values) => {
-                        fs.writeFile(__dirname + "/../_img/" + values.id + ".jpg", Buffer.from(data[4][0]), function (err) {
+                        fs.writeFile(__dirname + "/../user_data/_img/" + "item&" + values.id + ".jpg", Buffer.from(data[4][0]), function (err) {
                             if (err) throw err;
                             let da = [];
-                            sql.insert("UPDATE item SET picture ='" + values.id + ".jpg" + "' WHERE id = '" + values.id + "'", da, (w) => { });
+                            sql.insert("UPDATE item SET picture ='" + "item&" + values.id + ".jpg" + "' WHERE id = '" + values.id + "'", da, (w) => { });
                         });
                     });
                 });
@@ -458,7 +462,7 @@ function setsettings(data) {
         (data[4] = !'') ? data[4] : file[4],
         (data[5] = !'') ? data[5] : file[5],];
 
-    let settings_file = fs.readFileSync(__dirname + '/../settings.txt', "utf-8").toString().split(/\r?\n/);
+    let settings_file = fs.readFileSync(__dirname + '/../user_data/settings.txt', "utf-8").toString().split(/\r?\n/);
     let i = 0;
     console.log(settings_file);
     console.log(setsettings);
@@ -469,11 +473,6 @@ function setsettings(data) {
         }
     });
     console.log(settings_file);
-
-    // fs.unlink("settings.txt", function (err) {
-    //     if (err) throw err;
-    // });
-
     // fs.writeFile("settings.txt", settings_file, function (err) {
     //     if (err) throw err;
     // });

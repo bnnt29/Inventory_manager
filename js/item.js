@@ -90,16 +90,25 @@ function init_f(id) {
                             }
                             if (values.picture != null) {
                                 document.getElementById("item_img").src = values.picture;
+                                document.getElementById("item_picture").innerHTML = values.picture;
+                            } else {
+                                document.getElementById("item_picture").innerHTML = "undefined";
                             }
                             if (values.color != null) {
                                 document.getElementById("color_row").style.backgroundColor = values.color;
+                                document.getElementById("item_color").innerHTML = values.color;
+                                if (values.color === "#ffffff") {
+                                    document.getElementById("item_color").style.color = "#000000";
+                                } else {
+                                    document.getElementById("item_color").style.color = values.color;
+                                }
                             }
                             socket.emit("sql_read", "SELECT * FROM instructions WHERE id ='" + parseInt(values.instructions_id) + "'");
                             socket.on("sql_r" + "SELECT * FROM instructions WHERE id ='" + parseInt(values.instructions_id) + "'", (data) => {
                                 data.forEach((values) => {
                                     document.getElementById("text").innerHTML = values.name;
-                                    socket.emit('getfile', "/../_txt/" + values.document);
-                                    socket.on("get_f" + "/../_txt/" + values.document, (dat) => {
+                                    socket.emit('getfile', "/../user_data/_txt/" + values.document);
+                                    socket.on("get_f" + "/../user_data/_txt/" + values.document, (dat) => {
                                         document.getElementById("textarea").value = dat;
                                         document.getElementById("textarea").setAttribute("data-path", values.document);
                                         document.getElementById("textarea").setAttribute("data-or", dat);
@@ -587,5 +596,75 @@ function txtchange() {
             });
         });
     });
+}
+
+function change_item_color(a) {
+    if (a === 'true') {
+        var color = document.getElementById("item_color_edit").value;
+        document.getElementById("item_color_edit").value = color;
+        if (color != "") {
+            var ip = location.host;
+            var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
+            socket.on('connect', () => {
+                let dat = [];
+                dat = ["UPDATE item SET color ='" + color + "' WHERE id = '" + id + "'", dat];
+                socket.emit("sql_insert", dat);
+                socket.on("sql_i" + dat, (data) => { location.reload(); });
+            });
+        } else {
+            location.reload();
+        }
+    } else {
+        document.getElementById("edit_pen_color").disabled = true;
+        document.getElementById("edit_pen_color").style.display = "none";
+        document.getElementById("edit_save_color").style.display = "block";
+        document.getElementById("edit_save_color").disabled = true;
+        let input = document.createElement("input");
+        input.type = "color";
+        input.id = "item_color_edit"
+        input.style.width = "16rem";
+        input.style.height = "3rem";
+        input.title = "item color";
+        input.placeholder = "color";
+        input.value = document.getElementById("item_color").innerHTML;
+        document.getElementById("item_color").style.display = "none";
+        document.getElementById("item_color").parentElement.appendChild(input);
+    }
+}
+
+
+function change_item_picture(a) {
+    if (a === 'true') {
+        var pic = document.getElementById("item_pic_edit").files;
+        if (pic != "") {
+            var ip = location.host;
+            var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
+            socket.on('connect', () => {
+                let dat = [];
+                console.log(['item&' + id + '.jpg', pic[0]]);
+                socket.emit('setpicture', ["item&" + id + '.jpg', pic[0]]);
+                dat = ["UPDATE item SET picture ='" + "item&" + id + ".jpg" + "' WHERE id = '" + id + "'", dat];
+                socket.emit("sql_insert", dat);
+                socket.on("sql_i" + dat, (data) => { location.reload(); });
+            });
+        } else {
+            location.reload();
+        }
+    } else {
+        document.getElementById("edit_pen_picture").disabled = true;
+        document.getElementById("edit_pen_picture").style.display = "none";
+        document.getElementById("edit_save_picture").style.display = "block";
+        document.getElementById("edit_save_picture").disabled = true;
+        let input = document.createElement("input");
+        input.type = "file";
+        input.accept = ".jpg";
+        input.id = "item_pic_edit"
+        input.style.width = "16rem";
+        input.style.height = "3rem";
+        input.title = "item pic";
+        input.placeholder = "item";
+        document.getElementById("item_picture").style.display = "none";
+        document.getElementById("item_picture").parentElement.appendChild(input);
+    }
 }
 

@@ -86,7 +86,7 @@ function init_box_coll(tabc) {
     var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
     socket.on('connect', () => {
         socket.emit("sql_read", "SELECT * FROM box WHERE box_group_id ='" + tabc.id + "' ORDER BY name ASC");
-        socket.on("sql_r"+"SELECT * FROM box WHERE box_group_id ='" + tabc.id + "' ORDER BY name ASC", (data) => {
+        socket.on("sql_r" + "SELECT * FROM box WHERE box_group_id ='" + tabc.id + "' ORDER BY name ASC", (data) => {
             if (!init_box_coll) {
                 data.forEach((values) => {
                     let but = document.createElement("button");
@@ -115,7 +115,7 @@ function init_item_row(content) {
     var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
     socket.on('connect', () => {
         socket.emit("sql_read", "SELECT * FROM item_box ib LEFT JOIN item i ON ib.item_id = i.id WHERE ib.box_id='" + parseInt(content.getAttribute("data-id")) + "' ORDER BY i.name ASC");
-        socket.on("sql_r"+"SELECT * FROM item_box ib LEFT JOIN item i ON ib.item_id = i.id WHERE ib.box_id='" + parseInt(content.getAttribute("data-id")) + "' ORDER BY i.name ASC", (data) => {
+        socket.on("sql_r" + "SELECT * FROM item_box ib LEFT JOIN item i ON ib.item_id = i.id WHERE ib.box_id='" + parseInt(content.getAttribute("data-id")) + "' ORDER BY i.name ASC", (data) => {
             if (!init_item_row) {
                 data.forEach((values) => {
                     let row = document.createElement("div");

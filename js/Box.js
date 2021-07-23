@@ -345,9 +345,9 @@ function change_box_picture(a) {
             var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
             socket.on('connect', () => {
                 let dat = [];
-                console.log([id + '.jpg', pic[0]]);
+                console.log(['box&'+id + '.jpg', pic[0]]);
                 socket.emit('setpicture', [id + '.jpg', pic[0]]);
-                dat = ["UPDATE box SET picture ='" + id + ".jpg" + "' WHERE id = '" + id + "'", dat];
+                dat = ["UPDATE box SET picture ='" + "box&" + id + ".jpg" + "' WHERE id = '" + id + "'", dat];
                 socket.emit("sql_insert", dat);
                 socket.on("sql_i" + dat, (data) => { location.reload(); });
             });

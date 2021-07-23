@@ -3,7 +3,7 @@
 const { values } = require('underscore');
 
 const sqlite3 = require('sqlite3').verbose();
-const file = "C:/Users/Berni/Documents/inventory_manager/database/inventory.db";
+const file = "C:/Users/Berni/Documents/inventory_manager/user_data/inventory.db";
 var db;
 var pages;
 var unit;
@@ -28,6 +28,8 @@ function createTables() {
     db.run("CREATE TABLE IF NOT EXISTS item_box (item_id INTEGER NOT NULL REFERENCES item (id), box_id INTEGER (100) REFERENCES box (id) NOT NULL, quantity INTEGER (100) NOT NULL);");
     db.run("CREATE TABLE IF NOT EXISTS event (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE, item_id INTEGER NOT NULL REFERENCES item (id), quantity INTEGER (100) NOT NULL);");
     db.run("CREATE TABLE IF NOT EXISTS HTML_pages (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE, name STRING (100) NOT NULL UNIQUE, path STRING (200) NOT NULL UNIQUE, position INTEGER (100)  NOT NULL);");
+    db.run("CREATE TABLE IF NOT EXISTS Userpages (HTML_id INTEGER NOT NULL REFERENCES HTML_pages (id), User INTEGER NOT NULL REFERENCES User (id));");
+    db.run("CREATE TABLE IF NOT EXISTS User (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE, name STRING (100) NOT NULL UNIQUE, password STRING (100));");
     db.run("CREATE TABLE IF NOT EXISTS unit (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE, name STRING (100) NOT NULL UNIQUE, multiplicator INTEGER (100) NOT NULL);", closeDb(false, db));
 }
 function insertunit() {
