@@ -586,8 +586,8 @@ function txtchange() {
         socket.emit("sql_read", "SELECT * FROM instructions WHERE name ='" + select.value + "'");
         socket.on("sql_r" + "SELECT * FROM instructions WHERE name ='" + select.value + "'", (data) => {
             data.forEach((values) => {
-                socket.emit('getfile', "/../_txt/" + values.document);
-                socket.on("get_f" + "/../_txt/" + values.document, (dat) => {
+                socket.emit('getfile', "/../user_data/_txt/" + values.document);
+                socket.on("get_f" + "/../user_data/_txt/" + values.document, (dat) => {
                     document.getElementById("textarea").value = dat;
                     document.getElementById("textarea").setAttribute("data-path", values.document);
                     document.getElementById("textarea").setAttribute("data-or", dat);
