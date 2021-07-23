@@ -15,7 +15,7 @@ function getid(url) {
             let dat = url.substring(url.indexOf("+") + 1, url.length);
             dat = "SELECT * FROM Box WHERE name='" + dat + "'";
             socket.emit('sql_read', dat);
-            socket.on(dat, (data) => {
+            socket.on("sql_r" + dat, (data) => {
                 data.forEach((values) => {
                     if (values.name == url.substring(url.indexOf("+") + 1, url.length)) {
                         id = values.id;
@@ -37,34 +37,46 @@ function init() {
 }
 var l = 0;
 function init_f(id) {
-    console.log(l);
     l += 1;
     if (id >= 1) {
         var ip = location.host;
         var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
         socket.on('connect', () => {
             socket.emit('getBox_data', id);
-            socket.on(id, (data) => {
+            socket.on("box" + id, (data) => {
                 if (data.length != 0) {
-                    console.log(data);
                     data.forEach((values) => {
                         console.log(values);
                         document.getElementById("box_id").innerHTML = values.b_id;
                         document.getElementById("box_name").innerHTML = values.b_name;
                         document.getElementById("box_img").alt = values.b_name;
-                        //socket.emit('getBoxgroup_data', values.bg_id);
-                        socket.on(values.bg_id, (datas) => {
-                            document.getElementById("box_group").innerHTML = datas[0].bg_name;
+                        socket.emit('getBoxgroup_data', values.bg_id);
+                        socket.on("box_group" + values.bg_id, (datas) => {
+                            datas.some((values) => {
+                                document.getElementById("box_bg").innerHTML = values.bg_name;
+                                return true;
+                            });
                         });
-                        document.getElementById("box_group").alt = values.b_name;
-                        if (values.picture != null) {
-                            document.getElementById("item_img").src = values.b_picture;
+                        document.getElementById("box_bg").alt = values.b_name;
+                        if (values.b_picture != null) {
+                            document.getElementById("box_img").src = values.b_picture;
+                            document.getElementById("box_picture").innerHTML = values.b_picture;
+                        } else {
+                            document.getElementById("box_picture").innerHTML = "undefined";
                         }
-                        if (values.color != null) {
+                        if (values.b_color != null) {
                             document.getElementById("color_row").style.backgroundColor = values.b_color;
+                            document.getElementById("box_color").innerHTML = values.b_color;
+                            if (values.b_color === "#ffffff") {
+                                document.getElementById("box_color").style.color = "#000000";
+                            } else {
+                                document.getElementById("box_color").style.color = values.b_color;
+                            }
+                        } else {
+                            document.getElementById("box_color").innerHTML = "#000000";
                         }
                     });
-                    //init_tab_links(data);
+                    init_tab_links(data);
                 } else {
                     document.getElementById("body").style.display = "none";
                     document.getElementById("html").innerHTML = "The item with the id: " + id + " doesn't exist";
@@ -101,66 +113,31 @@ function init_picture() {
         modal.style.display = "none";
     }
 }
-
 function init_tab_links(data) {
-    let button;
-    let b = false;
     let bd_ids = [];
-    let tabc;
+    let tabc = document.getElementById("tablinks_div");
+    let content;
     data.forEach((values) => {
-        if (bd_ids.includes(values.box_group_id)) {
-            init_box_coll(tabc, values);
+        if (bd_ids.includes(values.b_id)) {
+            init_item_row(content, values);
         } else {
-            bd_ids = [...bd_ids, parseInt(values.box_group_id)];
-            if (values.box_id != null) {
-                document.getElementById("setup").style.display = "block";
-            } else {
-                document.getElementById("setup").style.display = "none";
-            }
-            let parent = document.getElementById("tablinks_div");
-            button = document.createElement("button");
-            button.classList.add("tablinks");
-            button.setAttribute("data-id", values.box_group_id);
-            button.innerHTML = values.bg_name;
-            button.onclick = () => { opentab(event, values.box_group_id); };
-            if (values.bg_color != null) {
-                button.style.backgroundColor = values.bg_color;
-            } else {
-                button.style.backgroundColor = "#FFFFFF";
-            }
-            let def = document.getElementById("default");
-            parent.appendChild(button);
-            b = true;
-
-            let col_lg_12 = document.getElementById("tabs");
-            tabc = document.createElement("div");
-            tabc.classList.add("tabcontent");
-            tabc.id = values.box_group_id;
-            col_lg_12.appendChild(tabc);
-            init_box_coll(tabc, values);
+            bd_ids = [...bd_ids, values.b_id];
+            let but = document.createElement("button");
+            but.type = "button";
+            but.classList.add("collapsible");
+            but.innerHTML = values.b_name;
+            but.style.backgroundColor = "#FFFFFF";
+            tabc.appendChild(but);
+            content = document.createElement("div");
+            content.classList.add("content");
+            content.id = values.b_name;
+            content.setAttribute("data-id", values.b_id);
+            content.style.display = "none";
+            tabc.append(content);
+            init_item_row(content, values);
+            init_collapse(but);
         }
     });
-}
-
-function init_box_coll(tabc, values) {
-    let but = document.createElement("button");
-    but.type = "button";
-    but.classList.add("collapsible");
-    but.innerHTML = values.box_name;
-    if (values.box_color != null) {
-        but.style.backgroundColor = values.box_color;
-    } else {
-        but.style.backgroundColor = "#FFFFFF";
-    }
-    tabc.appendChild(but);
-    let content = document.createElement("div");
-    content.classList.add("content");
-    content.id = values.box_name;
-    content.setAttribute("data-id", values.box_id);
-    content.style.display = "none";
-    tabc.append(content);
-    init_item_row(content, values);
-    init_collapse(but);
 }
 
 function init_item_row(content, values) {
@@ -168,10 +145,20 @@ function init_item_row(content, values) {
     let row = document.createElement("div");
     row.classList.add("row");
     content.appendChild(row);
+    let a = document.createElement("a");
+    a.href = 'http://' + location.host + '/item&' + values.i_id;
+    if (values.i_color === "#ffffff") {
+        a.style.color = "#000000";
+    } else {
+        a.style.color = values.i_color;
+    }
+    a.style.textDecoration = "none";
+    a.style.width = "100%";
+    row.appendChild(a);
     let col_lg_12 = document.createElement("div");
     col_lg_12.classList.add("col-lg-12");
-    col_lg_12.id = values.item_name;
-    row.appendChild(col_lg_12);
+    col_lg_12.id = values.i_name;
+    a.appendChild(col_lg_12);
     row = document.createElement("div");
     row.classList.add("row");
     row.style.marginTop = "1rem";
@@ -181,37 +168,14 @@ function init_item_row(content, values) {
     col_lg_6.classList.add("col-lg-6");
     row.appendChild(col_lg_6);
     let p = document.createElement("p");
-    p.innerHTML = values.item_name;
+    p.innerHTML = values.i_name;
     col_lg_6.appendChild(p);
     col_lg_6 = document.createElement("div");
     col_lg_6.classList.add("col-lg-6");
     row.appendChild(col_lg_6);
     p = document.createElement("p");
-    p.innerHTML = values.quantity;
+    p.innerHTML = values.ib_quantity;
     col_lg_6.appendChild(p);
-}
-
-function opentab(evt, tabName) {
-
-    // Declare all variables
-    var i, tabcontent, tablinks;
-
-    // Get all elements with class="tabcontent" and hide them
-    tabcontent = document.getElementsByClassName("tabcontent");
-    for (i = 0; i < tabcontent.length; i++) {
-        tabcontent[i].style.display = "none";
-    }
-
-    // Get all elements with class="tablinks" and remove the class "active"
-    tablinks = document.getElementsByClassName("tablinks");
-    for (i = 0; i < tablinks.length; i++) {
-        tablinks[i].className = tablinks[i].className.replace(" active", "");
-    }
-
-    // Show the current tab, and add an "active" class to the button that opened the tab
-    document.getElementById(tabName).style.display = "block";
-    evt.currentTarget.className += " active";
-
 }
 
 function init_collapse(a) {
@@ -240,22 +204,22 @@ function refresh() {
     });
 }
 
-function change_item_name(a) {
+function change_box_name(a) {
     if (a === 'true') {
-        var name = document.getElementById("item_name_edit").value;
-        document.getElementById("item_name").value = name;
-        document.getElementById("item_name_edit").value = name;
+        var name = document.getElementById("box_name_edit").value;
+        document.getElementById("box_name").value = name;
+        document.getElementById("box_name_edit").value = name;
         if (name != "") {
             var ip = location.host;
             var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
             socket.on('connect', () => {
-                socket.emit("sql_read", "SELECT * FROM item WHERE name='" + name + "'");
-                socket.on("SELECT * FROM item WHERE name='" + name + "'", (data) => {
+                socket.emit("sql_read", "SELECT * FROM box WHERE name='" + name + "'");
+                socket.on("sql_r" + "SELECT * FROM box WHERE name='" + name + "'", (data) => {
                     if (data.length <= 0) {
                         let dat = [];
-                        dat = ["UPDATE item SET name ='" + name + "' WHERE id = '" + id + "'", dat];
+                        dat = ["UPDATE box SET name ='" + name + "' WHERE id = '" + id + "'", dat];
                         socket.emit("sql_insert", dat);
-                        socket.on(dat, (data) => { location.reload(); });
+                        socket.on("sql_i" + dat, (data) => { location.reload(); });
                     } else {
                         console.log("Name already exist");
                     }
@@ -271,70 +235,32 @@ function change_item_name(a) {
         document.getElementById("edit_save_name").disabled = true;
         let input = document.createElement("input");
         input.type = "text";
-        input.id = "item_name_edit"
+        input.id = "box_name_edit"
         input.style.width = "16rem";
         input.style.height = "3rem";
-        input.title = "item name";
+        input.title = "box name";
         input.placeholder = "name";
-        document.getElementById("item_name").style.display = "none";
-        document.getElementById("item_name").parentElement.appendChild(input);
+        document.getElementById("box_name").style.display = "none";
+        document.getElementById("box_name").parentElement.appendChild(input);
     }
 }
 
-function change_item_quantity(a) {
-    if (a === 'true') {
-        var quantity = document.getElementById("total_quantity_edit").value;
-        document.getElementById("total_quantity").value = quantity;
-        document.getElementById("total_quantity_edit").value = quantity;
-        if (quantity != "") {
-            var ip = location.host;
-            var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
-            socket.on('connect', () => {
-                let dat = [];
-                dat = ["UPDATE item SET total_quantity ='" + quantity + "' WHERE id = '" + id + "'", dat];
-                socket.emit("sql_insert", dat);
-                socket.on(dat, (data) => { location.reload(); });
-            });
-        } else {
-            location.reload();
-        }
-    } else {
-        document.getElementById("edit_pen_quantity").disabled = true;
-        document.getElementById("edit_pen_quantity").style.display = "none";
-        document.getElementById("edit_save_quantity").style.display = "block";
-        document.getElementById("edit_save_quantity").disabled = false;
-        let input = document.createElement("input");
-        input.type = "number";
-        input.id = "total_quantity_edit"
-        input.style.width = "16rem";
-        input.style.height = "3rem";
-        input.title = "total quantity";
-        input.placeholder = "0";
-        document.getElementById("total_quantity").style.display = "none";
-        document.getElementById("total_quantity").parentElement.appendChild(input);
-    }
-}
 
-function change_item_size(a) {
+function change_box_bg(a) {
     if (a === 'true') {
-        var size = document.getElementById("item_size_edit").value;
-        document.getElementById("item_size").value = size;
-        document.getElementById("item_size_edit").value = size;
-        var unit = document.getElementById("unit").value;
-        document.getElementById("unit").value = "mm";
-        if (size != "") {
+        var bg = document.getElementById("bg").value;
+        document.getElementById("bg").value = bg;
+        if (bg != "") {
             var ip = location.host;
             var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
             socket.on('connect', () => {
-                socket.on('getUnit', (data) => {
+                socket.on('getboxgroup', (data) => {
                     data.forEach((values) => {
-                        if (unit === values.name) {
-                            size = size * parseFloat(values.multiplicator);
-                            size = ~~(size * 1000);
+                        if (bg === values.name) {
                             let dat = [];
-                            dat = ["UPDATE item SET size ='" + size + "' WHERE id = '" + id + "'", dat];
+                            dat = ["UPDATE box SET box_group_id ='" + values.id + "' WHERE id = '" + id + "'", dat];
                             socket.emit("sql_insert", dat);
-                            socket.on(dat, (data) => { location.reload(); });
+                            socket.on("sql_i" + dat, (data) => { location.reload(); });
                         }
                     });
                 })
@@ -343,33 +269,25 @@ function change_item_size(a) {
             location.reload();
         }
     } else {
-        document.getElementById("edit_pen_size").disabled = true;
-        document.getElementById("edit_pen_size").style.display = "none";
-        document.getElementById("edit_save_size").style.display = "block";
-        document.getElementById("edit_save_size").disabled = false;
-        let input = document.createElement("input");
-        input.type = "number";
-        input.id = "item_size_edit"
-        input.style.width = "16rem";
-        input.style.height = "3rem";
-        input.title = "item size";
-        input.placeholder = "0";
-        document.getElementById("item_size").style.display = "none";
-        document.getElementById("item_size").parentElement.appendChild(input);
+        document.getElementById("edit_pen_bg").disabled = true;
+        document.getElementById("edit_pen_bg").style.display = "none";
+        document.getElementById("edit_save_bg").style.display = "block";
+        document.getElementById("edit_save_bg").disabled = false;
         var ip = location.host;
         var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
         socket.on('connect', () => {
-            socket.on('getUnit', (data) => {
+            socket.on('getboxgroup', (data) => {
                 let form = document.createElement("form");
-                form.id = "item_unit_edit";
+                form.id = "box_bg_edit";
                 let label = document.createElement("label");
-                label.htmlFor = "unit";
+                label.htmlFor = "bg";
                 form.appendChild(label);
                 let select = document.createElement("select");
-                select.id = "unit";
-                select.name = "unit";
+                select.id = "bg";
+                select.name = "bg";
                 select.style.width = "5rem";
                 select.style.height = "3rem";
+                select.value = document.getElementById(box_bg).innerHTML;
                 label.appendChild(select);
                 data.forEach((values) => {
                     let option = document.createElement("option");
@@ -377,171 +295,79 @@ function change_item_size(a) {
                     option.value = values.name;
                     option.innerHTML = values.name;
                 });
-                document.getElementById("item_unit").style.display = "none";
-                document.getElementById("item_unit").parentElement.appendChild(form);
+                document.getElementById("box_bg").style.display = "none";
+                document.getElementById("box_bg").parentElement.appendChild(form);
             });
         });
     }
 }
 
-function change_item_inst(a) {
+function change_box_color(a) {
     if (a === 'true') {
-        var txt = document.getElementById("textarea").value;
-        var inst = document.getElementById("inst_edit_form").value;
-        var name = document.getElementById("inst_edit").value;
-        if (txt != document.getElementById("textarea").getAttribute("data-or")) {
+        var color = document.getElementById("box_color_edit").value;
+        document.getElementById("box_color_edit").value = color;
+        if (color != "") {
             var ip = location.host;
             var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
             socket.on('connect', () => {
-                socket.on('getdocuments', (data) => {
-                    let b = false;
-                    for (let i = 0; i < data; i + 2) {
-                        let values = [data[i], data[i + 1]];
-                        if (values[0] == txt) {
-                            let datas = [];
-                            datas = ["UPDATE item SET instructions_id ='" + values[1] + "' WHERE id = '" + id + "'", datas];
-                            b = true;
-                            socket.emit("sql_insert", datas);
-                            socket.on(datas, (data) => { location.reload(); });
-                        }
-                    }
-                    if (!b) {
-                        var ip = location.host;
-                        var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
-                        if (name != "") {
-                            let datas;
-                            datas = [name, [id], txt, txt.length];
-                            b = true;
-                            socket.emit('instruction_data', datas);
-                            socket.on("successinst", (data) => { location.reload(); });
-                        } else {
-                            if (inst == document.getElementById("text").innerHTML) {
-                                let datas = [document.getElementById("textarea").getAttribute("data-path"), txt];
-                                b = true;
-                                socket.emit('setfile', datas);
-                                socket.on(datas, (data) => { console.log("9"); location.reload(); });
-                            } else {
-                                var ip = location.host;
-                                var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
-                                socket.on('connect', () => {
-                                    socket.emit("sql_read", "SELECT * FROM instructions WHERE name ='" + inst + "'");
-                                    socket.on("SELECT * FROM instructions WHERE name ='" + inst + "'", (data) => {
-                                        data.forEach((values) => {
-                                            let dat = [];
-                                            dat = ["UPDATE item SET instructions_id ='" + values.id + "' WHERE id = '" + id + "'", dat];
-                                            socket.emit("sql_insert", dat);
-                                            socket.on(dat, (data) => { location.reload(); });
-                                        });
-                                    });
-                                });
-                            }
-                        }
-                    } else {
-                    }
-                });
+                let dat = [];
+                dat = ["UPDATE box SET color ='" + color + "' WHERE id = '" + id + "'", dat];
+                socket.emit("sql_insert", dat);
+                socket.on("sql_i" + dat, (data) => { location.reload(); });
             });
         } else {
-            console.log(name);
-            if (name != "") {
-                var ip = location.host;
-                var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
-                socket.on('connect', () => {
-                    socket.emit("sql_read", "SELECT * FROM instructions WHERE name ='" + inst + "'");
-                    socket.on("SELECT * FROM instructions WHERE name ='" + inst + "'", (data) => {
-                        data.forEach((values) => {
-                            let dat = [];
-                            dat = ["UPDATE instructions SET name ='" + name + "' WHERE id = '" + values.id + "'", dat];
-                            socket.emit("sql_insert", dat);
-                            socket.on(dat, (data) => { location.reload(); });
-                        });
-                    });
-                });
-            } else {
-                if (inst != document.getElementById("text").innerHTML) {
-                    var ip = location.host;
-                    var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
-                    socket.on('connect', () => {
-                        socket.emit("sql_read", "SELECT * FROM instructions WHERE name ='" + inst + "'");
-                        socket.on("SELECT * FROM instructions WHERE name ='" + inst + "'", (data) => {
-                            data.forEach((values) => {
-                                let dat = [];
-                                dat = ["UPDATE item SET instructions_id ='" + values.id + "' WHERE id = '" + id + "'", dat];
-                                console.log(dat);
-                                socket.emit("sql_insert", dat);
-                                socket.on(dat, (data) => { location.reload(); });
-                            });
-                        });
-                    });
-                } else {
-                    location.reload();
-                }
-            }
+            location.reload();
         }
     } else {
-        document.getElementById("edit_pen_inst").disabled = true;
-        document.getElementById("edit_pen_inst").style.display = "none";
-        document.getElementById("edit_save_inst").style.display = "block";
-        document.getElementById("edit_save_inst").disabled = false;
-        document.getElementById("textarea").style.display = "block";
-        document.getElementById("textarea").readOnly = false;
-
-        var ip = location.host;
-        var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
-        socket.on('connect', () => {
-            socket.on('getinstructions', (data) => {
-                let form = document.createElement("form");
-                form.id = "item_inst_edit";
-                let label = document.createElement("label");
-                label.htmlFor = "inst";
-                form.appendChild(label);
-                let select = document.createElement("select");
-                select.id = "inst_edit_form";
-                select.name = "inst_edit";
-                select.style.width = "5rem";
-                select.style.height = "3rem";
-                select.onchange = () => { txtchange(); };
-                label.appendChild(select);
-                document.getElementById("text").style.display = "none";
-                document.getElementById("text").parentElement.appendChild(form);
-                data.forEach((values) => {
-                    let option = document.createElement("option");
-                    select.appendChild(option);
-                    option.value = values.name;
-                    option.id = values.id;
-                    option.innerHTML = values.name;
-                });
-                let input = document.createElement("input");
-                input.type = "text";
-                input.id = "inst_edit"
-                input.style.width = "16rem";
-                input.style.height = "3rem";
-                input.title = "instruction name";
-                input.placeholder = "name";
-                document.getElementById("text").parentElement.appendChild(input);
-                select.value = document.getElementById("text").innerHTML;
-            });
-        });
+        document.getElementById("edit_pen_color").disabled = true;
+        document.getElementById("edit_pen_color").style.display = "none";
+        document.getElementById("edit_save_color").style.display = "block";
+        document.getElementById("edit_save_color").disabled = true;
+        let input = document.createElement("input");
+        input.type = "color";
+        input.id = "box_color_edit"
+        input.style.width = "16rem";
+        input.style.height = "3rem";
+        input.title = "box color";
+        input.placeholder = "color";
+        input.value = document.getElementById("box_color").innerHTML;
+        document.getElementById("box_color").style.display = "none";
+        document.getElementById("box_color").parentElement.appendChild(input);
     }
 }
 
 
-function txtchange() {
-    let select = document.getElementById("inst_edit_form");
-    var ip = location.host;
-    var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
-    socket.on('connect', () => {
-        socket.emit("sql_read", "SELECT * FROM instructions WHERE name ='" + select.value + "'");
-        socket.on("SELECT * FROM instructions WHERE name ='" + select.value + "'", (data) => {
-            data.forEach((values) => {
-                socket.emit('getfile', "/../_txt/" + values.document);
-                socket.on("/../_txt/" + values.document, (dat) => {
-                    document.getElementById("textarea").value = dat;
-                    document.getElementById("textarea").setAttribute("data-path", values.document);
-                    document.getElementById("textarea").setAttribute("data-or", dat);
-                    document.getElementById("textarea").style.display = "block";
-                });
+function change_box_picture(a) {
+    if (a === 'true') {
+        var pic = document.getElementById("box_pic_edit").files;
+        if (pic != "") {
+            var ip = location.host;
+            var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
+            socket.on('connect', () => {
+                let dat = [];
+                console.log([id + '.jpg', pic[0]]);
+                socket.emit('setpicture', [id + '.jpg', pic[0]]);
+                dat = ["UPDATE box SET picture ='" + id + ".jpg" + "' WHERE id = '" + id + "'", dat];
+                socket.emit("sql_insert", dat);
+                socket.on("sql_i" + dat, (data) => { location.reload(); });
             });
-        });
-    });
+        } else {
+            location.reload();
+        }
+    } else {
+        document.getElementById("edit_pen_picture").disabled = true;
+        document.getElementById("edit_pen_picture").style.display = "none";
+        document.getElementById("edit_save_picture").style.display = "block";
+        document.getElementById("edit_save_picture").disabled = true;
+        let input = document.createElement("input");
+        input.type = "file";
+        input.accept = ".jpg";
+        input.id = "box_pic_edit"
+        input.style.width = "16rem";
+        input.style.height = "3rem";
+        input.title = "box pic";
+        input.placeholder = "pic";
+        document.getElementById("box_picture").style.display = "none";
+        document.getElementById("box_picture").parentElement.appendChild(input);
+    }
 }
-

@@ -277,7 +277,6 @@ function reload_data() {
     });
 }
 var in_use_box_node_data = [];
-
 function iohandle(socket) {
     var address = socket.handshake.address;
     if (!ip_connections.includes(address)) {
@@ -295,14 +294,15 @@ function iohandle(socket) {
     socket.emit('getsettings', file);
     socket.emit('getUnit', unit);
     socket.emit('getdocuments', documents);
-    socket.on('setfile', (data) => { fs.writeFile(__dirname + "/../_txt/" + data[0], Buffer.from(data[1]), function (err) { if (err) throw err; socket.emit(data, true); }); });
-    socket.on('getfile', (data) => { let a = fs.readFileSync(__dirname + data).toString(); socket.emit(data, a); });
-    socket.on('getinstructions', (data) => { sql.recreateDb((db) => { sql.read(db, "SELECT * FROM instructions WHERE id='" + data + "'", (dat) => { socket.emit(data, dat); }); }); });
-    socket.on('getItem_data', (data) => { sql.recreateDb((db) => { sql.read(db, "SELECT i.name item_name, instructions_id, i.size, i.total_quantity, ib.box_id, b.name box_name, b.box_group_id, bg.name bg_name, bg.location bg_location, b.color box_color, i.color color, i.picture picture, bg.color bg_color, ib.quantity quantity FROM item i LEFT JOIN (item_box ib LEFT JOIN (box b LEFT JOIN box_group bg ON b.box_group_id=bg.id) ON ib.box_id = b.id) ON i.id = ib.item_id WHERE i.id='" + data + "' ORDER BY b.box_group_id ASC", (dat) => { socket.emit(data, dat); }); }); });
-    socket.on('getBox_data', (data) => { sql.recreateDb((db) => { sql.read(db, "SELECT b.id b_id, b.name b_name, b.box_group_id bg_id, b.color b_color, b.picture b_picture, ib.item_id ib_item_id, ib.quantity ib_quantity, i.id i_id, i.name i_name, i.color i_color, i.picture i_picture FROM Box b LEFT JOIN (item_box ib LEFT JOIN item i ON ib.item_id = i.id) ON b.id = ib.box_id WHERE b.id='" + data + "' ORDER BY b.box_group_id ASC", (dat) => { socket.emit(data, dat); }); }); });
-    socket.on('getBoxgroup_data', (data) => { sql.recreateDb((db) => { sql.read(db, "SELECT bg.id bg_id, bg.name bg_name, bg.color bg_color, bg.picture bg_picture, b.id b_id, b.name b_name, b.color b_color, b.picture b_picture, ib.item_id ib_item_id, ib.quantity ib_quantity, i.id i_id, i.name i_name, i.color i_color, i.picture i_picture FROM box_group bg LEFT JOIN (box b LEFT JOIN (item_box ib LEFT JOIN item i ON ib.item_id=i.id) ON b.id = ib.box_id) ON bg.id = b.box_group_id WHERE bg.id='" + data + "' ORDER BY b.id ASC", (dat) => { console.log(dat); socket.emit(data, dat); }); }); });
-    socket.on("sql_read", (data) => { sql.recreateDb((db) => { sql.read(db, data, (dat) => { socket.emit(data, dat); }); }); });
-    socket.on("sql_insert", (data) => { sql.insert(data[0], data[1], () => { reload_data(); socket.emit(data, true); }); });
+    socket.on('setpicture', (data) => {fs.writeFile(__dirname + "/../_img/" + data[0], Buffer.from(data[1]), function (err) {if (err) throw err; socket.emit("set_p" + data, true); }); });
+    socket.on('setfile', (data) => { fs.writeFile(__dirname + "/../_txt/" + data[0], Buffer.from(data[1]), function (err) { if (err) throw err; socket.emit("set_f" + data, true); }); });
+    socket.on('getfile', (data) => { let a = fs.readFileSync(__dirname + data).toString(); socket.emit("get_f" + data, a); });
+    socket.on('getinstructions', (data) => { sql.recreateDb((db) => { sql.read(db, "SELECT * FROM instructions WHERE id='" + data + "'", (dat) => { socket.emit("get_inst" + data, dat); }); }); });
+    socket.on('getItem_data', (data) => { sql.recreateDb((db) => { sql.read(db, "SELECT i.name item_name, instructions_id, i.size, i.total_quantity, ib.box_id, b.name box_name, b.box_group_id, bg.name bg_name, bg.location bg_location, b.color box_color, i.color color, i.picture picture, bg.color bg_color, ib.quantity quantity FROM item i LEFT JOIN (item_box ib LEFT JOIN (box b LEFT JOIN box_group bg ON b.box_group_id=bg.id) ON ib.box_id = b.id) ON i.id = ib.item_id WHERE i.id='" + data + "' ORDER BY b.box_group_id ASC", (dat) => { socket.emit("item" + data, dat); }); }); });
+    socket.on('getBox_data', (data) => { sql.recreateDb((db) => { sql.read(db, "SELECT b.id b_id, b.name b_name, b.box_group_id bg_id, b.color b_color, b.picture b_picture, ib.item_id ib_item_id, ib.quantity ib_quantity, i.id i_id, i.name i_name, i.color i_color, i.picture i_picture FROM Box b LEFT JOIN (item_box ib LEFT JOIN item i ON ib.item_id = i.id) ON b.id = ib.box_id WHERE b.id='" + data + "' ORDER BY b.box_group_id ASC", (dat) => { socket.emit("box" + data, dat); }); }); });
+    socket.on('getBoxgroup_data', (data) => { sql.recreateDb((db) => { sql.read(db, "SELECT bg.id bg_id, bg.name bg_name, bg.color bg_color, bg.picture bg_picture, b.id b_id, b.name b_name, b.color b_color, b.picture b_picture, ib.item_id ib_item_id, ib.quantity ib_quantity, i.id i_id, i.name i_name, i.color i_color, i.picture i_picture FROM box_group bg LEFT JOIN (box b LEFT JOIN (item_box ib LEFT JOIN item i ON ib.item_id=i.id) ON b.id = ib.box_id) ON bg.id = b.box_group_id WHERE bg.id='" + data + "' ORDER BY b.id ASC", (dat) => { socket.emit("box_group" + data, dat); }); }); });
+    socket.on("sql_read", (data) => { sql.recreateDb((db) => { sql.read(db, data, (dat) => { socket.emit("sql_r" + data, dat); }); }); });
+    socket.on("sql_insert", (data) => { sql.insert(data[0], data[1], () => { reload_data(); socket.emit("sql_i" + data, true); }); });
     socket.on("in_use_box_node", (data) => { in_use_box_node_data = [...in_use_box_node_data, data]; in_use_box_node_data.forEach((values) => { getbox_node_items(values, socket); }); });
     socket.on('box_data', (data) => { addbox(data); socket.emit("successb", true); });
     socket.on('box_group_data', (data) => { addboxgroup(data); socket.emit("successbg", true); });
