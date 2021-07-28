@@ -142,7 +142,7 @@ function getitem_node(a, b) {
                             var max = values.total_quantity;
                             var min = 0;
                             socket.emit("sql_read", "SELECT * FROM item_box WHERE item_id='" + values.id + "'");
-                            socket.on("sql_r"+"SELECT * FROM item_box WHERE item_id='" + values.id + "' AND NOT box_id='1'", (data) => { data.forEach((dat) => { max -= parseInt(dat.quantity); }); });
+                            socket.on("sql_r" + "SELECT * FROM item_box WHERE item_id='" + values.id + "' AND NOT box_id='1'", (data) => { data.forEach((dat) => { max -= parseInt(dat.quantity); }); });
                             input.setAttribute("data-max", max);
                             input.setAttribute("data-min", min);
                             input.addEventListener('change', () => { if (parseInt(input.value) > max) { input.value = max } if (parseInt(input.value) < min) { input.value = min } });
@@ -203,20 +203,33 @@ function getbox_node(a, b) {
 }
 
 function getUnit() {
-    var unit_get = false;
+    var unit_get_size = false;
+    var unit_get_weight = false;
     var ip = location.host;
     var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
     socket.on('connect', () => {
-        socket.on('getUnit', (data) => {
-            if (!unit_get) {
+        socket.on('getsize_Unit', (data) => {
+            if (!unit_get_size) {
                 data.forEach(function (values) {
-                    let parent = document.getElementById("unit");
+                    let parent = document.getElementById("unit_size");
                     let option = document.createElement("option");
                     parent.appendChild(option);
                     option.value = values.name;
                     option.innerHTML = values.name;
                 });
-                unit_get = true;
+                unit_get_size = true;
+            }
+        })
+        socket.on('getweight_Unit', (data) => {
+            if (!unit_get_weight) {
+                data.forEach(function (values) {
+                    let parent = document.getElementById("unit_weight");
+                    let option = document.createElement("option");
+                    parent.appendChild(option);
+                    option.value = values.name;
+                    option.innerHTML = values.name;
+                });
+                unit_get_weight = true;
             }
         })
     });
@@ -244,24 +257,38 @@ function additem() {
     document.getElementById("instructions_select").value = "Choose";
     var size = parseFloat(document.getElementById("item_size").value);
     document.getElementById("item_size").value = "";
-    var unit = document.getElementById("unit").value;
-    document.getElementById("unit").value = "mm";
+    var unit_size = document.getElementById("unit_size").value;
+    document.getElementById("unit_size").value = "mm";
     var quantity = parseFloat(document.getElementById("item_quantity").value);
     document.getElementById("item_quantity").value = "";
     var color = document.getElementById("item_color").value;
     document.getElementById("item_color").value = "#FFFFFF";
     var pic = document.getElementById("item_pic").files;
+    var weight = parseFloat(document.getElementById("item_weight").value);
+    document.getElementById("item_weight").value = "";
+    var unit_weight = document.getElementById("unit_weight").value;
+    document.getElementById("unit_weight").value = "g";
+    var price = parseFloat(document.getElementById("item_price").value);
+    document.getElementById("item_price").value = "";
+    console.log("1" + ", " + quantity);
     if (name != "") {
         var ip = location.host;
         var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
         socket.on('connect', () => {
-            socket.on('getUnit', (data) => {
-                data.forEach((values) => {
-                    if (unit === values.name) {
-                        size = size * parseFloat(values.multiplicator);
-                        socket.emit('item_data', [name, instructions, size, color, pic, quantity, pic.length]);
-                        socket.on("successi", (data) => { document.getElementById("item_pic_f").reset(); location.reload(); });
-                    }
+            socket.on('getsize_Unit', (data) => {
+                socket.on('getweight_Unit', (dat) => {
+                    data.forEach((values) => {
+                        if (unit_size === values.name) {
+                            size = size * parseFloat(values.multiplicator);
+                        }
+                    });
+                    dat.forEach((values) => {
+                        if (unit_weight === values.name) {
+                            weight = weight * parseFloat(values.multiplicator);
+                        }
+                    });
+                    socket.emit('item_data', [name, instructions, size, color, pic, quantity, pic.length, weight, price]);
+                    socket.on("successi", (data) => { document.getElementById("item_pic_f").reset(); location.reload(); });
                 });
             })
         });
@@ -348,38 +375,6 @@ function addboxgroup(a) {
         socket.on('connect', () => {
             socket.emit('box_group_data', [name, location_n, itemlist, color, pic, pic.length]);
             socket.on("successbg", (data) => { document.getElementById("bg_pic_f").reset(); location.reload(); });
-        });
-    }
-}
-
-function additem() {
-    var name = document.getElementById("item_name").value;
-    document.getElementById("item_name").value = "";
-    var instructions = parseInt(document.getElementById("instructions_select").value);
-    document.getElementById("instructions_select").value = "Choose";
-    var size = parseFloat(document.getElementById("item_size").value);
-    document.getElementById("item_size").value = "";
-    var unit = document.getElementById("unit").value;
-    document.getElementById("unit").value = "mm";
-    var quantity = parseFloat(document.getElementById("item_quantity").value);
-    document.getElementById("item_quantity").value = "";
-    var color = document.getElementById("item_color").value;
-    document.getElementById("item_color").value = "#FFFFFF";
-    var pic = document.getElementById("item_pic").files
-    if (name != "") {
-        var ip = location.host;
-        var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
-        socket.on('connect', () => {
-            socket.on('getUnit', (data) => {
-                data.forEach((values) => {
-                    if (unit === values.name) {
-                        size = size * parseFloat(values.multiplicator);
-                        size = ~~(size * 1000);
-                        socket.emit('item_data', [name, instructions, size, color, pic, quantity, pic.length]);
-                        socket.on("successi", (data) => { document.getElementById("item_pic_f").reset(); location.reload(); });
-                    }
-                });
-            })
         });
     }
 }

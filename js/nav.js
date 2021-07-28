@@ -23,8 +23,8 @@ function nav_items() {
                 }
             } else {
                 socket.emit('refresh', "nav");
-                socket.on('reloaded', () => {
-                    socket.on('html', (data) => { data != null ? nav_items() : () => {/*console.log("reload not successfull");*/ } });
+                socket.on('reloaded', (datas) => {
+                    socket.on('html', (data) => { if (data != null) { consolo.log(data); nav_items(); } else { console.log("reload not successfull"); location.reload; } });
                 });
             }
         });

@@ -1,5 +1,6 @@
 var url = document.URL;
 var id = -1;
+
 function getid(url) {
     if (url.indexOf("&") != -1) {
         if (!isNaN(url.substring(url.indexOf("&") + 1, url.length))) {
@@ -13,7 +14,7 @@ function getid(url) {
         var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
         socket.on('connect', () => {
             let dat = url.substring(url.indexOf("+") + 1, url.length);
-            dat = "SELECT * FROM Box WHERE name='" + dat + "'";
+            dat = "SELECT * FROM box_group WHERE name='" + dat + "'";
             socket.emit('sql_read', dat);
             socket.on("sql_r" + dat, (data) => {
                 data.forEach((values) => {
@@ -30,48 +31,43 @@ function getid(url) {
         return -1;
     }
 }
+
 function init() {
     url = document.URL;
     getid(url);
     init_picture();
 }
+
 function init_f(id) {
     if (id >= 1) {
         var ip = location.host;
         var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
         socket.on('connect', () => {
-            socket.emit('getBox_data', id);
-            socket.on("box" + id, (data) => {
+            socket.emit('getBoxgroup_data', id);
+            socket.on("box_group" + id, (data) => {
                 if (data.length != 0) {
                     data.forEach((values) => {
-                        document.getElementById("box_id").innerHTML = values.b_id;
-                        document.getElementById("box_name").innerHTML = values.b_name;
-                        document.getElementById("box_img").alt = values.b_name;
-                        socket.emit('getBoxgroup_data', values.bg_id);
-                        socket.on("box_group" + values.bg_id, (datas) => {
-                            datas.some((values) => {
-                                document.getElementById("box_bg").innerHTML = values.bg_name;
-                                document.getElementById("box_bg").href = "http://" + location.host + "/box_group&" + values.bg_id;
-                                return true;
-                            });
-                        });
-                        document.getElementById("box_bg").alt = values.b_name;
-                        if (values.b_picture != null) {
-                            document.getElementById("box_img").src = values.b_picture;
-                            document.getElementById("box_picture").innerHTML = values.b_picture;
+                        console.log(values);
+                        document.getElementById("box_group_id").innerHTML = values.bg_id;
+                        document.getElementById("box_group_name").innerHTML = values.bg_name;
+                        document.getElementById("box_group_img").alt = values.bg_name;
+                        document.getElementById("box_group_location").innerHTML = values.bg_location;
+                        if (values.bg_picture != null) {
+                            document.getElementById("box_group_img").src = values.bg_picture;
+                            document.getElementById("box_group_picture").innerHTML = values.bg_picture;
                         } else {
-                            document.getElementById("box_picture").innerHTML = "undefined";
+                            document.getElementById("box_group_picture").innerHTML = "undefined";
                         }
-                        if (values.b_color != null) {
-                            document.getElementById("color_row").style.backgroundColor = values.b_color;
-                            document.getElementById("box_color").innerHTML = values.b_color;
-                            if (values.b_color === "#ffffff") {
-                                document.getElementById("box_color").style.color = "#000000";
+                        if (values.bg_color != null) {
+                            document.getElementById("color_row").style.backgroundColor = values.bg_color;
+                            document.getElementById("box_group_color").innerHTML = values.bg_color;
+                            if (values.bg_color === "#ffffff") {
+                                document.getElementById("box_group_color").style.color = "#000000";
                             } else {
-                                document.getElementById("box_color").style.color = values.b_color;
+                                document.getElementById("box_group_color").style.color = values.bg_color;
                             }
                         } else {
-                            document.getElementById("box_color").innerHTML = "#000000";
+                            document.getElementById("box_group_color").innerHTML = "#000000";
                         }
                     });
                     init_tab_links(data);
@@ -84,7 +80,6 @@ function init_f(id) {
     }
 }
 
-
 function nofile() {
     document.write("opps this doesn't exist - 404  -  (tipp: use /item&[item_id])");
 }
@@ -94,7 +89,7 @@ function init_picture() {
     var modal = document.getElementById("myModal");
 
     // Get the image and insert it inside the modal - use its "alt" text as a caption
-    var img = document.getElementById("box_img");
+    var img = document.getElementById("box_group_img");
     var modalImg = document.getElementById("img01");
     var captionText = document.getElementById("caption");
     img.onclick = function () {
@@ -111,6 +106,7 @@ function init_picture() {
         modal.style.display = "none";
     }
 }
+
 function init_tab_links(data) {
     let bd_ids = [];
     let tabc = document.getElementById("tablinks_div");
@@ -202,20 +198,20 @@ function refresh() {
     });
 }
 
-function change_box_name(a) {
+function change_box_group_name(a) {
     if (a === 'true') {
-        var name = document.getElementById("box_name_edit").value;
-        document.getElementById("box_name").value = name;
-        document.getElementById("box_name_edit").value = name;
+        var name = document.getElementById("box_group_name_edit").value;
+        document.getElementById("box_group_name").value = name;
+        document.getElementById("box_group_name_edit").value = name;
         if (name != "") {
             var ip = location.host;
             var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
             socket.on('connect', () => {
-                socket.emit("sql_read", "SELECT * FROM box WHERE name='" + name + "'");
-                socket.on("sql_r" + "SELECT * FROM box WHERE name='" + name + "'", (data) => {
+                socket.emit("sql_read", "SELECT * FROM box_group WHERE name='" + name + "'");
+                socket.on("sql_r" + "SELECT * FROM box_group WHERE name='" + name + "'", (data) => {
                     if (data.length <= 0) {
                         let dat = [];
-                        dat = ["UPDATE box SET name ='" + name + "' WHERE id = '" + id + "'", dat];
+                        dat = ["UPDATE box_group SET name ='" + name + "' WHERE id = '" + id + "'", dat];
                         socket.emit("sql_insert", dat);
                         socket.on("sql_i" + dat, (data) => { location.reload(); });
                     } else {
@@ -233,83 +229,60 @@ function change_box_name(a) {
         document.getElementById("edit_save_name").disabled = true;
         let input = document.createElement("input");
         input.type = "text";
-        input.id = "box_name_edit"
+        input.id = "box_group_name_edit"
         input.style.width = "16rem";
         input.style.height = "3rem";
-        input.title = "box name";
+        input.title = "box group name";
         input.placeholder = "name";
-        document.getElementById("box_name").style.display = "none";
-        document.getElementById("box_name").parentElement.appendChild(input);
+        document.getElementById("box_group_name").style.display = "none";
+        document.getElementById("box_group_name").parentElement.appendChild(input);
     }
 }
 
-function change_box_bg(a) {
+function change_box_group_location(a) {
     if (a === 'true') {
-        var bg = document.getElementById("bg").value;
-        document.getElementById("bg").value = bg;
-        if (bg != "") {
+        var locations = document.getElementById("box_group_location_edit").value;
+        document.getElementById("box_group_location").value = locations;
+        document.getElementById("box_group_location_edit").value = locations;
+        if (locations != "") {
             var ip = location.host;
             var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
             socket.on('connect', () => {
-                socket.on('getboxgroup', (data) => {
-                    data.forEach((values) => {
-                        if (bg === values.name) {
-                            let dat = [];
-                            dat = ["UPDATE box SET box_group_id ='" + values.id + "' WHERE id = '" + id + "'", dat];
-                            socket.emit("sql_insert", dat);
-                            socket.on("sql_i" + dat, (data) => { location.reload(); });
-                        }
-                    });
-                })
+                let dat = [];
+                dat = ["UPDATE box_group SET location ='" + locations + "' WHERE id = '" + id + "'", dat];
+                socket.emit("sql_insert", dat);
+                socket.on("sql_i" + dat, (data) => { location.reload(); });
             });
         } else {
             location.reload();
         }
     } else {
-        document.getElementById("edit_pen_bg").disabled = true;
-        document.getElementById("edit_pen_bg").style.display = "none";
-        document.getElementById("edit_save_bg").style.display = "block";
-        document.getElementById("edit_save_bg").disabled = false;
-        var ip = location.host;
-        var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
-        socket.on('connect', () => {
-            socket.on('getboxgroup', (data) => {
-                console.log(data);
-                let form = document.createElement("form");
-                form.id = "box_bg_edit";
-                let label = document.createElement("label");
-                label.htmlFor = "bg";
-                form.appendChild(label);
-                let select = document.createElement("select");
-                select.id = "bg";
-                select.name = "bg";
-                select.style.width = "5rem";
-                select.style.height = "3rem";
-                select.value = document.getElementById("box_bg").innerHTML;
-                label.appendChild(select);
-                data.forEach((values) => {
-                    let option = document.createElement("option");
-                    select.appendChild(option);
-                    option.value = values.name;
-                    option.innerHTML = values.name;
-                });
-                document.getElementById("box_bg").style.display = "none";
-                document.getElementById("box_bg").parentElement.appendChild(form);
-            });
-        });
+        document.getElementById("edit_pen_location").disabled = true;
+        document.getElementById("edit_pen_location").style.display = "none";
+        document.getElementById("edit_save_location").style.display = "block";
+        document.getElementById("edit_save_location").disabled = true;
+        let input = document.createElement("input");
+        input.type = "text";
+        input.id = "box_group_location_edit"
+        input.style.width = "16rem";
+        input.style.height = "3rem";
+        input.title = "box group location";
+        input.placeholder = "location";
+        document.getElementById("box_group_location").style.display = "none";
+        document.getElementById("box_group_location").parentElement.appendChild(input);
     }
 }
 
-function change_box_color(a) {
+function change_box_group_color(a) {
     if (a === 'true') {
-        var color = document.getElementById("box_color_edit").value;
-        document.getElementById("box_color_edit").value = color;
+        var color = document.getElementById("box_group_color_edit").value;
+        document.getElementById("box_group_color_edit").value = color;
         if (color != "") {
             var ip = location.host;
             var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
             socket.on('connect', () => {
                 let dat = [];
-                dat = ["UPDATE box SET color ='" + color + "' WHERE id = '" + id + "'", dat];
+                dat = ["UPDATE box_group SET color ='" + color + "' WHERE id = '" + id + "'", dat];
                 socket.emit("sql_insert", dat);
                 socket.on("sql_i" + dat, (data) => { location.reload(); });
             });
@@ -323,27 +296,27 @@ function change_box_color(a) {
         document.getElementById("edit_save_color").disabled = true;
         let input = document.createElement("input");
         input.type = "color";
-        input.id = "box_color_edit"
+        input.id = "box_group_color_edit"
         input.style.width = "16rem";
         input.style.height = "3rem";
-        input.title = "box color";
+        input.title = "box group color";
         input.placeholder = "color";
-        input.value = document.getElementById("box_color").innerHTML;
-        document.getElementById("box_color").style.display = "none";
-        document.getElementById("box_color").parentElement.appendChild(input);
+        input.value = document.getElementById("box_group_color").innerHTML;
+        document.getElementById("box_group_color").style.display = "none";
+        document.getElementById("box_group_color").parentElement.appendChild(input);
     }
 }
 
-function change_box_picture(a) {
+function change_box_group_picture(a) {
     if (a === 'true') {
-        var pic = document.getElementById("box_pic_edit").files;
+        var pic = document.getElementById("box_group_pic_edit").files;
         if (pic != "") {
             var ip = location.host;
             var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
             socket.on('connect', () => {
                 let dat = [];
-                socket.emit('setpicture', ['box&' + id + '.jpg', pic[0]]);
-                dat = ["UPDATE box SET picture ='" + "box&" + id + ".jpg" + "' WHERE id = '" + id + "'", dat];
+                socket.emit('setpicture', ['boxgroup&' + id + '.jpg', pic[0]]);
+                dat = ["UPDATE box_group SET picture ='" + "boxgroup&" + id + ".jpg" + "' WHERE id = '" + id + "'", dat];
                 socket.emit("sql_insert", dat);
                 socket.on("sql_i" + dat, (data) => { location.reload(); });
             });
@@ -358,12 +331,12 @@ function change_box_picture(a) {
         let input = document.createElement("input");
         input.type = "file";
         input.accept = ".jpg";
-        input.id = "box_pic_edit"
+        input.id = "box_group_pic_edit"
         input.style.width = "16rem";
         input.style.height = "3rem";
-        input.title = "box pic";
+        input.title = "box group pic";
         input.placeholder = "pic";
-        document.getElementById("box_picture").style.display = "none";
-        document.getElementById("box_picture").parentElement.appendChild(input);
+        document.getElementById("box_group_picture").style.display = "none";
+        document.getElementById("box_group_picture").parentElement.appendChild(input);
     }
 }

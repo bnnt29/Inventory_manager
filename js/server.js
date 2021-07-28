@@ -1,6 +1,7 @@
 "use strict";
 var pages = ["index", "inventory_setup", "sql_add_objects", "settings"];
-var unitlist = ["mm", 0.1, "cm", 1, "dm", 10, "m", 100]
+var size_unitlist = ["mm", 0.1, "cm", 1, "dm", 10, "m", 100, "km", 1000];
+var weight_unitlist = ["g", 1, "kg", 1000, "t", 1000000];
 
 var ip_connections = [];
 
@@ -151,7 +152,7 @@ function fserverhandler(req, res) {
             res.end();
         });
     }
-    if (path.indexOf("item") != -1 && !used) {
+    if ((path.indexOf("item") != -1 && !used) || (path.indexOf("i") != -1 && !used)) {
         used = true;
         fs.readFile(__dirname + '/../html/item.html', function (error, data) {
             if (error) console.error(error);
@@ -163,7 +164,19 @@ function fserverhandler(req, res) {
         });
     }
 
-    if (path.indexOf("box") != -1 && !used) {
+    if ((path.indexOf("bg") != -1 && !used) || (path.indexOf("box_group") != -1 && !used) || (path.indexOf("boxgroup") != -1 && !used)) {
+        used = true;
+        fs.readFile(__dirname + '/../html/box_group.html', function (error, data) {
+            if (error) console.error(error);
+            res.writeHead(200, {
+                'Content-Type': 'text/html'
+            });
+            res.write(data);
+            res.end();
+        });
+    }
+
+    if ((path.indexOf("box") != -1 && !used) || (path.indexOf("b") != -1 && !used)) {
         used = true;
         fs.readFile(__dirname + '/../html/box.html', function (error, data) {
             if (error) console.error(error);
@@ -174,6 +187,7 @@ function fserverhandler(req, res) {
             res.end();
         });
     }
+
     if (!used) {
         res.writeHead(404);
         res.write("opps this doesn't exist - 404");
@@ -205,14 +219,15 @@ var html;
 var instructions;
 var box;
 var item;
-var unit
+var size_unit;
+var weight_unit;
 var unused_item;
 var unused_box;
 var boxgroup;
 var boxgroupname;
 var documents = [];
 
-sql.setdata(pages, unitlist);
+sql.setdata(pages, size_unitlist, weight_unitlist);
 sql.initDB(() => { reload_data(); });
 
 function reload_data() {
@@ -275,8 +290,14 @@ function reload_data() {
     });
 
     sql.recreateDb(function (data) {
-        sql.read(data, "SELECT * FROM unit ORDER BY multiplicator ASC", function (data) {
-            unit = data;
+        sql.read(data, "SELECT * FROM size_unit ORDER BY multiplicator ASC", function (data) {
+            size_unit = data;
+        });
+    });
+
+    sql.recreateDb(function (data) {
+        sql.read(data, "SELECT * FROM weight_unit ORDER BY multiplicator ASC", function (data) {
+            weight_unit = data;
         });
     });
 }
@@ -296,15 +317,16 @@ function iohandle(socket) {
     socket.emit('getinstructions', instructions);
     socket.emit('html', html);
     socket.emit('getsettings', file);
-    socket.emit('getUnit', unit);
+    socket.emit('getsize_Unit', size_unit);
+    socket.emit('getweight_Unit', weight_unit);
     socket.emit('getdocuments', documents);
     socket.on('setpicture', (data) => { fs.writeFile(__dirname + "/../user_data/_img/" + data[0], Buffer.from(data[1]), function (err) { if (err) throw err; socket.emit("set_p" + data, true); }); });
     socket.on('setfile', (data) => { fs.writeFile(__dirname + "/../user_data/_txt/" + data[0], Buffer.from(data[1]), function (err) { if (err) throw err; socket.emit("set_f" + data, true); }); });
     socket.on('getfile', (data) => { let a = fs.readFileSync(__dirname + data).toString(); socket.emit("get_f" + data, a); });
     socket.on('getinstructions', (data) => { sql.recreateDb((db) => { sql.read(db, "SELECT * FROM instructions WHERE id='" + data + "'", (dat) => { socket.emit("get_inst" + data, dat); }); }); });
-    socket.on('getItem_data', (data) => { sql.recreateDb((db) => { sql.read(db, "SELECT i.name item_name, instructions_id, i.size, i.total_quantity, ib.box_id, b.name box_name, b.box_group_id, bg.name bg_name, bg.location bg_location, b.color box_color, i.color color, i.picture picture, bg.color bg_color, ib.quantity quantity FROM item i LEFT JOIN (item_box ib LEFT JOIN (box b LEFT JOIN box_group bg ON b.box_group_id=bg.id) ON ib.box_id = b.id) ON i.id = ib.item_id WHERE i.id='" + data + "' ORDER BY b.box_group_id ASC", (dat) => { socket.emit("item" + data, dat); }); }); });
+    socket.on('getItem_data', (data) => { sql.recreateDb((db) => { sql.read(db, "SELECT i.name item_name, instructions_id, i.size, i.weight, i.price, i.total_quantity, ib.box_id, b.name box_name, b.box_group_id, bg.name bg_name, bg.location bg_location, b.color box_color, i.color color, i.picture picture, bg.color bg_color, ib.quantity quantity FROM item i LEFT JOIN (item_box ib LEFT JOIN (box b LEFT JOIN box_group bg ON b.box_group_id=bg.id) ON ib.box_id = b.id) ON i.id = ib.item_id WHERE i.id='" + data + "' ORDER BY b.box_group_id ASC", (dat) => { socket.emit("item" + data, dat); }); }); });
     socket.on('getBox_data', (data) => { sql.recreateDb((db) => { sql.read(db, "SELECT b.id b_id, b.name b_name, b.box_group_id bg_id, b.color b_color, b.picture b_picture, ib.item_id ib_item_id, ib.quantity ib_quantity, i.id i_id, i.name i_name, i.color i_color, i.picture i_picture FROM Box b LEFT JOIN (item_box ib LEFT JOIN item i ON ib.item_id = i.id) ON b.id = ib.box_id WHERE b.id='" + data + "' ORDER BY b.box_group_id ASC", (dat) => { socket.emit("box" + data, dat); }); }); });
-    socket.on('getBoxgroup_data', (data) => { sql.recreateDb((db) => { sql.read(db, "SELECT bg.id bg_id, bg.name bg_name, bg.color bg_color, bg.picture bg_picture, b.id b_id, b.name b_name, b.color b_color, b.picture b_picture, ib.item_id ib_item_id, ib.quantity ib_quantity, i.id i_id, i.name i_name, i.color i_color, i.picture i_picture FROM box_group bg LEFT JOIN (box b LEFT JOIN (item_box ib LEFT JOIN item i ON ib.item_id=i.id) ON b.id = ib.box_id) ON bg.id = b.box_group_id WHERE bg.id='" + data + "' ORDER BY b.id ASC", (dat) => { socket.emit("box_group" + data, dat); }); }); });
+    socket.on('getBoxgroup_data', (data) => { sql.recreateDb((db) => { sql.read(db, "SELECT bg.id bg_id, bg.name bg_name, bg.color bg_color, bg.picture bg_picture, bg.location bg_location, b.id b_id, b.name b_name, b.color b_color, b.picture b_picture, ib.item_id ib_item_id, ib.quantity ib_quantity, i.id i_id, i.name i_name, i.color i_color, i.picture i_picture FROM box_group bg LEFT JOIN (box b LEFT JOIN (item_box ib LEFT JOIN item i ON ib.item_id=i.id) ON b.id = ib.box_id) ON bg.id = b.box_group_id WHERE bg.id='" + data + "' ORDER BY b.id ASC", (dat) => { socket.emit("box_group" + data, dat); }); }); });
     socket.on("sql_read", (data) => { sql.recreateDb((db) => { sql.read(db, data, (dat) => { socket.emit("sql_r" + data, dat); }); }); });
     socket.on("sql_insert", (data) => { sql.insert(data[0], data[1], () => { reload_data(); socket.emit("sql_i" + data, true); }); });
     socket.on("in_use_box_node", (data) => { in_use_box_node_data = [...in_use_box_node_data, data]; in_use_box_node_data.forEach((values) => { getbox_node_items(values, socket); }); });
@@ -424,8 +446,12 @@ function addinstruction(data) {
 }
 
 function additem(data) {
-    let dat = [data[0], data[1], data[2], data[5], data[3]];
-    sql.insert("INSERT OR IGNORE INTO item (name, instructions_id, size, total_quantity, color) VALUES (?, ?, ?, ?, ?)", dat, (q) => {
+    let quantity = data[5];
+    if (quantity == null || quantity == "" || quantity == 0 || quantity == NaN) {
+        quantity = 0;
+    }
+    let dat = [data[0], data[1], data[2], quantity, data[3], data[8], data[7]];
+    sql.insert("INSERT OR IGNORE INTO item (name, instructions_id, size, total_quantity, color, price, weight) VALUES (?, ?, ?, ?, ?, ?, ?)", dat, (q) => {
         reload_data();
         if (data[6] != 0) {
             sql.recreateDb((db) => {
@@ -443,9 +469,18 @@ function additem(data) {
         sql.recreateDb((db) => {
             sql.read(db, "SELECT * FROM item WHERE name ='" + data[0] + "'", (datas) => {
                 datas.forEach((values) => {
-                    let dat = [values.id, 1, data[5]];
-                    sql.insert("INSERT OR IGNORE INTO item_box (item_id, box_id, quantity) VALUES (?, ?, ?)", dat, (callback) => {
-                        reload_data();
+                    sql.recreateDb((db) => {
+                        sql.read(db, "SELECT * FROM item_box WHERE item_id ='" + values.id + "' AND Box_id='1'", (d) => {
+                            if (d.length == 0) {
+                                let dat = [values.id, 1, quantity];
+                                sql.insert("INSERT OR IGNORE INTO item_box (item_id, box_id, quantity) VALUES (?, ?, ?)", dat, (callback) => {
+                                    reload_data();
+                                });
+                            } else if (d.length > 1) {
+                                console.log("An error occured");
+                                reload_data();
+                            }
+                        });
                     });
                 });
             });
