@@ -2,8 +2,9 @@ function opentab(evt, tabName) {
     if (evt.currentTarget.classList.contains("active")) {
         evt.currentTarget.className = evt.currentTarget.className.replace(" active", "");
         document.getElementById(tabName).style.display = "none";
+        document.getElementById("edit_box").style.display = "none";
+        document.getElementById("edit_pen_box").href = "";
     } else {
-
         // Declare all variables
         var i, tabcontent, tablinks;
 
@@ -22,6 +23,8 @@ function opentab(evt, tabName) {
         // Show the current tab, and add an "active" class to the button that opened the tab
         document.getElementById(tabName).style.display = "block";
         evt.currentTarget.className += " active";
+        document.getElementById("edit_box").style.display = "block";
+        document.getElementById("edit_pen_box").href = "http://" + location.host + "/box_group&" + evt.currentTarget.getAttribute("data-id");
     }
 }
 
@@ -93,19 +96,44 @@ function init_box_coll(tabc) {
         socket.on("sql_r" + "SELECT * FROM box WHERE box_group_id ='" + tabc.id + "' ORDER BY name ASC", (data) => {
             if (!init_box_coll) {
                 data.forEach((values) => {
-                    let but = document.createElement("button");
-                    but.type = "button";
-                    but.classList.add("collapsible");
-                    but.innerHTML = values.name;
-                    tabc.appendChild(but);
+                    let row4 = document.createElement("div");
+                    row4.classList.add("row");
+                    let col_lg_11 = document.createElement("div");
+                    col_lg_11.classList.add("col-lg-11");
+                    row4.appendChild(col_lg_11);
+                    let p = document.createElement("p");
+                    p.classList.add("collapsible");
+                    p.innerHTML = values.name;
+                    col_lg_11.appendChild(p);
+                    if (values.color != null) {
+                        p.style.backgroundColor = values.color;
+                    } else {
+                        p.style.backgroundColor = "#FFFFFF";
+                    }
+                    tabc.appendChild(row4);
+                    let col_lg_1 = document.createElement("div");
+                    col_lg_1.classList.add("col-lg-1");
+                    col_lg_1.style.transform = "translateY(25%)";
+                    let a = document.createElement("a");
+                    a.href = "http://" + location.host + "/box&" + values.id;
+                    col_lg_1.appendChild(a);
+                    let svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+                    let img = document.createElementNS("http://www.w3.org/2000/svg", 'path'); //Create a path in SVG's namespace
+                    svg.setAttributeNS(null, 'viewBox', "0 0 528.899 528.899");
+                    img.setAttributeNS(null, "d", "M328.883,89.125l107.59,107.589l-272.34,272.34L56.604,361.465L328.883,89.125z M518.113,63.177l-47.981-47.981   c-18.543-18.543-48.653-18.543-67.259,0l-45.961,45.961l107.59,107.59l53.611-53.611   C532.495,100.753,532.495,77.559,518.113,63.177z M0.3,512.69c-1.958,8.812,5.998,16.708,14.811,14.565l119.891-29.069   L27.473,390.597L0.3,512.69z"); //Set path's data
+                    a.appendChild(svg);
+                    svg.style.width = "2rem";
+                    svg.style.height = "2rem";
+                    svg.appendChild(img);
+                    row4.appendChild(col_lg_1);
                     let content = document.createElement("div");
                     content.classList.add("content");
                     content.id = values.name;
                     content.setAttribute("data-id", values.id);
                     content.style.display = "none";
                     tabc.append(content);
-                    init_item_row(content);
-                    init_collapse(but);
+                    init_item_row(content, values);
+                    init_collapse(row4);
                 });
                 init_box_coll = true;
             }
@@ -113,7 +141,7 @@ function init_box_coll(tabc) {
     });
 }
 
-function init_item_row(content) {
+function init_item_row(content, vals) {
     var init_item_row = false;
     var ip = location.host;
     var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
@@ -124,13 +152,14 @@ function init_item_row(content) {
                 data.forEach((values) => {
                     let row = document.createElement("div");
                     row.classList.add("row");
+                    row.classList.add("item");
                     content.appendChild(row);
                     let col_lg_12 = document.createElement("div");
                     col_lg_12.classList.add("col-lg-12");
-                    col_lg_12.id = values.name;
+                    col_lg_12.id = vals.name + "_" + values.name;
                     row.appendChild(col_lg_12);
                     let a = document.createElement("a");
-                    a.id = values.name;
+                    a.id = "link" + vals.name + "_" + values.name;
                     a.href = "http://" + location.host + "/item&" + values.id;
                     a.style.color = "black";
                     a.style.textDecoration = "none";

@@ -71,7 +71,8 @@
                                 <p>(0.0.0.0 is standart for system ip)</p>
                             </div>
                             <div class="col-lg-3">
-                                <textarea id="server_1_ip" style="width: 16rem; height: 3rem;"></textarea>
+                                <input type="text" class="form-input" id="server_1_ip"
+                                    style="width: 16rem; height: 3rem;" name="ipv4" placeholder="xxx.xxx.xxx.xxx" />
                             </div>
                             <div class="col-lg-5">
                                 <p>Note: many ip-confugurations will fail <abbr
@@ -106,7 +107,9 @@
                                             <h4>Server 2 IP:</h4>
                                         </div>
                                         <div class="col-lg-3">
-                                            <textarea id="server_2_ip" style="width: 16rem; height: 3rem;"></textarea>
+                                            <input type="text" class="form-input" id="server_2_ip"
+                                                style="width: 16rem; height: 3rem;" name="ipv4"
+                                                placeholder="xxx.xxx.xxx.xxx" />
                                         </div>
                                         <div class="col-lg-5">
                                             <p>Note: many ip-confugurations will fail <abbr
@@ -127,11 +130,15 @@
                         </div>
                         <div class="row">
                             <div class="col-lg-4"></div>
-                            <div class="col-lg-4">
-                                <button id="save_settings" onclick="setsettings()" style="width: 16rem; height: 3rem;"
-                                    disabled>save</button>
+                            <div class="col-lg-3">
+                                <button id="save_settings" onclick="setsettings()"
+                                    style="width: 16rem; height: 3rem;">save</button>
                             </div>
-                            <div class="col-lg-4"></div>
+                            <div class="col-lg-5">
+                                <p>Note: Some Changes will only apply after restart <abbr
+                                        title="They are probably visible on this site">?</abbr>
+                                </p>
+                            </div>
                             <script type="text/javascript">
                                 window.onload = getsettings();
                             </script>

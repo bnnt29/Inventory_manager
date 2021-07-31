@@ -1,6 +1,4 @@
 .collapsible {
-    background-color: #777;
-    color: white;
     cursor: pointer;
     padding: 1.5rem;
     width: 100%;
@@ -61,6 +59,13 @@
 .tabcontent {
     animation: fadeEffect 1s;
     /* Fading effect takes 1 second */
+}
+
+.item {
+    border-bottom: 1px solid #FFFFFF;
+    border-top: 1px solid #FFFFFF;
+    border-left: none;
+    border-right: none;
 }
 
 /* Go from zero to full opacity */

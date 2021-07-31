@@ -3,7 +3,7 @@
 const { values } = require('underscore');
 
 const sqlite3 = require('sqlite3').verbose();
-const file = "C:/Users/Berni/Documents/inventory_manager/user_data/inventory.db";
+var file = "";
 var db;
 var pages;
 var size_unit;
@@ -103,10 +103,11 @@ function closedbcall(dbn, callback) {
     dbn.close(callback);
 }
 
-function setdata(p, a, b) {
+function setdata(p, a, b, f) {
     pages = p;
     size_unit = a;
     weight_unit = b;
+    file = f + "/inventory.db";
 }
 
 function read(dbn, r, callback) {
@@ -119,7 +120,7 @@ function read(dbn, r, callback) {
 module.exports = function (p, a, db, callback, r) {
     var module = {};
     module.read = function (db, r, callback) { read(db, r, callback) }
-    module.setdata = function (p, a, db) { setdata(p, a, db) };
+    module.setdata = function (p, a, db, callback) { setdata(p, a, db, callback) };
     module.initDB = function (callback) { initDB(callback) };
     module.recreateDb = function (callback) { recreateDb(callback) };
     module.closedb = function (db) { closedb(db) };

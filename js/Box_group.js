@@ -44,37 +44,94 @@ function init_f(id) {
         var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
         socket.on('connect', () => {
             socket.emit('getBoxgroup_data', id);
-            socket.on("box_group" + id, (data) => {
-                if (data.length != 0) {
-                    data.forEach((values) => {
-                        console.log(values);
-                        document.getElementById("box_group_id").innerHTML = values.bg_id;
-                        document.getElementById("box_group_name").innerHTML = values.bg_name;
-                        document.getElementById("box_group_img").alt = values.bg_name;
-                        document.getElementById("box_group_location").innerHTML = values.bg_location;
-                        if (values.bg_picture != null) {
-                            document.getElementById("box_group_img").src = values.bg_picture;
-                            document.getElementById("box_group_picture").innerHTML = values.bg_picture;
-                        } else {
-                            document.getElementById("box_group_picture").innerHTML = "undefined";
-                        }
-                        if (values.bg_color != null) {
-                            document.getElementById("color_row").style.backgroundColor = values.bg_color;
-                            document.getElementById("box_group_color").innerHTML = values.bg_color;
-                            if (values.bg_color === "#ffffff") {
-                                document.getElementById("box_group_color").style.color = "#000000";
-                            } else {
-                                document.getElementById("box_group_color").style.color = values.bg_color;
+            socket.on('getweight_Unit', (dats) => {
+                socket.on("box_group" + id, (data) => {
+                    if (data.length != 0) {
+                        console.log(data);
+                        let weight = 0;
+                        let price = 0;
+                        let bd_ids = [];
+                        document.getElementById("total_items").innerHTML = data.length;
+                        data.forEach((values) => {
+                            if (values.i_weight != null) {
+                                weight += values.i_weight;
                             }
+                            if (!bd_ids.includes(values.b_id)) {
+                                weight += values.b_weight;
+                            }
+                            if (values.i_price != null) {
+                                price += values.i_price;
+                            }
+                            document.getElementById("box_group_id").innerHTML = values.bg_id;
+                            document.getElementById("box_group_name").innerHTML = values.bg_name;
+                            document.getElementById("box_group_img").alt = values.bg_name;
+                            document.getElementById("box_group_location").innerHTML = values.bg_location;
+                            if (values.bg_picture != null) {
+                                document.getElementById("box_group_img").src = values.bg_picture;
+                                document.getElementById("box_group_picture").innerHTML = values.bg_picture;
+                            } else {
+                                document.getElementById("box_group_picture").innerHTML = "undefined";
+                            }
+                            if (values.bg_color != null) {
+                                document.getElementById("color_row").style.backgroundColor = values.bg_color;
+                                document.getElementById("box_group_color").innerHTML = values.bg_color;
+                                if (values.bg_color === "#ffffff") {
+                                    document.getElementById("box_group_color").style.color = "#000000";
+                                } else {
+                                    document.getElementById("box_group_color").style.color = values.bg_color;
+                                }
+                            } else {
+                                document.getElementById("box_group_color").innerHTML = "#000000";
+                            }
+                        });
+                        weight += data[0].b_weight;
+                        let shortest_weight = [];
+                        let units_weight = [];
+                        let b = false;
+                        i = parseFloat(weight);
+                        b = false;
+                        if (dats != null) {
+                            dats.forEach((val) => {
+                                shortest_weight = [...shortest_weight, "" + i / parseFloat(val.multiplicator)];
+                                units_weight = [...units_weight, val];
+                                b = true;
+                            });
                         } else {
-                            document.getElementById("box_group_color").innerHTML = "#000000";
+                            socket.emit('refresh', true);
+                            socket.on('reloaded', (a) => {
+                                socket.on('getweight_Unit', (dats) => {
+                                    if (dats != null) {
+                                        dats.forEach((val) => {
+                                            shortest_weight = [...shortest_weight, "" + i / parseFloat(val.multiplicator)];
+                                            units_weight = [...units_weight, val];
+                                            b = true;
+                                        });
+                                    }
+                                });
+                            });
                         }
-                    });
-                    init_tab_links(data);
-                } else {
-                    document.getElementById("body").style.display = "none";
-                    document.getElementById("html").innerHTML = "The item with the id: " + id + " doesn't exist";
-                }
+                        if (b) {
+                            let unit = 0;
+                            for (let i = 0; i < shortest_weight.length; i++) {
+                                if (shortest_weight[unit].length > shortest_weight[i].length) {
+                                    unit = i;
+                                }
+                            }
+                            document.getElementById("total_weight").innerHTML = i / (parseFloat(dats[unit].multiplicator));
+                            document.getElementById("total_weight_unit").innerHTML = dats[unit].name;
+                        } else {
+                            console.log("Unit konnte nicht geladen werden.");
+                            document.getElementById("total_weight").innerHTML = values.size;
+                            document.getElementById("total_weight_unit").innerHTML = "g";
+                        }
+                        document.getElementById("total_price").innerHTML = price;
+                        document.getElementById("total_box").innerHTML = 0;
+                        init_tab_links(data);
+                    } else {
+                        document.getElementById("body").style.display = "none";
+                        document.getElementById("html").innerHTML = "The item with the id: " + id + " doesn't exist";
+                    }
+                });
             });
         });
     }
@@ -132,6 +189,7 @@ function init_tab_links(data) {
             init_collapse(but);
         }
     });
+    document.getElementById("total_box").innerHTML = bd_ids.length;
 }
 
 function init_item_row(content, values) {

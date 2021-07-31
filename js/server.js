@@ -1,36 +1,39 @@
 "use strict";
 var pages = ["index", "inventory_setup", "sql_add_objects", "settings"];
 var size_unitlist = ["mm", 0.1, "cm", 1, "dm", 10, "m", 100, "km", 1000];
-var weight_unitlist = ["g", 1, "kg", 1000, "t", 1000000];
+var weight_unitlist = ["g", 0.001, "kg", 1, "t", 1000];
 
 var ip_connections = [];
 
 var sql = require("./sql")();
 var fs = require('fs');
 
-var file = preparefile(__dirname + '/../user_data/' + 'settings.txt');
+var file = preparefile(__dirname + '/../' + 'settings.txt');
 
+var ip;
 if (file[1] != "0.0.0.0") {
-    var ip = file[1]
+    ip = file[1]
 } else {
-    var _ = require('underscore'); var ip = _.chain(require('os').networkInterfaces()).values().flatten().filter(function (val) { return (val.family == 'IPv4' && val.internal == false) }).pluck('address').first().value();
+    var _ = require('underscore'); ip = _.chain(require('os').networkInterfaces()).values().flatten().filter(function (val) { return (val.family == 'IPv4' && val.internal == false) }).pluck('address').first().value();
 }
-var ip = "192.168.178.29";
 var http = require('http');
 
-var server_port1 = process.env.PORT || 4466//|| file[2];
+var server_port1 = process.env.PORT || file[2];
 var server_port2 = process.env.PORT || file[5];
 
 var url = require('url');
 
 function preparefile(file) {
     let settings_file = fs.readFileSync(file, "utf-8").toString().split(/\r?\n/);
+    let fileda = [];
     if (settings_file != null) {
         settings_file.forEach(function (s) {
-            if (s.startsWith("//")) remove(settings_file, s);
+            if (s.indexOf("#") != -1) {
+                let f = s.substring(1);
+                fileda = [...fileda, f];
+            }
         });
-        remove(settings_file, "");
-        return settings_file;
+        return fileda;
     } else {
         console.log("Settings file has to be created manually");
     }
@@ -110,7 +113,7 @@ function fserverhandler(req, res) {
         });
 
         if (path.indexOf('default') == -1) {
-            fs.readFile(__dirname + '/../user_data/_img/' + path, function (err, data) {
+            fs.readFile(file[0] + '/_img/' + path, function (err, data) {
                 res.write(data);
                 res.end();
             });
@@ -127,7 +130,7 @@ function fserverhandler(req, res) {
         res.writeHead(202, {
             'Content-Type': 'text/txt'
         });
-        fs.readFile(__dirname + "/../user_data/_txt/" + path, function (err, data) {
+        fs.readFile(file[0] + "/_txt/" + path, function (err, data) {
             res.write(data);
             res.end();
         });
@@ -227,7 +230,7 @@ var boxgroup;
 var boxgroupname;
 var documents = [];
 
-sql.setdata(pages, size_unitlist, weight_unitlist);
+sql.setdata(pages, size_unitlist, weight_unitlist, file[0]);
 sql.initDB(() => { reload_data(); });
 
 function reload_data() {
@@ -325,8 +328,8 @@ function iohandle(socket) {
     socket.on('getfile', (data) => { let a = fs.readFileSync(__dirname + data).toString(); socket.emit("get_f" + data, a); });
     socket.on('getinstructions', (data) => { sql.recreateDb((db) => { sql.read(db, "SELECT * FROM instructions WHERE id='" + data + "'", (dat) => { socket.emit("get_inst" + data, dat); }); }); });
     socket.on('getItem_data', (data) => { sql.recreateDb((db) => { sql.read(db, "SELECT i.name item_name, instructions_id, i.size, i.weight, i.price, i.total_quantity, ib.box_id, b.name box_name, b.box_group_id, bg.name bg_name, bg.location bg_location, b.color box_color, i.color color, i.picture picture, bg.color bg_color, ib.quantity quantity FROM item i LEFT JOIN (item_box ib LEFT JOIN (box b LEFT JOIN box_group bg ON b.box_group_id=bg.id) ON ib.box_id = b.id) ON i.id = ib.item_id WHERE i.id='" + data + "' ORDER BY b.box_group_id ASC", (dat) => { socket.emit("item" + data, dat); }); }); });
-    socket.on('getBox_data', (data) => { sql.recreateDb((db) => { sql.read(db, "SELECT b.id b_id, b.name b_name, b.box_group_id bg_id, b.color b_color, b.picture b_picture, ib.item_id ib_item_id, ib.quantity ib_quantity, i.id i_id, i.name i_name, i.color i_color, i.picture i_picture FROM Box b LEFT JOIN (item_box ib LEFT JOIN item i ON ib.item_id = i.id) ON b.id = ib.box_id WHERE b.id='" + data + "' ORDER BY b.box_group_id ASC", (dat) => { socket.emit("box" + data, dat); }); }); });
-    socket.on('getBoxgroup_data', (data) => { sql.recreateDb((db) => { sql.read(db, "SELECT bg.id bg_id, bg.name bg_name, bg.color bg_color, bg.picture bg_picture, bg.location bg_location, b.id b_id, b.name b_name, b.color b_color, b.picture b_picture, ib.item_id ib_item_id, ib.quantity ib_quantity, i.id i_id, i.name i_name, i.color i_color, i.picture i_picture FROM box_group bg LEFT JOIN (box b LEFT JOIN (item_box ib LEFT JOIN item i ON ib.item_id=i.id) ON b.id = ib.box_id) ON bg.id = b.box_group_id WHERE bg.id='" + data + "' ORDER BY b.id ASC", (dat) => { socket.emit("box_group" + data, dat); }); }); });
+    socket.on('getBox_data', (data) => { sql.recreateDb((db) => { sql.read(db, "SELECT b.weight b_weight, b.id b_id, b.name b_name, b.box_group_id bg_id, b.color b_color, b.picture b_picture, ib.item_id ib_item_id, ib.quantity ib_quantity, i.id i_id, i.name i_name, i.price i_price, i.weight i_weight, i.color i_color, i.picture i_picture FROM Box b LEFT JOIN (item_box ib LEFT JOIN item i ON ib.item_id = i.id) ON b.id = ib.box_id WHERE b.id='" + data + "' ORDER BY b.box_group_id ASC", (dat) => { socket.emit("box" + data, dat); }); }); });
+    socket.on('getBoxgroup_data', (data) => { sql.recreateDb((db) => { sql.read(db, "SELECT bg.id bg_id, bg.name bg_name, bg.color bg_color, bg.picture bg_picture, bg.location bg_location, b.weight b_weight, b.id b_id, b.name b_name, b.color b_color, b.picture b_picture, ib.item_id ib_item_id, ib.quantity ib_quantity, i.id i_id, i.name i_name, i.price i_price, i.weight i_weight, i.color i_color, i.picture i_picture FROM box_group bg LEFT JOIN (box b LEFT JOIN (item_box ib LEFT JOIN item i ON ib.item_id=i.id) ON b.id = ib.box_id) ON bg.id = b.box_group_id WHERE bg.id='" + data + "' ORDER BY b.id ASC", (dat) => { socket.emit("box_group" + data, dat); }); }); });
     socket.on("sql_read", (data) => { sql.recreateDb((db) => { sql.read(db, data, (dat) => { socket.emit("sql_r" + data, dat); }); }); });
     socket.on("sql_insert", (data) => { sql.insert(data[0], data[1], () => { reload_data(); socket.emit("sql_i" + data, true); }); });
     socket.on("in_use_box_node", (data) => { in_use_box_node_data = [...in_use_box_node_data, data]; in_use_box_node_data.forEach((values) => { getbox_node_items(values, socket); }); });
@@ -335,7 +338,7 @@ function iohandle(socket) {
     socket.on('item_data', (data) => { additem(data); socket.emit("successi", true); });
     socket.on('instruction_data', (data) => { addinstruction(data); socket.emit("successinst", true); });
     socket.on('refresh', (data) => { reload_data(); socket.emit('reloaded', data); });
-    socket.on('setsettings', (data) => { setsettings(data); });
+    socket.on('setsettings', (data) => { setsettings(data); socket.emit("setsettings" + data, data); });
     socket.on('disconnect', function () {
     });
 }
@@ -490,25 +493,47 @@ function additem(data) {
 
 function setsettings(data) {
     var setsettings = [
-        (data[0] = !'') ? data[0] : file[0],
-        (data[1] = !'') ? data[1] : file[1],
-        (data[2] = !'') ? data[2] : file[2],
-        (data[3] = !'') ? data[3] : file[3],
-        (data[4] = !'') ? data[4] : file[4],
-        (data[5] = !'') ? data[5] : file[5],];
+        (data[0] != '') ? ((data[0] != null) ? data[0] : file[0]) : file[0],
+        (data[1] != '') ? ((data[1] != null) ? data[1] : file[1]) : file[1],
+        (data[2] != '') ? ((data[2] != null) ? data[2] : file[2]) : file[2],
+        data[3] + "",
+        (data[4] != '') ? ((data[4] != null) ? data[4] : file[4]) : file[4],
+        (data[5] != '') ? ((data[5] != null) ? data[5] : file[5]) : file[5],
+        (data[6] != '') ? ((data[6] != null) ? data[6] : file[6]) : file[6]];
 
-    let settings_file = fs.readFileSync(__dirname + '/../user_data/settings.txt', "utf-8").toString().split(/\r?\n/);
+    let settings_file = fs.readFileSync(__dirname + '/../' + 'settings.txt', "utf-8").toString().split(/\r?\n/);
     let i = 0;
-    console.log(settings_file);
-    console.log(setsettings);
-    settings_file.forEach(function (s) {
-        if (!s.startsWith("//")) {
-            settings_file.splice(i, 1, setsettings[i]);
-            i += 1;
+    let set = settings_file.slice();
+    let a = 0;
+    for (let i = 0; i < set.length; i++) {
+        let s = set[i];
+        if (s.indexOf('#') != -1) {
+            settings_file.splice(i, 1, "#" + setsettings[a]);
+            a += 1;
         }
+    }
+    file = setsettings;
+    sql.setdata(pages, size_unitlist, weight_unitlist, file[0]);
+    server1.close();
+    server2.close();
+    ip_connections = [];
+    server_port1 = process.env.PORT || file[2];
+    server_port2 = process.env.PORT || file[5];
+    server1.listen(server_port1, ip);
+    console.log("Server1 is listening on " + ip + ":" + server_port1);
+    io1.on('connection', (data) => {
+        reload_data();
+        iohandle(data);
     });
-    console.log(settings_file);
-    // fs.writeFile("settings.txt", settings_file, function (err) {
-    //     if (err) throw err;
-    // });
+    if (file[3] === 'true') {
+        server2.listen(server_port2, file[4]);
+        console.log("Server2 is listening on " + file[4] + ":" + server_port2);
+        io2.on('connection', (data) => {
+            reload_data();
+            iohandle(data);
+        });
+    }
+    fs.writeFile(__dirname + '/../' + 'settings.txt', settings_file.join('\r\n'), function (err) {
+        if (err) throw err;
+    });
 }

@@ -30,60 +30,155 @@ function getid(url) {
         return -1;
     }
 }
+
 function init() {
     url = document.URL;
     getid(url);
     init_picture();
 }
+
 function init_f(id) {
     if (id >= 1) {
         var ip = location.host;
         var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
         socket.on('connect', () => {
             socket.emit('getBox_data', id);
-            socket.on("box" + id, (data) => {
-                if (data.length != 0) {
-                    data.forEach((values) => {
-                        document.getElementById("box_id").innerHTML = values.b_id;
-                        document.getElementById("box_name").innerHTML = values.b_name;
-                        document.getElementById("box_img").alt = values.b_name;
-                        socket.emit('getBoxgroup_data', values.bg_id);
-                        socket.on("box_group" + values.bg_id, (datas) => {
-                            datas.some((values) => {
-                                document.getElementById("box_bg").innerHTML = values.bg_name;
-                                document.getElementById("box_bg").href = "http://" + location.host + "/box_group&" + values.bg_id;
-                                return true;
-                            });
-                        });
-                        document.getElementById("box_bg").alt = values.b_name;
-                        if (values.b_picture != null) {
-                            document.getElementById("box_img").src = values.b_picture;
-                            document.getElementById("box_picture").innerHTML = values.b_picture;
-                        } else {
-                            document.getElementById("box_picture").innerHTML = "undefined";
-                        }
-                        if (values.b_color != null) {
-                            document.getElementById("color_row").style.backgroundColor = values.b_color;
-                            document.getElementById("box_color").innerHTML = values.b_color;
-                            if (values.b_color === "#ffffff") {
-                                document.getElementById("box_color").style.color = "#000000";
-                            } else {
-                                document.getElementById("box_color").style.color = values.b_color;
+            socket.on('getweight_Unit', (dats) => {
+                socket.on("box" + id, (data) => {
+                    console.log(data);
+                    if (data.length != 0) {
+                        let weight = 0;
+                        let price = 0;
+                        document.getElementById("total_items").innerHTML = data.length;
+                        data.forEach((values) => {
+                            if (values.i_weight != null) {
+                                weight += values.i_weight;
                             }
+                            if (values.i_price != null) {
+                                price += values.i_price;
+                            }
+                            document.getElementById("box_id").innerHTML = values.b_id;
+                            document.getElementById("box_name").innerHTML = values.b_name;
+                            document.getElementById("box_img").alt = values.b_name;
+                            socket.emit('getBoxgroup_data', values.bg_id);
+                            socket.on("box_group" + values.bg_id, (datas) => {
+                                datas.some((values) => {
+                                    document.getElementById("box_bg").innerHTML = values.bg_name;
+                                    document.getElementById("box_bg").href = "http://" + location.host + "/box_group&" + values.bg_id;
+                                    return true;
+                                });
+                            });
+
+                            let shortest_weight = [];
+                            let units_weight = [];
+                            let b = false;
+                            i = parseFloat(values.b_weight);
+                            b = false;
+                            if (dats != null) {
+                                dats.forEach((val) => {
+                                    shortest_weight = [...shortest_weight, "" + i / parseFloat(val.multiplicator)];
+                                    units_weight = [...units_weight, val];
+                                    b = true;
+                                });
+                            } else {
+                                socket.emit('refresh', true);
+                                socket.on('reloaded', (a) => {
+                                    socket.on('getweight_Unit', (dats) => {
+                                        if (dats != null) {
+                                            dats.forEach((val) => {
+                                                shortest_weight = [...shortest_weight, "" + i / parseFloat(val.multiplicator)];
+                                                units_weight = [...units_weight, val];
+                                                b = true;
+                                            });
+                                        }
+                                    });
+                                });
+                            }
+                            if (b) {
+                                let unit = 0;
+                                for (let i = 0; i < shortest_weight.length; i++) {
+                                    if (shortest_weight[unit].length > shortest_weight[i].length) {
+                                        unit = i;
+                                    }
+                                }
+                                document.getElementById("box_weight").innerHTML = i / (parseFloat(dats[unit].multiplicator));
+                                document.getElementById("box_weight_unit").innerHTML = dats[unit].name;
+                            } else {
+                                console.log("Unit konnte nicht geladen werden.");
+                                document.getElementById("box_weight").innerHTML = values.size;
+                                document.getElementById("box_weight_unit").innerHTML = "g";
+                            }
+
+                            document.getElementById("box_bg").alt = values.b_name;
+                            if (values.b_picture != null) {
+                                document.getElementById("box_img").src = values.b_picture;
+                                document.getElementById("box_picture").innerHTML = values.b_picture;
+                            } else {
+                                document.getElementById("box_picture").innerHTML = "undefined";
+                            }
+                            if (values.b_color != null) {
+                                document.getElementById("color_row").style.backgroundColor = values.b_color;
+                                document.getElementById("box_color").innerHTML = values.b_color;
+                                if (values.b_color === "#ffffff") {
+                                    document.getElementById("box_color").style.color = "#000000";
+                                } else {
+                                    document.getElementById("box_color").style.color = values.b_color;
+                                }
+                            } else {
+                                document.getElementById("box_color").innerHTML = "#000000";
+                            }
+                        })
+                        weight += data[0].b_weight;
+                        let shortest_weight = [];
+                        let units_weight = [];
+                        let b = false;
+                        i = parseFloat(weight);
+                        b = false;
+                        if (dats != null) {
+                            dats.forEach((val) => {
+                                shortest_weight = [...shortest_weight, "" + i / parseFloat(val.multiplicator)];
+                                units_weight = [...units_weight, val];
+                                b = true;
+                            });
                         } else {
-                            document.getElementById("box_color").innerHTML = "#000000";
+                            socket.emit('refresh', true);
+                            socket.on('reloaded', (a) => {
+                                socket.on('getweight_Unit', (dats) => {
+                                    if (dats != null) {
+                                        dats.forEach((val) => {
+                                            shortest_weight = [...shortest_weight, "" + i / parseFloat(val.multiplicator)];
+                                            units_weight = [...units_weight, val];
+                                            b = true;
+                                        });
+                                    }
+                                });
+                            });
                         }
-                    });
-                    init_tab_links(data);
-                } else {
-                    document.getElementById("body").style.display = "none";
-                    document.getElementById("html").innerHTML = "The item with the id: " + id + " doesn't exist";
-                }
+                        if (b) {
+                            let unit = 0;
+                            for (let i = 0; i < shortest_weight.length; i++) {
+                                if (shortest_weight[unit].length > shortest_weight[i].length) {
+                                    unit = i;
+                                }
+                            }
+                            document.getElementById("total_weight").innerHTML = i / (parseFloat(dats[unit].multiplicator));
+                            document.getElementById("total_weight_unit").innerHTML = dats[unit].name;
+                        } else {
+                            console.log("Unit konnte nicht geladen werden.");
+                            document.getElementById("total_weight").innerHTML = values.size;
+                            document.getElementById("total_weight_unit").innerHTML = "g";
+                        }
+                        document.getElementById("total_price").innerHTML = price;
+                        init_tab_links(data);
+                    } else {
+                        document.getElementById("body").style.display = "none";
+                        document.getElementById("html").innerHTML = "The item with the id: " + id + " doesn't exist";
+                    }
+                });
             });
         });
     }
 }
-
 
 function nofile() {
     document.write("opps this doesn't exist - 404  -  (tipp: use /item&[item_id])");
@@ -111,6 +206,7 @@ function init_picture() {
         modal.style.display = "none";
     }
 }
+
 function init_tab_links(data) {
     let bd_ids = [];
     let tabc = document.getElementById("tablinks_div");
@@ -365,5 +461,76 @@ function change_box_picture(a) {
         input.placeholder = "pic";
         document.getElementById("box_picture").style.display = "none";
         document.getElementById("box_picture").parentElement.appendChild(input);
+    }
+}
+
+function change_box_weight(a) {
+    if (a === 'true') {
+        var weight = document.getElementById("box_weight_edit").value;
+        document.getElementById("box_weight").value = weight;
+        document.getElementById("box_weight_edit").value = weight;
+        var unit = document.getElementById("weight_unit").value;
+        document.getElementById("weight_unit").value = "g";
+        if (weight != "") {
+            var ip = location.host;
+            var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
+            socket.on('connect', () => {
+                socket.on('getweight_Unit', (data) => {
+                    data.forEach((values) => {
+                        if (unit === values.name) {
+                            weight = weight * parseFloat(values.multiplicator);
+                            weight = ~~(weight * 1000);
+                            weight = (weight / 1000);
+                            let dat = [];
+                            console.log(weight);
+                            dat = ["UPDATE box SET weight ='" + weight + "' WHERE id = '" + id + "'", dat];
+                            socket.emit("sql_insert", dat);
+                            socket.on("sql_i" + dat, (data) => { location.reload(); });
+                        }
+                    });
+                })
+            });
+        } else {
+            location.reload();
+        }
+    } else {
+        document.getElementById("edit_pen_weight").disabled = true;
+        document.getElementById("edit_pen_weight").style.display = "none";
+        document.getElementById("edit_save_weight").style.display = "block";
+        document.getElementById("edit_save_weight").disabled = false;
+        let input = document.createElement("input");
+        input.type = "number";
+        input.id = "box_weight_edit"
+        input.style.width = "16rem";
+        input.style.height = "3rem";
+        input.title = "box weight";
+        input.placeholder = "0";
+        document.getElementById("box_weight").style.display = "none";
+        document.getElementById("box_weight").parentElement.appendChild(input);
+        var ip = location.host;
+        var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
+        socket.on('connect', () => {
+            socket.on('getweight_Unit', (data) => {
+                let form = document.createElement("form");
+                form.id = "box_unit_edit";
+                let label = document.createElement("label");
+                label.htmlFor = "weight_unit";
+                form.appendChild(label);
+                let select = document.createElement("select");
+                select.id = "weight_unit";
+                select.name = "weight unit";
+                select.style.width = "5rem";
+                select.style.height = "3rem";
+                label.appendChild(select);
+                data.forEach((values) => {
+                    let option = document.createElement("option");
+                    select.appendChild(option);
+                    option.value = values.name;
+                    option.innerHTML = values.name;
+                });
+                document.getElementById("box_weight_unit").style.display = "none";
+                document.getElementById("box_weight_unit").parentElement.appendChild(form);
+            });
+        });
     }
 }
