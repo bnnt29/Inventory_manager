@@ -1,4 +1,3 @@
-"use strict";
 var pages = ["index", "inventory_setup", "sql_add_objects", "settings"];
 var size_unitlist = ["mm", 0.1, "cm", 1, "dm", 10, "m", 100, "km", 1000];
 var weight_unitlist = ["g", 0.001, "kg", 1, "t", 1000];
@@ -17,6 +16,7 @@ if (file[1] != "0.0.0.0") {
     var _ = require('underscore'); ip = _.chain(require('os').networkInterfaces()).values().flatten().filter(function (val) { return (val.family == 'IPv4' && val.internal == false) }).pluck('address').first().value();
 }
 var http = require('http');
+const ConnectionConfig = require("mysql/lib/ConnectionConfig");
 
 var server_port1 = process.env.PORT || file[2];
 var server_port2 = process.env.PORT || file[5];
@@ -352,8 +352,8 @@ function getbox_node_items(values, socket) {
 }
 
 function addbox(data) {
-    let d = [data[0], data[1], data[3]];
-    sql.insert("INSERT OR IGNORE INTO box (name, box_group_id, color) VALUES (?, ?, ?)", d, (callback) => {
+    let d = [data[0], data[1], data[3], data[6]];
+    sql.insert("INSERT OR IGNORE INTO box (name, box_group_id, color, weight) VALUES (?, ?, ?, ?)", d, (callback) => {
         sql.recreateDb((db) => {
             sql.read(db, "SELECT * FROM box WHERE name = '" + data[0] + "'", (da) => {
                 var b = false;
@@ -378,10 +378,10 @@ function addbox(data) {
                         b = true;
                     }
                     if (data[5] != 0) {
-                        fs.writeFile(__dirname + "/../user_data/_img/" + "box&" + values.id + ".jpg", Buffer.from(data[4][0]), function (err) {
+                        fs.writeFile(__dirname + "/../user_data/_img/" + "box?b=" + values.id + ".jpg", Buffer.from(data[4][0]), function (err) {
                             if (err) throw err;
                             let da = [];
-                            sql.insert("UPDATE box SET picture ='" + "box&" + values.id + ".jpg" + "' WHERE id = '" + values.id + "'", da, (w) => { });
+                            sql.insert("UPDATE box SET picture ='" + "box?b=" + values.id + ".jpg" + "' WHERE id = '" + values.id + "'", da, (w) => { });
                         });
                     }
                 });
@@ -407,10 +407,10 @@ function addboxgroup(data) {
                         b = true;
                     }
                     if (data[5] != 0) {
-                        fs.writeFile(__dirname + "/../user_data/_img/" + "boxgroup&" + values.id + ".jpg", Buffer.from(data[4][0]), function (err) {
+                        fs.writeFile(__dirname + "/../user_data/_img/" + "boxgroup?bg=" + values.id + ".jpg", Buffer.from(data[4][0]), function (err) {
                             if (err) throw err;
                             let da = [];
-                            sql.insert("UPDATE box SET picture ='" + "boxgroup&" + values.id + ".jpg" + "' WHERE id = '" + values.id + "'", da, (w) => { });
+                            sql.insert("UPDATE box SET picture ='" + "boxgroup?bg=" + values.id + ".jpg" + "' WHERE id = '" + values.id + "'", da, (w) => { });
                         });
                     }
                 });
@@ -460,10 +460,10 @@ function additem(data) {
             sql.recreateDb((db) => {
                 sql.read(db, "SELECT * FROM item WHERE name ='" + data[0] + "'", (datas) => {
                     datas.forEach((values) => {
-                        fs.writeFile(__dirname + "/../user_data/_img/" + "item&" + values.id + ".jpg", Buffer.from(data[4][0]), function (err) {
+                        fs.writeFile(__dirname + "/../user_data/_img/" + "item?i=" + values.id + ".jpg", Buffer.from(data[4][0]), function (err) {
                             if (err) throw err;
                             let da = [];
-                            sql.insert("UPDATE item SET picture ='" + "item&" + values.id + ".jpg" + "' WHERE id = '" + values.id + "'", da, (w) => { });
+                            sql.insert("UPDATE item SET picture ='" + "item?i=" + values.id + ".jpg" + "' WHERE id = '" + values.id + "'", da, (w) => { });
                         });
                     });
                 });

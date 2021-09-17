@@ -1,24 +1,22 @@
+var urlp = []; if (location.toString().indexOf('?') != -1) { s = location.toString().split('?'); s = s[1].split('&'); for (i = 0; i < s.length; i++) { if (s[i].indexOf('=') != -1) { u = s[i].split('='); urlp[u[0]] = u[1]; } else { urlp[s[i]] = ""; } } }
 var url = document.URL;
 var id = -1;
 
-function getid(url) {
-    if (url.indexOf("&") != -1) {
-        if (!isNaN(url.substring(url.indexOf("&") + 1, url.length))) {
-            ids = url.substring(url.indexOf("&") + 1, url.length);
-            id = parseInt(ids);
-            init_f(id);
-            return id;
-        }
-    } else if (url.indexOf("+") != -1) {
+function getid() {
+    if ((parseInt(urlp['id']) != null || urlp['id'] != "")&& parseInt(urlp['id']) >= 0) {
+        id = parseInt(urlp['id']);
+        init_f(id);
+        return id;
+    } else if (urlp['n'] != "" || urlp['n'] != null || urlp['name'] != "" || urlp['name'] != null) {
         var ip = location.host;
         var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
         socket.on('connect', () => {
-            let dat = url.substring(url.indexOf("+") + 1, url.length);
+            let dat = urlp['n'] || urlp['name'];
             dat = "SELECT * FROM box_group WHERE name='" + dat + "'";
             socket.emit('sql_read', dat);
             socket.on("sql_r" + dat, (data) => {
                 data.forEach((values) => {
-                    if (values.name == url.substring(url.indexOf("+") + 1, url.length)) {
+                    if (values.name === urlp['n'] || values.name === urlp['name']) {
                         id = values.id;
                         init_f(id);
                         return id;
@@ -33,8 +31,7 @@ function getid(url) {
 }
 
 function init() {
-    url = document.URL;
-    getid(url);
+    getid();
     init_picture();
 }
 
@@ -138,7 +135,7 @@ function init_f(id) {
 }
 
 function nofile() {
-    document.write("opps this doesn't exist - 404  -  (tipp: use /item&[item_id])");
+    document.write("opps this doesn't exist - 404  -  (tipp: use /box_group?id=[item_id])");
 }
 
 function init_picture() {
@@ -198,7 +195,7 @@ function init_item_row(content, values) {
     row.classList.add("row");
     content.appendChild(row);
     let a = document.createElement("a");
-    a.href = 'http://' + location.host + '/item&' + values.i_id;
+    a.href = 'http://' + location.host + '/item?id=' + values.i_id;
     if (values.i_color === "#ffffff") {
         a.style.color = "#000000";
     } else {
@@ -373,8 +370,8 @@ function change_box_group_picture(a) {
             var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
             socket.on('connect', () => {
                 let dat = [];
-                socket.emit('setpicture', ['boxgroup&' + id + '.jpg', pic[0]]);
-                dat = ["UPDATE box_group SET picture ='" + "boxgroup&" + id + ".jpg" + "' WHERE id = '" + id + "'", dat];
+                socket.emit('setpicture', ['boxgroup?id=' + id + '.jpg', pic[0]]);
+                dat = ["UPDATE box_group SET picture ='" + "boxgroup?id=" + id + ".jpg" + "' WHERE id = '" + id + "'", dat];
                 socket.emit("sql_insert", dat);
                 socket.on("sql_i" + dat, (data) => { location.reload(); });
             });

@@ -24,7 +24,7 @@ function opentab(evt, tabName) {
         document.getElementById(tabName).style.display = "block";
         evt.currentTarget.className += " active";
         document.getElementById("edit_box").style.display = "block";
-        document.getElementById("edit_pen_box").href = "http://" + location.host + "/box_group&" + evt.currentTarget.getAttribute("data-id");
+        document.getElementById("edit_pen_box").href = "http://" + location.host + "/box_group?id=" + evt.currentTarget.getAttribute("data-id");
     }
 }
 
@@ -115,7 +115,7 @@ function init_box_coll(tabc) {
                     col_lg_1.classList.add("col-lg-1");
                     col_lg_1.style.transform = "translateY(25%)";
                     let a = document.createElement("a");
-                    a.href = "http://" + location.host + "/box&" + values.id;
+                    a.href = "http://" + location.host + "/box?id=" + values.id;
                     col_lg_1.appendChild(a);
                     let svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
                     let img = document.createElementNS("http://www.w3.org/2000/svg", 'path'); //Create a path in SVG's namespace
@@ -160,7 +160,7 @@ function init_item_row(content, vals) {
                     row.appendChild(col_lg_12);
                     let a = document.createElement("a");
                     a.id = "link" + vals.name + "_" + values.name;
-                    a.href = "http://" + location.host + "/item&" + values.id;
+                    a.href = "http://" + location.host + "/item?id=" + values.id;
                     a.style.color = "black";
                     a.style.textDecoration = "none";
                     col_lg_12.appendChild(a);

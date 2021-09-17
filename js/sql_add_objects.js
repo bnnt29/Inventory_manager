@@ -223,11 +223,16 @@ function getUnit() {
         socket.on('getweight_Unit', (data) => {
             if (!unit_get_weight) {
                 data.forEach(function (values) {
-                    let parent = document.getElementById("unit_weight");
-                    let option = document.createElement("option");
-                    parent.appendChild(option);
-                    option.value = values.name;
-                    option.innerHTML = values.name;
+                    let parent1 = document.getElementById("unit_weight");
+                    let parent2 = document.getElementById("unit_box_weight");
+                    let option1 = document.createElement("option");
+                    parent1.appendChild(option1);
+                    option1.value = values.name;
+                    option1.innerHTML = values.name;
+                    let option2 = document.createElement("option");
+                    parent2.appendChild(option2);
+                    option2.value = values.name;
+                    option2.innerHTML = values.name;
                 });
                 unit_get_weight = true;
             }
@@ -270,7 +275,6 @@ function additem() {
     document.getElementById("unit_weight").value = "g";
     var price = parseFloat(document.getElementById("item_price").value);
     document.getElementById("item_price").value = "";
-    console.log("1" + ", " + quantity);
     if (name != "") {
         var ip = location.host;
         var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
@@ -300,6 +304,10 @@ function addbox(a) {
     document.getElementById("box_name").value = "";
     var box_group = parseInt(document.getElementById("box_group_select").value);
     document.getElementById("box_group_select").value = "Choose";
+    var weight = parseFloat(document.getElementById("box_weight").value);
+    document.getElementById("box_weight").value = "";
+    var unit_weight = document.getElementById("unit_box_weight").value;
+    document.getElementById("unit_box_weight").value = "g";
     if (box_group == "Choose" || box_group == null) {
         box_group = 1;
     }
@@ -342,9 +350,16 @@ function addbox(a) {
         var ip = location.host;
         var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
         socket.on('connect', () => {
-            socket.emit('box_data', [name, box_group, itemlist, color, pic, pic.length]);
-            socket.on("successb", (data) => { document.getElementById("box_pic_f").reset(); location.reload(); });
-        });
+            socket.on('getweight_Unit', (dat) => {
+                dat.forEach((values) => {
+                    if (unit_weight === values.name) {
+                        weight = weight * parseFloat(values.multiplicator);
+                    }
+                });
+                socket.emit('box_data', [name, box_group, itemlist, color, pic, pic.length, weight]);
+                socket.on("successb", (data) => { document.getElementById("box_pic_f").reset(); location.reload(); });
+            });
+        })
     }
 }
 
