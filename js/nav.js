@@ -6,6 +6,7 @@ function nav_items() {
     socket.on('connect', () => {
         socket.on('html', (data) => {
             if (data != null) {
+                console.log(data);
                 if (!nav_set) {
                     data.forEach(function (row) {
                         var body = document.createElement("li");
@@ -22,9 +23,10 @@ function nav_items() {
                     nav_set = true;
                 }
             } else {
-                socket.emit('refresh', "nav");
-                socket.on('reloaded', (datas) => {
-                    socket.on('html', (data) => { if (data != null) { consolo.log(data); nav_items(); } else { console.log("reload not successfull"); location.reload; } });
+                var ip = location.host;
+                var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
+                socket.on('connect', () => {
+                    socket.on('html', (data) => { if (data != null) { console.log(data); nav_items(); } else { console.log("reload not successfull"); location.reload; } });
                 });
             }
         });
