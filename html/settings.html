@@ -16,7 +16,7 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
-    <link rel="stylesheet" src="../_settings.css" />
+    <link rel="stylesheet" href="settings.css" type="text/css" />
     <script type="text/javascript" src="settings.js"></script>
     <title>Settings</title>
 </head>
@@ -54,60 +54,37 @@
                     </script>
                 </div>
             </div>
-            <div class="col-lg-8">
-                <div class="row" style="margin-top: 1rem; margin-bottom: 1rem;">
+            <div class="col-lg-9" style="margin-top: 2rem; margin-bottom: 2rem;">
+                <div class="row">
                     <div class="col-lg-12">
-                        <div class="row">
-                            <div class="col-lg-4">
-                                <h4>local Database location:</h4>
-                            </div>
-                            <div class="col-lg-8">
-                                <textarea id="database_location" style="width: 16rem; height: 3rem;"></textarea>
-                            </div>
+                        <!-- Tab links -->
+                        <div class="tab">
+                            <button class="tablinks" onclick="opentab(event, 'main')" id="defaultOpen">Settings</button>
+                            <button class="tablinks" onclick="opentab(event, 'user')">User</button>
                         </div>
-                        <div class="row">
-                            <div class="col-lg-4">
-                                <h4>Server 1 IP:</h4>
-                                <p>(0.0.0.0 is standart for system ip)</p>
-                            </div>
-                            <div class="col-lg-3">
-                                <input type="text" class="form-input" id="server_1_ip"
-                                    style="width: 16rem; height: 3rem;" name="ipv4" placeholder="xxx.xxx.xxx.xxx" />
-                            </div>
-                            <div class="col-lg-5">
-                                <p>Note: many ip-confugurations will fail <abbr
-                                        title="Change this may result in a fatal error. The ip then has to be configured manually at: [file_location]">?</abbr>
-                                </p>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-lg-4">
-                                <h4>Server 1 Port:</h4>
-                            </div>
-                            <div class="col-lg-8">
-                                <textarea id="server_1_port" style="width: 16rem; height: 3rem;"></textarea>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-lg-4">
-                                <h4>Server 2 Use:</h4>
-                            </div>
-                            <div class="col-lg-8">
-                                <input name="collapseGroup" type="radio" value="true" id="server_2_use_true"
-                                    style="margin-right: 0.5rem;" onclick="toggle(true)" />enabled
-                                <input name="collapseGroup" type="radio" value="false" id="server_2_use_false"
-                                    style="margin-right: 0.5rem; margin-left: 1rem;" onclick="toggle(false)" />disabled
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-lg-12">
-                                <div id="collapseOne">
+                    </div>
+                </div>
+                <div class="row" style="margin-bottom: 2rem;">
+                    <div class="col-lg-12">
+                        <!-- Tab content -->
+                        <div id="main" class="tabcontent">
+                            <div class="row" style="margin-top: 1rem; margin-bottom: 1rem;">
+                                <div class="col-lg-12">
                                     <div class="row">
                                         <div class="col-lg-4">
-                                            <h4>Server 2 IP:</h4>
+                                            <h4>local Database location:</h4>
+                                        </div>
+                                        <div class="col-lg-8">
+                                            <input id="database_location" style="width: 16rem; height: 3rem;"></input>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-lg-4">
+                                            <h4>Server 1 IP:</h4>
+                                            <p>(0.0.0.0 is standart for system ip)</p>
                                         </div>
                                         <div class="col-lg-3">
-                                            <input type="text" class="form-input" id="server_2_ip"
+                                            <input type="text" class="form-input" id="server_1_ip"
                                                 style="width: 16rem; height: 3rem;" name="ipv4"
                                                 placeholder="xxx.xxx.xxx.xxx" />
                                         </div>
@@ -119,74 +96,127 @@
                                     </div>
                                     <div class="row">
                                         <div class="col-lg-4">
-                                            <h4>Server 2 Port:</h4>
+                                            <h4>Server 1 Port:</h4>
                                         </div>
                                         <div class="col-lg-8">
-                                            <textarea id="server_2_port" style="width: 16rem; height: 3rem;"></textarea>
+                                            <input id="server_1_port" style="width: 16rem; height: 3rem;"></input>
                                         </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-lg-4">
+                                            <h4>Server 2 Use:</h4>
+                                        </div>
+                                        <div class="col-lg-8">
+                                            <input name="collapseGroup" type="radio" value="true" id="server_2_use_true"
+                                                style="margin-right: 0.5rem;" onclick="toggle(true)" />enabled
+                                            <input name="collapseGroup" type="radio" value="false"
+                                                id="server_2_use_false" style="margin-right: 0.5rem; margin-left: 1rem;"
+                                                onclick="toggle(false)" />disabled
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-lg-12">
+                                            <div id="collapseOne">
+                                                <div class="row">
+                                                    <div class="col-lg-4">
+                                                        <h4>Server 2 IP:</h4>
+                                                    </div>
+                                                    <div class="col-lg-3">
+                                                        <input type="text" class="form-input" id="server_2_ip"
+                                                            style="width: 16rem; height: 3rem;" name="ipv4"
+                                                            placeholder="xxx.xxx.xxx.xxx" />
+                                                    </div>
+                                                    <div class="col-lg-5">
+                                                        <p>Note: many ip-confugurations will fail <abbr
+                                                                title="Change this may result in a fatal error. The ip then has to be configured manually at: [file_location]">?</abbr>
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-lg-4">
+                                                        <h4>Server 2 Port:</h4>
+                                                    </div>
+                                                    <div class="col-lg-8">
+                                                        <input id="server_2_port"
+                                                            style="width: 16rem; height: 3rem;"></input>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-lg-4"></div>
+                                        <div class="col-lg-3">
+                                            <button id="save_settings" onclick="setsettings()"
+                                                style="width: 16rem; height: 3rem;">save</button>
+                                        </div>
+                                        <div class="col-lg-5">
+                                            <p>Note: Some Changes will only apply after restart <abbr
+                                                    title="They are probably visible on this site">?</abbr>
+                                            </p>
+                                        </div>
+                                        <script type="text/javascript">
+                                            window.onload = getsettings();
+                                        </script>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="row">
-                            <div class="col-lg-4"></div>
-                            <div class="col-lg-3">
-                                <button id="save_settings" onclick="setsettings()"
-                                    style="width: 16rem; height: 3rem;">save</button>
-                            </div>
-                            <div class="col-lg-5">
-                                <p>Note: Some Changes will only apply after restart <abbr
-                                        title="They are probably visible on this site">?</abbr>
-                                </p>
-                            </div>
+                        <div id="user" class="tabcontent">
                             <script type="text/javascript">
-                                window.onload = getsettings();
+                                window.onload = getusers();
                             </script>
+                            <div class="row">
+                                <div class="col-lg-12" id="user_container">
+
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="col-lg-2">
-
-            </div>
         </div>
-    </div>
-    <!-- footer -->
-    <div class="row" style="background-color: burlywood; padding-bottom: 1rem;">
-        <div class="col-lg-6">
-            <div class="row">
-                <div class="col">
-                    <h4 style="text-align: center;">credits</h4>
+        <!-- footer -->
+        <div class="row" style="background-color: burlywood; padding-bottom: 1rem;">
+            <div class="col-lg-6">
+                <div class="row">
+                    <div class="col">
+                        <h4 style="text-align: center;">credits</h4>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <p style="text-align: center;">created by Bennet Richter</p>
+                    </div>
                 </div>
             </div>
-            <div class="row">
-                <div class="col">
-                    <p style="text-align: center;">created by Bennet Richter</p>
+            <div class="col-lg-6">
+                <div class="row">
+                    <div class="col">
+                        <h4 style="text-align: center;">help</h4>
+                    </div>
                 </div>
-            </div>
-        </div>
-        <div class="col-lg-6">
-            <div class="row">
-                <div class="col">
-                    <h4 style="text-align: center;">help</h4>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col">
-                    <a href="https://github.com/bnnt29/Inventory_manager" target="_blank"
-                        style="text-align: center; display: block;">
-                        <svg class="octicon octicon-mark-github v-align-middle" height="32" viewBox="0 0 16 16"
-                            version="1.1" width="32" aria-hidden="true">
-                            <path fill-rule="evenodd"
-                                d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z">
-                            </path>
-                        </svg>
-                        Github</a>
+                <div class="row">
+                    <div class="col">
+                        <a href="https://github.com/bnnt29/Inventory_manager" target="_blank"
+                            style="text-align: center; display: block;">
+                            <svg class="octicon octicon-mark-github v-align-middle" height="32" viewBox="0 0 16 16"
+                                version="1.1" width="32" aria-hidden="true">
+                                <path fill-rule="evenodd"
+                                    d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z">
+                                </path>
+                            </svg>
+                            Github</a>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-    <!-- footer -->
+        <script type="text/javascript">
+            // Get the element with id="defaultOpen" and click on it
+            document.getElementById("defaultOpen").click();
+        </script>
+        <script>history.navigationMode = 'compatible';</script>
+        <!-- footer -->
     </div>
     <!--Bootstrap JS-->
     <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"

@@ -16,7 +16,7 @@ item question mark, only default items can be changed
 /item change picture / color
 
 /folder for user content
-settings change folder path instead if db path
+/settings change folder path instead if db path
 
 german language support
     settings
@@ -30,5 +30,5 @@ put styles in css
 /        expandable list (box)
 /            clickable list (item)
 
-rename sql_ad_objects to add / create objects 
-    generell rename of html etc. files
+/rename sql_ad_objects to add / create objects 
+/    generell rename of html etc. files

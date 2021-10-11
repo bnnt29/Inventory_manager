@@ -900,3 +900,24 @@ function change_item_picture(a) {
         document.getElementById("item_picture").parentElement.appendChild(input);
     }
 }
+
+function del() {
+    var ip = location.host;
+    var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
+    socket.on('connect', () => {
+        socket.emit('getItem_data', id);
+        socket.on("item" + id, (data) => {
+            let person = prompt("Please Confirm to continue deleting the following object: Item " + id + ", name " + data.name + ", by typing the id");
+            if (person != null && parseInt(person) === id) {
+                socket.emit("sql_delete", "DELETE FROM item WHERE item.id=" + id + "" + ";");
+                socket.on("sql_d" + "DELETE FROM item WHERE item.id=" + id + "" + ";", (data) => {
+                    if (data) {
+                        location.href = "/index";
+                    }
+                });
+            } else {
+                location.reload();
+            }
+        });
+    });
+}

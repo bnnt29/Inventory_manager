@@ -3,7 +3,7 @@
 //Database_file_location:
 #C:/Users/Berni/Documents/inventory_manager/user_data
 
-//where the Database is saved or located
+//where the Database, pictures and instructions are saved or located
 
 //note: many ip configurations will fail
 

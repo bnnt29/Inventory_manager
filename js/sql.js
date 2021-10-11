@@ -12,6 +12,7 @@ var weight_unit;
 
 function createDb() {
     db = new sqlite3.Database(file, createTables);
+    console.log("database connected");
 }
 
 function recreateDb(callback) {
@@ -22,14 +23,14 @@ function createTables() {
     //console.log("createTable box");
     db.run("CREATE TABLE IF NOT EXISTS box (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE, name STRING (200) NOT NULL UNIQUE, box_group_id INTEGER (100) REFERENCES box_group (id), color STRING (200), picture STRING (200), weight INTEGER (100));");
     db.run("CREATE TABLE IF NOT EXISTS box_group (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE, name STRING (100) NOT NULL UNIQUE, location STRING (100), color STRING (200), picture STRING (200));");
-    db.run("CREATE TABLE IF NOT EXISTS in_use (item_id INTEGER  NOT NULL REFERENCES item (id), box_id   INTEGER (100) NOT NULL REFERENCES box (id), quantity INTEGER (100) NOT NULL, notes STRING (100));");
+    db.run("CREATE TABLE IF NOT EXISTS in_use (item_id INTEGER  NOT NULL REFERENCES item (id), box_id   INTEGER (100) NOT NULL REFERENCES box (id), location STRING (100), quantity INTEGER (100) NOT NULL, notes STRING (100));");
     db.run("CREATE TABLE IF NOT EXISTS instructions (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE, name STRING (100) NOT NULL UNIQUE, document STRING (200) UNIQUE);");
     db.run("CREATE TABLE IF NOT EXISTS item (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE, name STRING (100) NOT NULL UNIQUE, instructions_id INTEGER (100) REFERENCES instructions (id), size INTEGER (100), total_quantity INTEGER (100) NOT NULL, color STRING (200), picture STRING (200), price INTEGER (100), weight INTEGER (100));");
     db.run("CREATE TABLE IF NOT EXISTS item_box (item_id INTEGER NOT NULL REFERENCES item (id), box_id INTEGER (100) REFERENCES box (id) NOT NULL, quantity INTEGER (100) NOT NULL);");
     db.run("CREATE TABLE IF NOT EXISTS event (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE, item_id INTEGER NOT NULL REFERENCES item (id), quantity INTEGER (100) NOT NULL);");
     db.run("CREATE TABLE IF NOT EXISTS HTML_pages (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE, name STRING (100) NOT NULL UNIQUE, path STRING (200) NOT NULL UNIQUE, position INTEGER (100)  NOT NULL);");
-    db.run("CREATE TABLE IF NOT EXISTS Userpages (HTML_id INTEGER NOT NULL REFERENCES HTML_pages (id), User INTEGER NOT NULL REFERENCES User (id));");
-    db.run("CREATE TABLE IF NOT EXISTS User (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE, name STRING (100) NOT NULL UNIQUE, password STRING (100));");
+    db.run("CREATE TABLE IF NOT EXISTS Userpages (HTML_name STRING NOT NULL REFERENCES HTML_pages (name), User INTEGER NOT NULL REFERENCES User (id));");
+    db.run("CREATE TABLE IF NOT EXISTS User (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE, name STRING (100) NOT NULL UNIQUE, password STRING (100), level INTEGER (100), canchangeIV INTEGER (100));");
     db.run("CREATE TABLE IF NOT EXISTS size_unit (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE, name STRING (100) NOT NULL UNIQUE, multiplicator INTEGER (100) NOT NULL);");
     db.run("CREATE TABLE IF NOT EXISTS weight_unit (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE, name STRING (100) NOT NULL UNIQUE, multiplicator INTEGER (100) NOT NULL);", closeDb(false, db));
 }
@@ -58,7 +59,13 @@ function insertunit() {
 function insertdefaults() {
     insert("INSERT OR IGNORE INTO box_group (id, name, location, color) VALUES (?, ?, ?, ?)", [1, "default", "somewhere", "#FFFFFF"], (values) => {
         insert("INSERT OR IGNORE INTO box (id, name, box_group_id, color) VALUES (?, ?, ?, ?)", [1, "default", 1, "#FFFFFF"], (values) => {
-            return;
+            insert("INSERT OR IGNORE INTO User (id, name, password, level, canchangeIV) VALUES (?, ?, ?, ?, ?)", [1, "admin", "", "0", "1"], (values) => {
+                insert("INSERT OR IGNORE INTO User (id, name, password, level, canchangeIV) VALUES (?, ?, ?, ?, ?)", [2, "standard", "", "1", "0"], (values) => {
+                    insert("INSERT OR IGNORE INTO Userpages (HTML_name, User) VALUES (?, ?)", ["settings", 2], (values) => {
+                        return;
+                    });
+                });
+            });
         });
     });
 }
@@ -67,6 +74,14 @@ function insert(r, data, callback) {
     recreateDb(function (db) {
         var stmt = db.prepare(r);
         stmt.run(...data);
+        stmt.finalize(() => { closedb(db); callback(true); });
+    });
+}
+
+function deletesql(r, callback) {
+    recreateDb(function (db) {
+        var stmt = db.prepare(r);
+        stmt.run();
         stmt.finalize(() => { closedb(db); callback(true); });
     });
 }
@@ -124,6 +139,7 @@ module.exports = function (p, a, db, callback, r) {
     module.initDB = function (callback) { initDB(callback) };
     module.recreateDb = function (callback) { recreateDb(callback) };
     module.closedb = function (db) { closedb(db) };
-    module.insert = function (p, a, callback) { insert(p, a, callback) };
+    module.insert = function (p, a, db) { insert(p, a, db) };
+    module.delete = function (p, a) { deletesql(p, a); }
     return module;
 };

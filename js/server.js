@@ -1,8 +1,10 @@
-var pages = ["index", "inventory_setup", "sql_add_objects", "settings"];
+var pages = ["index", "inventory_setup", "add_objects", "settings"];
 var size_unitlist = ["mm", 0.1, "cm", 1, "dm", 10, "m", 100, "km", 1000];
 var weight_unitlist = ["g", 0.001, "kg", 1, "t", 1000];
 
 var ip_connections = [];
+
+var user = [];
 
 var sql = require("./sql")();
 var fs = require('fs');
@@ -16,7 +18,6 @@ if (file[1] != "0.0.0.0") {
     var _ = require('underscore'); ip = _.chain(require('os').networkInterfaces()).values().flatten().filter(function (val) { return (val.family == 'IPv4' && val.internal == false) }).pluck('address').first().value();
 }
 var http = require('http');
-const ConnectionConfig = require("mysql/lib/ConnectionConfig");
 
 var server_port1 = process.env.PORT || file[2];
 var server_port2 = process.env.PORT || file[5];
@@ -51,6 +52,11 @@ function remove(arr, what) {
 function fserverhandler(req, res) {
     var path = url.parse(req.url).pathname;
 
+    // if (temporary) {
+    //     username = "standard";
+    //     password = "12345";
+    // }
+
     if (path != '') {
         let tmp = path.split('');
         tmp = tmp.slice(1, path.length);
@@ -74,15 +80,17 @@ function fserverhandler(req, res) {
                 let page = pages[i];
                 if (page == path || page + '.html' == path) {
                     if (!pageset) {
-                        pageset = true;
-                        fs.readFile(__dirname + '/../html/' + page + '.html', function (error, data) {
-                            if (error) console.error(error);
-                            res.writeHead(200, {
-                                'Content-Type': 'text/html'
+                        if (openprompt(page, res, req)) {
+                            pageset = true;
+                            fs.readFile(__dirname + '/../html/' + page + '.html', function (error, data) {
+                                if (error) console.error(error);
+                                res.writeHead(200, {
+                                    'Content-Type': 'text/html'
+                                });
+                                res.write(data);
+                                res.end();
                             });
-                            res.write(data);
-                            res.end();
-                        });
+                        }
                     }
                 }
             }
@@ -217,6 +225,15 @@ if (file[3] === 'true') {
         iohandle(data);
     });
 }
+function openprompt(page, res, req) {
+    // fs.readFile(__dirname + '/../html/' + "prompt" + '.html', function (err, data) {
+    //     if (err) console.log(err);
+    //     res.writeHead(200, { 'Content-Type': 'text/html' });
+    //     res.write(data);
+    //     res.end();
+    // });
+    return true;
+}
 
 var html;
 var instructions;
@@ -229,11 +246,18 @@ var unused_box;
 var boxgroup;
 var boxgroupname;
 var documents = [];
+var Users;
 
 sql.setdata(pages, size_unitlist, weight_unitlist, file[0]);
 sql.initDB(() => { reload_data(); });
 
 function reload_data() {
+
+    sql.recreateDb(function (data) {
+        sql.read(data, "SELECT * FROM User LEFT JOIN (Userpages LEFT JOIN HTML_pages ON Userpages.HTML_name=HTML_pages.name) ON User.id = Userpages.User", function (data) {
+            Users = data;
+        })
+    });
 
     sql.recreateDb(function (data) {
         sql.read(data, "SELECT * FROM box_group", function (data) {
@@ -323,6 +347,9 @@ function iohandle(socket) {
     socket.emit('getsize_Unit', size_unit);
     socket.emit('getweight_Unit', weight_unit);
     socket.emit('getdocuments', documents);
+    socket.on('login', (data) => {
+        //TODO
+    });
     socket.on('setpicture', (data) => { fs.writeFile(__dirname + "/../user_data/_img/" + data[0], Buffer.from(data[1]), function (err) { if (err) throw err; socket.emit("set_p" + data, true); }); });
     socket.on('setfile', (data) => { fs.writeFile(__dirname + "/../user_data/_txt/" + data[0], Buffer.from(data[1]), function (err) { if (err) throw err; socket.emit("set_f" + data, true); }); });
     socket.on('getfile', (data) => { let a = fs.readFileSync(__dirname + data).toString(); socket.emit("get_f" + data, a); });
@@ -332,15 +359,50 @@ function iohandle(socket) {
     socket.on('getBoxgroup_data', (data) => { sql.recreateDb((db) => { sql.read(db, "SELECT bg.id bg_id, bg.name bg_name, bg.color bg_color, bg.picture bg_picture, bg.location bg_location, b.weight b_weight, b.id b_id, b.name b_name, b.color b_color, b.picture b_picture, ib.item_id ib_item_id, ib.quantity ib_quantity, i.id i_id, i.name i_name, i.price i_price, i.weight i_weight, i.color i_color, i.picture i_picture FROM box_group bg LEFT JOIN (box b LEFT JOIN (item_box ib LEFT JOIN item i ON ib.item_id=i.id) ON b.id = ib.box_id) ON bg.id = b.box_group_id WHERE bg.id='" + data + "' ORDER BY b.id ASC", (dat) => { socket.emit("box_group" + data, dat); }); }); });
     socket.on("sql_read", (data) => { sql.recreateDb((db) => { sql.read(db, data, (dat) => { socket.emit("sql_r" + data, dat); }); }); });
     socket.on("sql_insert", (data) => { sql.insert(data[0], data[1], () => { reload_data(); socket.emit("sql_i" + data, true); }); });
+    socket.on("sql_delete", (data) => { sql.delete(data, () => { reload_data(); socket.emit("sql_d" + data, true); }); });
     socket.on("in_use_box_node", (data) => { in_use_box_node_data = [...in_use_box_node_data, data]; in_use_box_node_data.forEach((values) => { getbox_node_items(values, socket); }); });
     socket.on('box_data', (data) => { addbox(data); socket.emit("successb", true); });
     socket.on('box_group_data', (data) => { addboxgroup(data); socket.emit("successbg", true); });
     socket.on('item_data', (data) => { additem(data); socket.emit("successi", true); });
     socket.on('instruction_data', (data) => { addinstruction(data); socket.emit("successinst", true); });
     socket.on('refresh', (data) => { reload_data(); socket.emit('reloaded', data); });
-    socket.on('setsettings', (data) => { setsettings(data); socket.emit("setsettings" + data, data); });
-    socket.on('disconnect', function () {
+    socket.on('setsettings', (data) => { socket.emit("setsettings" + data, setsettings(data)); });
+    socket.on('user', (data) => { setuser(data); socket.emit("user" + data, data); });
+    socket.on('check_user', (data) => { socket.emit("check_user" + data, checkforperm(data)); });
+    socket.on('disconnect', function () { });
+}
+
+function checkforperm(datas) {
+    sql.recreateDb(function (data) {
+        sql.read(data, "SELECT * FROM User LEFT JOIN Userpages ON User.id = Userpages.User WHERE User.name = '" + username, function (data) {
+            let user = data[0];
+            if (user.HTML_name === datas[0]) {
+                return true;
+            }
+        })
     });
+    return false;
+}
+
+function setuser(data) {
+    sql.recreateDb(function (datas) {
+        sql.read(datas, "SELECT * FROM User WHERE name = '" + data[0] + "' ODER BY id ASC", function (datas) {
+            Array.prototype.forEach.call(datas, (value) => {
+                bcrypt.compare(data[1], value, function (err, result) {
+                    if (err) throw err;
+                    if (result) {
+                        username = data[0];
+                        password = data[1];
+                        temporary = data[2];
+                    }
+                });
+            });
+        });
+    });
+}
+
+function adduser(data) {
+    //TODO
 }
 
 function getbox_node_items(values, socket) {
@@ -378,10 +440,10 @@ function addbox(data) {
                         b = true;
                     }
                     if (data[5] != 0) {
-                        fs.writeFile(__dirname + "/../user_data/_img/" + "box?b=" + values.id + ".jpg", Buffer.from(data[4][0]), function (err) {
+                        fs.writeFile(__dirname + "/../user_data/_img/" + "box+b=" + values.id + ".jpg", Buffer.from(data[4]), function (err) {
                             if (err) throw err;
                             let da = [];
-                            sql.insert("UPDATE box SET picture ='" + "box?b=" + values.id + ".jpg" + "' WHERE id = '" + values.id + "'", da, (w) => { });
+                            sql.insert("UPDATE box SET picture ='" + "box+b=" + values.id + ".jpg" + "' WHERE id = '" + values.id + "'", da, (w) => { });
                         });
                     }
                 });
@@ -407,10 +469,10 @@ function addboxgroup(data) {
                         b = true;
                     }
                     if (data[5] != 0) {
-                        fs.writeFile(__dirname + "/../user_data/_img/" + "boxgroup?bg=" + values.id + ".jpg", Buffer.from(data[4][0]), function (err) {
+                        fs.writeFile(__dirname + "/../user_data/_img/" + "boxgroup+bg=" + values.id + ".jpg", Buffer.from(data[4]), function (err) {
                             if (err) throw err;
                             let da = [];
-                            sql.insert("UPDATE box SET picture ='" + "boxgroup?bg=" + values.id + ".jpg" + "' WHERE id = '" + values.id + "'", da, (w) => { });
+                            sql.insert("UPDATE box SET picture ='" + "boxgroup+bg=" + values.id + ".jpg" + "' WHERE id = '" + values.id + "'", da, (w) => { });
                         });
                     }
                 });
@@ -456,18 +518,20 @@ function additem(data) {
     let dat = [data[0], data[1], data[2], quantity, data[3], data[8], data[7]];
     sql.insert("INSERT OR IGNORE INTO item (name, instructions_id, size, total_quantity, color, price, weight) VALUES (?, ?, ?, ?, ?, ?, ?)", dat, (q) => {
         reload_data();
-        if (data[6] != 0) {
+        if (data[6] != 0 && (typeof data[4] != "boolean" && !data[4])) {
             sql.recreateDb((db) => {
                 sql.read(db, "SELECT * FROM item WHERE name ='" + data[0] + "'", (datas) => {
                     datas.forEach((values) => {
-                        fs.writeFile(__dirname + "/../user_data/_img/" + "item?i=" + values.id + ".jpg", Buffer.from(data[4][0]), function (err) {
-                            if (err) throw err;
+                        fs.writeFile(__dirname + "/../user_data/_img/" + "item+i=" + values.id + ".jpg", Buffer.from(data[4]), function (err) {
+                            if (err) { console.log(err); throw err; }
                             let da = [];
-                            sql.insert("UPDATE item SET picture ='" + "item?i=" + values.id + ".jpg" + "' WHERE id = '" + values.id + "'", da, (w) => { });
+                            sql.insert("UPDATE item SET picture ='" + "item+i=" + values.id + ".jpg" + "' WHERE id = '" + values.id + "'", da, (w) => { });
                         });
                     });
                 });
             });
+        } else {
+            //TODO
         }
         sql.recreateDb((db) => {
             sql.read(db, "SELECT * FROM item WHERE name ='" + data[0] + "'", (datas) => {
@@ -536,4 +600,5 @@ function setsettings(data) {
     fs.writeFile(__dirname + '/../' + 'settings.txt', settings_file.join('\r\n'), function (err) {
         if (err) throw err;
     });
+    return [ip, server_port1];
 }

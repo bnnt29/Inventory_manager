@@ -6,7 +6,6 @@ function nav_items() {
     socket.on('connect', () => {
         socket.on('html', (data) => {
             if (data != null) {
-                console.log(data);
                 if (!nav_set) {
                     data.forEach(function (row) {
                         var body = document.createElement("li");
