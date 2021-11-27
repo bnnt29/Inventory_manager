@@ -25,6 +25,7 @@ function getsettings() {
         socket.on('getsettings', (data) => {
             console.log(data);
             document.getElementById("database_location").placeholder = data[0];
+            document.getElementById("database_location").title = data[0];
             document.getElementById("server_1_ip").placeholder = data[1];
             document.getElementById("server_1_port").placeholder = data[2];
             if (data[3] === 'true') {

@@ -5,6 +5,7 @@ var weight_unitlist = ["g", 0.001, "kg", 1, "t", 1000];
 var ip_connections = [];
 
 var user = [];
+//class for user
 
 var sql = require("./sql")();
 var fs = require('fs');
