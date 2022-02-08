@@ -10,11 +10,11 @@ function getid() {
     } else if (urlp['name'] != "" || urlp['name'] != null || urlp['n'] != "" || urlp['n'] != null) {
         var ip = location.host;
         var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
-        socket.on('connect', () => {
+        socket.once('connect', () => {
             let dat = urlp['n'] || urlp['name'];
             dat = "SELECT * FROM item WHERE name='" + dat + "'";
             socket.emit('sql_read', dat);
-            socket.on("sql_r" + dat, (data) => {
+            socket.once("sql_r" + dat, (data) => {
                 data.forEach((values) => {
                     if (values.name === urlp['n'] || values.name === urlp['name']) {
                         id = values.id;
@@ -39,11 +39,12 @@ function init_f(id) {
     if (id >= 1) {
         var ip = location.host;
         var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
-        socket.on('connect', () => {
+        socket.once('connect', () => {
             socket.emit('getItem_data', id);
-            socket.on('getsize_Unit', (dat) => {
-                socket.on('getweight_Unit', (dats) => {
-                    socket.on("item" + id, (data) => {
+            socket.once('getsize_Unit', (dat) => {
+                socket.once('getweight_Unit', (dats) => {
+                    socket.once("item" + id, (data) => {
+                        console.log(data);
                         if (data.length != 0) {
                             data.forEach((values) => {
                                 document.getElementById("title").innerHTML = values.item_name;
@@ -66,8 +67,8 @@ function init_f(id) {
                                     });
                                 } else {
                                     socket.emit('refresh', true);
-                                    socket.on('reloaded', (a) => {
-                                        socket.on('getsize_Unit', (dat) => {
+                                    socket.once('reloaded', (a) => {
+                                        socket.once('getsize_Unit', (dat) => {
                                             if (dat != null) {
                                                 dat.forEach((val) => {
                                                     shortest_size = [...shortest_size, "" + i / parseFloat(val.multiplicator)];
@@ -102,8 +103,8 @@ function init_f(id) {
                                     });
                                 } else {
                                     socket.emit('refresh', true);
-                                    socket.on('reloaded', (a) => {
-                                        socket.on('getweight_Unit', (dats) => {
+                                    socket.once('reloaded', (a) => {
+                                        socket.once('getweight_Unit', (dats) => {
                                             if (dats != null) {
                                                 dats.forEach((val) => {
                                                     shortest_weight = [...shortest_weight, "" + i / parseFloat(val.multiplicator)];
@@ -128,6 +129,7 @@ function init_f(id) {
                                     document.getElementById("item_weight").innerHTML = values.size;
                                     document.getElementById("item_weight_unit").innerHTML = "g";
                                 }
+                                console.log(values);
                                 if (values.picture != null) {
                                     document.getElementById("item_img").src = values.picture;
                                     document.getElementById("item_picture").innerHTML = values.picture;
@@ -144,11 +146,11 @@ function init_f(id) {
                                     }
                                 }
                                 socket.emit("sql_read", "SELECT * FROM instructions WHERE id ='" + parseInt(values.instructions_id) + "'");
-                                socket.on("sql_r" + "SELECT * FROM instructions WHERE id ='" + parseInt(values.instructions_id) + "'", (data) => {
+                                socket.once("sql_r" + "SELECT * FROM instructions WHERE id ='" + parseInt(values.instructions_id) + "'", (data) => {
                                     data.forEach((values) => {
                                         document.getElementById("text").innerHTML = values.name;
                                         socket.emit('getfile', "/../user_data/_txt/" + values.document);
-                                        socket.on("get_f" + "/../user_data/_txt/" + values.document, (dat) => {
+                                        socket.once("get_f" + "/../user_data/_txt/" + values.document, (dat) => {
                                             document.getElementById("textarea").value = dat;
                                             document.getElementById("textarea").setAttribute("data-path", values.document);
                                             document.getElementById("textarea").setAttribute("data-or", dat);
@@ -346,10 +348,10 @@ function refresh() {
     var refresh = false;
     var ip = location.host;
     var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
-    socket.on('connect', () => {
+    socket.once('connect', () => {
         if (!refresh) {
             socket.emit('refresh', true);
-            socket.on('reloaded', (data) => {
+            socket.once('reloaded', (data) => {
                 refresh = true;
                 location.reload();
             })
@@ -365,14 +367,14 @@ function change_item_name(a) {
         if (name != "") {
             var ip = location.host;
             var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
-            socket.on('connect', () => {
+            socket.once('connect', () => {
                 socket.emit("sql_read", "SELECT * FROM item WHERE name='" + name + "'");
-                socket.on("sql_r" + "SELECT * FROM item WHERE name='" + name + "'", (data) => {
+                socket.once("sql_r" + "SELECT * FROM item WHERE name='" + name + "'", (data) => {
                     if (data.length <= 0) {
                         let dat = [];
                         dat = ["UPDATE item SET name ='" + name + "' WHERE id = '" + id + "'", dat];
                         socket.emit("sql_insert", dat);
-                        socket.on("sql_i" + dat, (data) => { location.reload(); });
+                        socket.once("sql_i" + dat, (data) => { location.reload(); });
                     } else {
                         console.log("Name already exist");
                     }
@@ -407,11 +409,11 @@ function change_item_price(a) {
         if (price != "") {
             var ip = location.host;
             var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
-            socket.on('connect', () => {
+            socket.once('connect', () => {
                 let dat = [];
                 dat = ["UPDATE item SET price ='" + price + "' WHERE id = '" + id + "'", dat];
                 socket.emit("sql_insert", dat);
-                socket.on("sql_i" + dat, (data) => { location.reload(); });
+                socket.once("sql_i" + dat, (data) => { location.reload(); });
             });
         } else {
             location.reload();
@@ -444,8 +446,8 @@ function change_item_weight(a) {
         if (weight != "") {
             var ip = location.host;
             var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
-            socket.on('connect', () => {
-                socket.on('getweight_Unit', (data) => {
+            socket.once('connect', () => {
+                socket.once('getweight_Unit', (data) => {
                     data.forEach((values) => {
                         if (unit === values.name) {
                             weight = weight * parseFloat(values.multiplicator);
@@ -455,7 +457,7 @@ function change_item_weight(a) {
                             console.log(weight);
                             dat = ["UPDATE item SET weight ='" + weight + "' WHERE id = '" + id + "'", dat];
                             socket.emit("sql_insert", dat);
-                            socket.on("sql_i" + dat, (data) => { location.reload(); });
+                            socket.once("sql_i" + dat, (data) => { location.reload(); });
                         }
                     });
                 })
@@ -479,8 +481,8 @@ function change_item_weight(a) {
         document.getElementById("item_weight").parentElement.appendChild(input);
         var ip = location.host;
         var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
-        socket.on('connect', () => {
-            socket.on('getweight_Unit', (data) => {
+        socket.once('connect', () => {
+            socket.once('getweight_Unit', (data) => {
                 let form = document.createElement("form");
                 form.id = "item_unit_edit";
                 let label = document.createElement("label");
@@ -512,13 +514,13 @@ function change_item_quantity(a) {
         if (quantity != "") {
             var ip = location.host;
             var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
-            socket.on('connect', () => {
+            socket.once('connect', () => {
                 socket.emit('getItem_data', id);
-                socket.on("item" + id, (dats) => {
+                socket.once("item" + id, (dats) => {
                     dats.forEach((val) => {
                         if (val.total_quantity > quantity) {
                             socket.emit("sql_read", "SELECT * FROM item_box WHERE item_id ='" + id + "' AND box_id='1'");
-                            socket.on("sql_r" + "SELECT * FROM item_box WHERE item_id ='" + id + "' AND box_id='1'", (data) => {
+                            socket.once("sql_r" + "SELECT * FROM item_box WHERE item_id ='" + id + "' AND box_id='1'", (data) => {
                                 if (data.length > 1 || data.length < 0) {
                                     console.log("Wrong data in the database");
                                 } else {
@@ -528,29 +530,29 @@ function change_item_quantity(a) {
                                         let dat = [];
                                         dat = ["UPDATE item SET total_quantity ='" + val.total_quantity + "' WHERE id = '" + id + "'", dat];
                                         socket.emit("sql_insert", dat);
-                                        socket.on("sql_i" + dat, (data) => { location.reload(); });
+                                        socket.once("sql_i" + dat, (data) => { location.reload(); });
                                     } else {
                                         if (data.quantity - (val.total_quantity - quantity) < 0) {
                                             let dat = [];
                                             dat = ["UPDATE item SET total_quantity ='" + (val.total_quantity - data.quantity) + "' WHERE id = '" + id + "'", dat];
                                             socket.emit("sql_insert", dat);
-                                            socket.on("sql_i" + dat, (data) => {
+                                            socket.once("sql_i" + dat, (data) => {
                                                 dat = [];
                                                 dat = ["UPDATE item_box SET quantity ='" + 0 + "' WHERE item_id = '" + id + "' AND box_id='1'", dat];
                                                 socket.emit("sql_insert", dat);
-                                                socket.on("sql_i" + dat, (data) => { location.reload(); });
+                                                socket.once("sql_i" + dat, (data) => { location.reload(); });
                                             });
                                         } else {
                                             let dat = [];
                                             dat = ["UPDATE item SET total_quantity ='" + quantity + "' WHERE id = '" + id + "'", dat];
                                             socket.emit("sql_insert", dat);
-                                            socket.on("sql_i" + dat, (d) => {
+                                            socket.once("sql_i" + dat, (d) => {
                                                 dat = [];
                                                 dat = ["UPDATE item_box SET quantity ='" + (data.quantity - (val.total_quantity - quantity)) + "' WHERE item_id = '" + id + "' AND box_id='1'", dat];
                                                 console.log((data.quantity - (val.total_quantity - quantity)) + ", " + data.quantity + ", " + val.total_quantity + ", " + quantity);
                                                 console.log(dat);
                                                 socket.emit("sql_insert", dat);
-                                                socket.on("sql_i" + dat, (data) => { /*location.reload();*/ });
+                                                socket.once("sql_i" + dat, (data) => { /*location.reload();*/ });
                                             });
                                         }
                                     }
@@ -560,9 +562,9 @@ function change_item_quantity(a) {
                             let dat = [];
                             dat = ["UPDATE item SET total_quantity ='" + quantity + "' WHERE id = '" + id + "'", dat];
                             socket.emit("sql_insert", dat);
-                            socket.on("sql_i" + dat, (data) => {
+                            socket.once("sql_i" + dat, (data) => {
                                 socket.emit("sql_read", "SELECT * FROM item_box WHERE item_id ='" + id + "' AND NOT box_id='1'");
-                                socket.on("sql_r" + "SELECT * FROM item_box WHERE item_id ='" + id + "' AND NOT box_id='1'", (data) => {
+                                socket.once("sql_r" + "SELECT * FROM item_box WHERE item_id ='" + id + "' AND NOT box_id='1'", (data) => {
                                     let default_quantity = quantity;
                                     data.forEach((values) => {
                                         default_quantity -= values.quantity;
@@ -573,7 +575,7 @@ function change_item_quantity(a) {
                                         dat = [];
                                         dat = ["UPDATE item_box SET quantity ='" + default_quantity + "' WHERE item_id = '" + id + "' AND box_id='1'", dat];
                                         socket.emit("sql_insert", dat);
-                                        socket.on("sql_i" + dat, (data) => { location.reload(); });
+                                        socket.once("sql_i" + dat, (data) => { location.reload(); });
                                     }
                                 });
                             });
@@ -613,8 +615,8 @@ function change_item_size(a) {
         if (size != "") {
             var ip = location.host;
             var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
-            socket.on('connect', () => {
-                socket.on('getsize_Unit', (data) => {
+            socket.once('connect', () => {
+                socket.once('getsize_Unit', (data) => {
                     data.forEach((values) => {
                         if (unit === values.name) {
                             size = size * parseFloat(values.multiplicator);
@@ -623,7 +625,7 @@ function change_item_size(a) {
                             let dat = [];
                             dat = ["UPDATE item SET size ='" + size + "' WHERE id = '" + id + "'", dat];
                             socket.emit("sql_insert", dat);
-                            socket.on("sql_i" + dat, (data) => { location.reload(); });
+                            socket.once("sql_i" + dat, (data) => { location.reload(); });
                         }
                     });
                 })
@@ -647,8 +649,8 @@ function change_item_size(a) {
         document.getElementById("item_size").parentElement.appendChild(input);
         var ip = location.host;
         var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
-        socket.on('connect', () => {
-            socket.on('getsize_Unit', (data) => {
+        socket.once('connect', () => {
+            socket.once('getsize_Unit', (data) => {
                 let form = document.createElement("form");
                 form.id = "item_unit_edit";
                 let label = document.createElement("label");
@@ -681,8 +683,8 @@ function change_item_inst(a) {
         if (txt != document.getElementById("textarea").getAttribute("data-or")) {
             var ip = location.host;
             var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
-            socket.on('connect', () => {
-                socket.on('getdocuments', (data) => {
+            socket.once('connect', () => {
+                socket.once('getdocuments', (data) => {
                     let b = false;
                     for (let i = 0; i < data; i + 2) {
                         let values = [data[i], data[i + 1]];
@@ -691,7 +693,7 @@ function change_item_inst(a) {
                             datas = ["UPDATE item SET instructions_id ='" + values[1] + "' WHERE id = '" + id + "'", datas];
                             b = true;
                             socket.emit("sql_insert", datas);
-                            socket.on("sql_i" + datas, (data) => { location.reload(); });
+                            socket.once("sql_i" + datas, (data) => { location.reload(); });
                         }
                     }
                     if (!b) {
@@ -702,24 +704,24 @@ function change_item_inst(a) {
                             datas = [name, [id], txt, txt.length];
                             b = true;
                             socket.emit('instruction_data', datas);
-                            socket.on("successinst", (data) => { location.reload(); });
+                            socket.once("successinst", (data) => { location.reload(); });
                         } else {
                             if (inst == document.getElementById("text").innerHTML) {
                                 let datas = [document.getElementById("textarea").getAttribute("data-path"), txt];
                                 b = true;
                                 socket.emit('setfile', datas);
-                                socket.on("set_f" + datas, (data) => { location.reload(); });
+                                socket.once("set_f" + datas, (data) => { location.reload(); });
                             } else {
                                 var ip = location.host;
                                 var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
-                                socket.on('connect', () => {
+                                socket.once('connect', () => {
                                     socket.emit("sql_read", "SELECT * FROM instructions WHERE name ='" + inst + "'");
-                                    socket.on("sql_r" + "SELECT * FROM instructions WHERE name ='" + inst + "'", (data) => {
+                                    socket.once("sql_r" + "SELECT * FROM instructions WHERE name ='" + inst + "'", (data) => {
                                         data.forEach((values) => {
                                             let dat = [];
                                             dat = ["UPDATE item SET instructions_id ='" + values.id + "' WHERE id = '" + id + "'", dat];
                                             socket.emit("sql_insert", dat);
-                                            socket.on("sql_i" + dat, (data) => { location.reload(); });
+                                            socket.once("sql_i" + dat, (data) => { location.reload(); });
                                         });
                                     });
                                 });
@@ -733,14 +735,14 @@ function change_item_inst(a) {
             if (name != "") {
                 var ip = location.host;
                 var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
-                socket.on('connect', () => {
+                socket.once('connect', () => {
                     socket.emit("sql_read", "SELECT * FROM instructions WHERE name ='" + inst + "'");
-                    socket.on("sql_r" + "SELECT * FROM instructions WHERE name ='" + inst + "'", (data) => {
+                    socket.once("sql_r" + "SELECT * FROM instructions WHERE name ='" + inst + "'", (data) => {
                         data.forEach((values) => {
                             let dat = [];
                             dat = ["UPDATE instructions SET name ='" + name + "' WHERE id = '" + values.id + "'", dat];
                             socket.emit("sql_insert", dat);
-                            socket.on("sql_i" + dat, (data) => { location.reload(); });
+                            socket.once("sql_i" + dat, (data) => { location.reload(); });
                         });
                     });
                 });
@@ -748,14 +750,14 @@ function change_item_inst(a) {
                 if (inst != document.getElementById("text").innerHTML) {
                     var ip = location.host;
                     var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
-                    socket.on('connect', () => {
+                    socket.once('connect', () => {
                         socket.emit("sql_read", "SELECT * FROM instructions WHERE name ='" + inst + "'");
-                        socket.on("sql_r" + "SELECT * FROM instructions WHERE name ='" + inst + "'", (data) => {
+                        socket.once("sql_r" + "SELECT * FROM instructions WHERE name ='" + inst + "'", (data) => {
                             data.forEach((values) => {
                                 let dat = [];
                                 dat = ["UPDATE item SET instructions_id ='" + values.id + "' WHERE id = '" + id + "'", dat];
                                 socket.emit("sql_insert", dat);
-                                socket.on("sql_i" + dat, (data) => { location.reload(); });
+                                socket.once("sql_i" + dat, (data) => { location.reload(); });
                             });
                         });
                     });
@@ -774,8 +776,8 @@ function change_item_inst(a) {
 
         var ip = location.host;
         var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
-        socket.on('connect', () => {
-            socket.on('getinstructions', (data) => {
+        socket.once('connect', () => {
+            socket.once('getinstructions', (data) => {
                 let form = document.createElement("form");
                 form.id = "item_inst_edit";
                 let label = document.createElement("label");
@@ -815,12 +817,12 @@ function txtchange() {
     let select = document.getElementById("inst_edit_form");
     var ip = location.host;
     var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
-    socket.on('connect', () => {
+    socket.once('connect', () => {
         socket.emit("sql_read", "SELECT * FROM instructions WHERE name ='" + select.value + "'");
-        socket.on("sql_r" + "SELECT * FROM instructions WHERE name ='" + select.value + "'", (data) => {
+        socket.once("sql_r" + "SELECT * FROM instructions WHERE name ='" + select.value + "'", (data) => {
             data.forEach((values) => {
                 socket.emit('getfile', "/../user_data/_txt/" + values.document);
-                socket.on("get_f" + "/../user_data/_txt/" + values.document, (dat) => {
+                socket.once("get_f" + "/../user_data/_txt/" + values.document, (dat) => {
                     document.getElementById("textarea").value = dat;
                     document.getElementById("textarea").setAttribute("data-path", values.document);
                     document.getElementById("textarea").setAttribute("data-or", dat);
@@ -838,11 +840,11 @@ function change_item_color(a) {
         if (color != "") {
             var ip = location.host;
             var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
-            socket.on('connect', () => {
+            socket.once('connect', () => {
                 let dat = [];
                 dat = ["UPDATE item SET color ='" + color + "' WHERE id = '" + id + "'", dat];
                 socket.emit("sql_insert", dat);
-                socket.on("sql_i" + dat, (data) => { location.reload(); });
+                socket.once("sql_i" + dat, (data) => { location.reload(); });
             });
         } else {
             location.reload();
@@ -872,13 +874,13 @@ function change_item_picture(a) {
         if (pic != "") {
             var ip = location.host;
             var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
-            socket.on('connect', () => {
+            socket.once('connect', () => {
                 let dat = [];
                 console.log(['item?id=' + id + '.jpg', pic[0]]);
                 socket.emit('setpicture', ["item?id=" + id + '.jpg', pic[0]]);
                 dat = ["UPDATE item SET picture ='" + "item?id=" + id + ".jpg" + "' WHERE id = '" + id + "'", dat];
                 socket.emit("sql_insert", dat);
-                socket.on("sql_i" + dat, (data) => { location.reload(); });
+                socket.once("sql_i" + dat, (data) => { location.reload(); });
             });
         } else {
             location.reload();
@@ -904,13 +906,13 @@ function change_item_picture(a) {
 function del() {
     var ip = location.host;
     var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
-    socket.on('connect', () => {
+    socket.once('connect', () => {
         socket.emit('getItem_data', id);
-        socket.on("item" + id, (data) => {
+        socket.once("item" + id, (data) => {
             let person = prompt("Please Confirm to continue deleting the following object: Item " + id + ", name " + data.name + ", by typing the id");
             if (person != null && parseInt(person) === id) {
                 socket.emit("sql_delete", "DELETE FROM item WHERE item.id=" + id + "" + ";");
-                socket.on("sql_d" + "DELETE FROM item WHERE item.id=" + id + "" + ";", (data) => {
+                socket.once("sql_d" + "DELETE FROM item WHERE item.id=" + id + "" + ";", (data) => {
                     if (data) {
                         location.href = "/index";
                     }

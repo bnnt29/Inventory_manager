@@ -32,3 +32,14 @@ put styles in css
 
 /rename sql_ad_objects to add / create objects 
 /    generell rename of html etc. files
+
+UPDATE SQL ins and outs
+
+3d workspace for planning
+    connections
+    Add object data (male / female cable, cable type, ins/outs count, ip, dhcp (lowip, highip))
+    simulate network (who is accessible)
+    light programmer (vereinfacht)
+    programm emulator
+
+PDF reader

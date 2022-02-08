@@ -11,8 +11,14 @@ var weight_unit;
 
 
 function createDb() {
-    db = new sqlite3.Database(file, createTables);
-    console.log("database connected");
+    db = new sqlite3.Database(file, err => {
+        if (err) {
+            console.log(err);
+            return;
+        }
+        createTables();
+    });
+    console.log("database connected at: " + file);
 }
 
 function recreateDb(callback) {
@@ -21,17 +27,27 @@ function recreateDb(callback) {
 
 function createTables() {
     //console.log("createTable box");
-    db.run("CREATE TABLE IF NOT EXISTS box (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE, name STRING (200) NOT NULL UNIQUE, box_group_id INTEGER (100) REFERENCES box_group (id), color STRING (200), picture STRING (200), weight INTEGER (100));");
-    db.run("CREATE TABLE IF NOT EXISTS box_group (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE, name STRING (100) NOT NULL UNIQUE, location STRING (100), color STRING (200), picture STRING (200));");
-    db.run("CREATE TABLE IF NOT EXISTS in_use (item_id INTEGER  NOT NULL REFERENCES item (id), box_id   INTEGER (100) NOT NULL REFERENCES box (id), location STRING (100), quantity INTEGER (100) NOT NULL, notes STRING (100));");
-    db.run("CREATE TABLE IF NOT EXISTS instructions (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE, name STRING (100) NOT NULL UNIQUE, document STRING (200) UNIQUE);");
-    db.run("CREATE TABLE IF NOT EXISTS item (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE, name STRING (100) NOT NULL UNIQUE, instructions_id INTEGER (100) REFERENCES instructions (id), size INTEGER (100), total_quantity INTEGER (100) NOT NULL, color STRING (200), picture STRING (200), price INTEGER (100), weight INTEGER (100));");
-    db.run("CREATE TABLE IF NOT EXISTS item_box (item_id INTEGER NOT NULL REFERENCES item (id), box_id INTEGER (100) REFERENCES box (id) NOT NULL, quantity INTEGER (100) NOT NULL);");
-    db.run("CREATE TABLE IF NOT EXISTS event (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE, item_id INTEGER NOT NULL REFERENCES item (id), quantity INTEGER (100) NOT NULL);");
+    db.run("CREATE TABLE IF NOT EXISTS version (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE, version STRING (200) NOT NULL);");
+    db.run("CREATE TABLE IF NOT EXISTS box (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE, name STRING (200) NOT NULL UNIQUE, color STRING (200), weight INTEGER (100), location STRING (200), instructions_id INTEGER (100) REFERENCES instructions (id));");
+    db.run("CREATE TABLE IF NOT EXISTS box_box (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE, inner_box_id INTEGER (100) NOT NULL REFERENCES box (id), outer_box_id INTEGER (100) NOT NULL REFERENCES box (id));");
+    db.run("CREATE TABLE IF NOT EXISTS in_use (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE, item_sizes_id INTEGER  NOT NULL REFERENCES item_sizes (id), box_id   INTEGER (100) NOT NULL REFERENCES box (id), location STRING (100), quantity INTEGER (100) NOT NULL, notes STRING (100));");
+    db.run("CREATE TABLE IF NOT EXISTS instructions (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE, name STRING (100) NOT NULL UNIQUE, txtdocument STRING (200), pdfdocument_path STRING (200));");
+    db.run("CREATE TABLE IF NOT EXISTS item (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE, name STRING (100) NOT NULL UNIQUE, instructions_id INTEGER (100) REFERENCES instructions (id), color STRING (200));");
+    db.run("CREATE TABLE IF NOT EXISTS item_sizes (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE, item_id INTEGER NOT NULL REFERENCES item (id), sizeX INTEGER (100), sizeY INTEGER (100), sizeZ INTEGER (100), quantity INTEGER (100) NOT NULL, price INTEGER (100), weight INTEGER (100), IP STRING (40));");
+    db.run("CREATE TABLE IF NOT EXISTS item_sizes_box (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE, item_sizes_id INTEGER NOT NULL REFERENCES item_sizes (id), box_id INTEGER (100) REFERENCES box (id) NOT NULL, quantity INTEGER (100) NOT NULL);");
+    db.run("CREATE TABLE IF NOT EXISTS item_picture (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE, item_id INTEGER NOT NULL REFERENCES item (id), picture_id INTEGER (100) REFERENCES picture (id) NOT NULL);");
+    db.run("CREATE TABLE IF NOT EXISTS box_picture (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE, box_id INTEGER NOT NULL REFERENCES box (id), picture_id INTEGER (100) REFERENCES picture (id) NOT NULL);");
+    db.run("CREATE TABLE IF NOT EXISTS picture (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE, name STRING(200) NOT NULL, path STRING (200) NOT NULL);");
+    db.run("CREATE TABLE IF NOT EXISTS event (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE, name STRING(200) NOT NULL, description STRING (100));");
+    db.run("CREATE TABLE IF NOT EXISTS event_item (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE, event_id INTEGER NOT NULL REFERENCES event (id),item_sizes_id INTEGER NOT NULL REFERENCES item_sizes (id), quantity INTEGER (100) NOT NULL);");
     db.run("CREATE TABLE IF NOT EXISTS HTML_pages (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE, name STRING (100) NOT NULL UNIQUE, path STRING (200) NOT NULL UNIQUE, position INTEGER (100)  NOT NULL);");
-    db.run("CREATE TABLE IF NOT EXISTS Userpages (HTML_name STRING NOT NULL REFERENCES HTML_pages (name), User INTEGER NOT NULL REFERENCES User (id));");
+    db.run("CREATE TABLE IF NOT EXISTS Userpages (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE, HTML_name STRING NOT NULL REFERENCES HTML_pages (name), User INTEGER NOT NULL REFERENCES User (id));");
     db.run("CREATE TABLE IF NOT EXISTS User (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE, name STRING (100) NOT NULL UNIQUE, password STRING (100), level INTEGER (100), canchangeIV INTEGER (100));");
     db.run("CREATE TABLE IF NOT EXISTS size_unit (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE, name STRING (100) NOT NULL UNIQUE, multiplicator INTEGER (100) NOT NULL);");
+    db.run("CREATE TABLE IF NOT EXISTS connection_category (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE, name STRING (100) NOT NULL UNIQUE);");
+    db.run("CREATE TABLE IF NOT EXISTS connection (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE, name STRING (100) NOT NULL UNIQUE, gender Integer NOT NULL, note STRING (200), instructions_id INTEGER (100) REFERENCES instructions (id));");
+    db.run("CREATE TABLE IF NOT EXISTS connection_copatible (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE, connection_id INTEGER NOT NULL REFERENCES connection (id), compatible_id INTEGER NOT NULL REFERENCES connection (id));");
+    db.run("CREATE TABLE IF NOT EXISTS connection_item_sizes (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE, connection_id INTEGER NOT NULL REFERENCES connection (id), item_sizes_id INTEGER NOT NULL REFERENCES item_sizes (id), count INTEGER (100) NOT NULL);");
     db.run("CREATE TABLE IF NOT EXISTS weight_unit (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE, name STRING (100) NOT NULL UNIQUE, multiplicator INTEGER (100) NOT NULL);", closeDb(false, db));
 }
 function insertunit() {
@@ -57,11 +73,11 @@ function insertunit() {
 }
 
 function insertdefaults() {
-    insert("INSERT OR IGNORE INTO box_group (id, name, location, color) VALUES (?, ?, ?, ?)", [1, "default", "somewhere", "#FFFFFF"], (values) => {
-        insert("INSERT OR IGNORE INTO box (id, name, box_group_id, color) VALUES (?, ?, ?, ?)", [1, "default", 1, "#FFFFFF"], (values) => {
-            insert("INSERT OR IGNORE INTO User (id, name, password, level, canchangeIV) VALUES (?, ?, ?, ?, ?)", [1, "admin", "", "0", "1"], (values) => {
-                insert("INSERT OR IGNORE INTO User (id, name, password, level, canchangeIV) VALUES (?, ?, ?, ?, ?)", [2, "standard", "", "1", "0"], (values) => {
-                    insert("INSERT OR IGNORE INTO Userpages (HTML_name, User) VALUES (?, ?)", ["settings", 2], (values) => {
+    insert("INSERT OR IGNORE INTO box (name, color) VALUES (?, ?)", ["default", "#FFFFFF"], (values) => {
+        insert("INSERT OR IGNORE INTO User (name, password, level, canchangeIV) VALUES (?, ?, ?, ?)", ["admin", "", "0", "1"], (values) => {
+            insert("INSERT OR IGNORE INTO User (name, password, level, canchangeIV) VALUES (?, ?, ?, ?)", ["standard", "", "1", "0"], (values) => {
+                insert("INSERT OR IGNORE INTO Userpages (HTML_name, User) VALUES (?, ?)", ["settings", 2], (values) => {
+                    insert("INSERT OR IGNORE INTO version (version) VALUES (?)", ["IM 1.0.0"], (values) => {
                         return;
                     });
                 });
@@ -74,7 +90,7 @@ function insert(r, data, callback) {
     recreateDb(function (db) {
         var stmt = db.prepare(r);
         stmt.run(...data);
-        stmt.finalize(() => { closedb(db); callback(true); });
+        stmt.finalize(() => { closedb(db, callback(true)); });
     });
 }
 
@@ -104,6 +120,11 @@ function initDB(callback) {
 
 function closedb(dbn) {
     dbn.close();
+}
+
+function closedb(dbn, callback) {
+    dbn.close();
+    callback;
 }
 
 function closeDb(b, dbn) {

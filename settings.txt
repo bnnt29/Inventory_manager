@@ -1,7 +1,7 @@
 //IM v 1.0
 
 //Database_file_location:
-#C:/Users/Berni/Documents/inventory_manager/user_data
+#./user_data
 
 //where the Database, pictures and instructions are saved or located
 

@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!--websocket socket io-->
+    <script src="/socket.io/socket.io.js"></script>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>Inventory Manager</title>
+    <link rel="stylesheet" href="../css/objects.css">
+    <link rel="stylesheet" href="../bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../fonts/font-awesome.min.css">
+    <link rel="stylesheet" href="../fonts/ionicons.min.css">
+    <link rel="stylesheet" href="../css/styles.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/baguettebox.js/1.10.0/baguetteBox.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Swiper/6.4.8/swiper-bundle.min.css">
+</head>
+
+<body style="width: 100%;">
+    <!-- Start: Navigation with Search -->
+    <nav class="navbar navbar-light navbar-expand-lg navigation-clean-search">
+        <div class="container"><a class="navbar-brand" href="index.html">Inventory Manager</a><button
+                data-bs-toggle="collapse" class="navbar-toggler" data-bs-target="#navcol-1"><span
+                    class="visually-hidden">Toggle navigation</span><span class="navbar-toggler-icon"></span></button>
+            <div class="collapse navbar-collapse" id="navcol-1">
+                <ul class="navbar-nav">
+                    <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="setup.html">Setup</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="objects.html">Objects</a></li>
+                    <li class="nav-item"><a class="nav-link" href="settings.html">Settings</a></li>
+                </ul>
+                <form class="me-auto search-form" target="_self">
+                    <div class="d-flex align-items-center"><label class="form-label d-flex mb-0" for="search-field"><i
+                                class="fa fa-search"></i></label><input class="form-control search-field" type="search"
+                            id="search-field" name="search"></div>
+                </form><button class="btn btn-light active action-button" type="button"
+                    style="background: var(--bs-blue);"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em"
+                        fill="currentColor" viewBox="0 0 16 16" class="bi bi-arrow-clockwise">
+                        <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z">
+                        </path>
+                        <path
+                            d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z">
+                        </path>
+                    </svg></button>
+            </div>
+        </div>
+    </nav><!-- End: Navigation with Search -->
+    <div class="row">
+        <div class="col-auto d-xl-flex align-self-start align-items-xl-center">
+            <div>
+                <script type="text/javascript" src="js/qrcode.js"></script>
+                <div id="qrcode" style="width:100px; height:100px; margin:15px;">
+                    <script type="text/javascript">
+                        var qrcode = new QRCode(document.getElementById("qrcode"), {
+                            width: 100,
+                            height: 100
+                        });
+                        qrcode.makeCode('http://' + location.host + location.pathname);
+                    </script>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <!-- Start: 1 Row 1 Column -->
+            <div class="container" style="margin: 0;padding: 0;">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div>
+                            <ul class="nav nav-tabs d-xl-flex align-items-xl-center" role="tablist">
+                                <li class="nav-item" role="presentation">
+                                    <a class="nav-link active" role="tab" data-bs-toggle="tab" href="#tab-1">Item</a>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <a class="nav-link" role="tab" data-bs-toggle="tab" href="#tab-2">Box</a>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <a class="nav-link" role="tab" data-bs-toggle="tab" href="#tab-3">Instruction</a>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <a class="nav-link" role="tab" data-bs-toggle="tab" href="#tab-4">in_use</a>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <a class="nav-link" role="tab" data-bs-toggle="tab" href="#tab-5">connections</a>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <a class="nav-link" role="tab" data-bs-toggle="tab" href="#tab-6">remove</a>
+                                </li>
+                            </ul>
+                            <div class="tab-content">
+                                <div class="tab-pane active" role="tabpanel" id="tab-1">
+                                    <div class="row">
+                                        <div class="col d-xl-flex align-items-xl-center">
+                                            <p>Name:</p>
+                                        </div>
+                                        <div class="col d-xl-flex align-items-xl-center">
+                                            <input class="form-control-sm" type="text" placeholder="name"
+                                                autocomplete="on" id="item_name">
+                                        </div>
+                                        <div class="col d-xl-flex align-items-xl-center"></div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col d-xl-flex align-items-xl-center">
+                                            <p>Instructions:</p>
+                                        </div>
+                                        <div class="col d-xl-flex align-items-xl-center"><select style="width: 50%;">
+                                                <optgroup label="Instructions" id="item_instruction">
+                                                    <option value="1" selected="">This is item 1</option>
+                                                </optgroup>
+                                            </select></div>
+                                        <div class="col d-xl-flex align-items-xl-center"></div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col d-xl-flex align-items-xl-center">
+                                            <p>Color:</p>
+                                        </div>
+                                        <div class="col d-xl-flex align-items-xl-center"><input type="color"
+                                                id="item_color"></div>
+                                        <div class="col d-xl-flex align-items-xl-center"></div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col d-xl-flex align-items-xl-center">
+                                            <p>Picture:</p>
+                                        </div>
+                                        <div class="col d-xl-flex align-items-xl-center"><input type="file"
+                                                id="item_picture"></div>
+                                        <div class="col d-xl-flex align-items-xl-center"></div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col">
+                                            <div class="accordion" role="tablist" id="accordion-12">
+                                                <div class="accordion-item">
+                                                    <h2 class="accordion-header" role="tab"><button
+                                                            class="accordion-button" data-bs-toggle="collapse"
+                                                            data-bs-target="#accordion-12 .item-1" aria-expanded="true"
+                                                            aria-controls="accordion-12 .item-1">Size</button></h2>
+                                                    <div class="accordion-collapse collapse show item-1" role="tabpanel"
+                                                        data-bs-parent="#accordion-12">
+                                                        <div class="accordion-body" id="item_size_body">
+                                                            <div class="row">
+                                                                <div class="col"><button class="btn btn-primary"
+                                                                        type="button"
+                                                                        style="width: 100%;background: var(--bs-blue);"
+                                                                        id="item_size_button">new
+                                                                        size</button></div>
+                                                            </div>
+                                                            <div class="accordion" role="tablist" id="accordion-2">
+                                                                <div class="accordion-item">
+                                                                    <h2 class="accordion-header" role="tab"><button
+                                                                            class="accordion-button"
+                                                                            data-bs-toggle="collapse"
+                                                                            data-bs-target="#accordion-2 .item-1"
+                                                                            aria-expanded="true"
+                                                                            aria-controls="accordion-2 .item-1">[size]</button>
+                                                                    </h2>
+                                                                    <div class="accordion-collapse collapse show item-1"
+                                                                        role="tabpanel" data-bs-parent="#accordion-2">
+                                                                        <div class="accordion-body">
+                                                                            <div class="row"
+                                                                                style="border-bottom: 2px dotted var(--bs-gray-400) ;">
+                                                                                <div class="col">
+                                                                                    <div class="row">
+                                                                                        <div class="col-auto">
+                                                                                            <div class="row">
+                                                                                                <div
+                                                                                                    class="col-auto d-xl-flex align-items-xl-center">
+                                                                                                    <p>Size:</p>
+                                                                                                </div>
+                                                                                                <div
+                                                                                                    class="col text-nowrap d-xl-flex align-items-xl-center">
+                                                                                                    <input type="number"
+                                                                                                        placeholder="0"><select>
+                                                                                                        <optgroup
+                                                                                                            label="Size_units">
+                                                                                                            <option
+                                                                                                                value="12"
+                                                                                                                selected="">
+                                                                                                                This is
+                                                                                                                item 1
+                                                                                                            </option>
+                                                                                                        </optgroup>
+                                                                                                    </select>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <div class="col-auto">
+                                                                                            <div class="row">
+                                                                                                <div
+                                                                                                    class="col-auto d-xl-flex align-items-xl-center">
+                                                                                                    <p>Quantity:</p>
+                                                                                                </div>
+                                                                                                <div
+                                                                                                    class="col d-xl-flex align-items-xl-center">
+                                                                                                    <input type="number"
+                                                                                                        placeholder="0">
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <div class="col-auto">
+                                                                                            <div class="row">
+                                                                                                <div
+                                                                                                    class="col-auto d-xl-flex align-items-xl-center">
+                                                                                                    <p>outer Box:</p>
+                                                                                                </div>
+                                                                                                <div
+                                                                                                    class="col d-xl-flex align-items-xl-center">
+                                                                                                    <select>
+                                                                                                        <optgroup
+                                                                                                            label="Box">
+                                                                                                            <option
+                                                                                                                value="12"
+                                                                                                                selected="">
+                                                                                                                This is
+                                                                                                                item 1
+                                                                                                            </option>
+                                                                                                        </optgroup>
+                                                                                                    </select>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    <div class="row">
+                                                                                        <div class="col-auto">
+                                                                                            <div class="row">
+                                                                                                <div
+                                                                                                    class="col-auto d-xl-flex align-items-xl-center">
+                                                                                                    <p>Weight:</p>
+                                                                                                </div>
+                                                                                                <div
+                                                                                                    class="col text-nowrap d-xl-flex align-items-xl-center">
+                                                                                                    <input type="number"
+                                                                                                        placeholder="0"><select>
+                                                                                                        <optgroup
+                                                                                                            label="weight_units">
+                                                                                                            <option
+                                                                                                                value="12"
+                                                                                                                selected="">
+                                                                                                                This is
+                                                                                                                item 1
+                                                                                                            </option>
+                                                                                                        </optgroup>
+                                                                                                    </select>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <div class="col-auto">
+                                                                                            <div class="row">
+                                                                                                <div
+                                                                                                    class="col-auto d-xl-flex align-items-xl-center">
+                                                                                                    <p>Price:</p>
+                                                                                                </div>
+                                                                                                <div
+                                                                                                    class="col d-xl-flex align-items-xl-center">
+                                                                                                    <input type="number"
+                                                                                                        placeholder="0">
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <div class="col-auto">
+                                                                                            <div class="row">
+                                                                                                <div
+                                                                                                    class="col-auto d-xl-flex align-items-xl-center">
+                                                                                                    <p>IP:</p>
+                                                                                                </div>
+                                                                                                <div
+                                                                                                    class="col d-xl-flex align-items-xl-center">
+                                                                                                    <input
+                                                                                                        class="form-control-sm"
+                                                                                                        type="text"
+                                                                                                        placeholder="0.0.0.0"
+                                                                                                        autocomplete="on"
+                                                                                                        id="item_size_ip">
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    <div class="row">
+                                                                                        <div class="col">
+                                                                                            <div class="accordion"
+                                                                                                role="tablist"
+                                                                                                id="accordion-3">
+                                                                                                <div
+                                                                                                    class="accordion-item">
+                                                                                                    <h2 class="accordion-header"
+                                                                                                        role="tab">
+                                                                                                        <button
+                                                                                                            class="accordion-button"
+                                                                                                            data-bs-toggle="collapse"
+                                                                                                            data-bs-target="#accordion-3 .item-1"
+                                                                                                            aria-expanded="true"
+                                                                                                            aria-controls="accordion-3 .item-1">connections</button>
+                                                                                                    </h2>
+                                                                                                    <div class="accordion-collapse collapse show item-1"
+                                                                                                        role="tabpanel"
+                                                                                                        data-bs-parent="#accordion-3">
+                                                                                                        <div
+                                                                                                            class="accordion-body">
+                                                                                                            <div
+                                                                                                                class="row row-cols-1">
+                                                                                                                <div
+                                                                                                                    class="col-6 d-xl-flex align-items-xl-center">
+                                                                                                                    <p>[connections
+                                                                                                                        name]
+                                                                                                                    </p>
+                                                                                                                </div>
+                                                                                                                <div
+                                                                                                                    class="col-6 d-xl-flex justify-content-xl-end align-items-xl-center">
+                                                                                                                    <input
+                                                                                                                        type="number"
+                                                                                                                        placeholder="0">
+                                                                                                                </div>
+                                                                                                            </div>
+                                                                                                        </div>
+                                                                                                    </div>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col d-xl-flex justify-content-xl-end align-items-xl-center"><button
+                                                class="btn btn-primary save" type="button"
+                                                style="width: 50%;background: var(--bs-blue);"
+                                                id="item_save">save</button></div>
+                                        <div class="col d-xl-flex justify-content-xl-start align-items-xl-center">
+                                            <button class="btn btn-primary reset" type="button"
+                                                style="width: 50%;background: var(--bs-blue);"
+                                                id="item_reset">reset</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="tab-pane" role="tabpanel" id="tab-2">
+                                    <div class="row">
+                                        <div class="col d-xl-flex align-items-xl-center">
+                                            <p>name:</p>
+                                        </div>
+                                        <div class="col d-xl-flex align-items-xl-center"><input class="form-control-sm"
+                                                type="text" placeholder="name" autocomplete="on" id="box_name"></div>
+                                        <div class="col d-xl-flex align-items-xl-center"></div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col d-xl-flex align-items-xl-center">
+                                            <p>outer box:</p>
+                                        </div>
+                                        <div class="col d-xl-flex align-items-xl-center"><select>
+                                                <optgroup label="This is a group" id="box_outer">
+                                                    <option value="1" selected="">This is item 1</option>
+                                                </optgroup>
+                                            </select></div>
+                                        <div class="col d-xl-flex align-items-xl-center"></div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col d-xl-flex align-items-xl-center">
+                                            <p>color:</p>
+                                        </div>
+                                        <div class="col d-xl-flex align-items-xl-center"><input type="color"
+                                                id="box_color"></div>
+                                        <div class="col d-xl-flex align-items-xl-center"></div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col d-xl-flex align-items-xl-center">
+                                            <p>Weight:</p>
+                                        </div>
+                                        <div class="col d-xl-flex align-items-xl-center"><input type="number"
+                                                placeholder="0" id="box_weight"></div>
+                                        <div class="col d-xl-flex align-items-xl-center"></div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col d-xl-flex align-items-xl-center">
+                                            <p>Instructions:</p>
+                                        </div>
+                                        <div class="col d-xl-flex align-items-xl-center"><select>
+                                                <optgroup label="This is a group" id="box_instruction">
+                                                    <option value="1" selected="">This is item 1</option>
+                                                </optgroup>
+                                            </select></div>
+                                        <div class="col d-xl-flex align-items-xl-center"></div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col d-xl-flex align-items-xl-center">
+                                            <p>Location</p>
+                                        </div>
+                                        <div class="col d-xl-flex align-items-xl-center"><input class="form-control-sm"
+                                                type="text" placeholder="location" autocomplete="on" id="box_location">
+                                        </div>
+                                        <div class="col d-xl-flex align-items-xl-center"></div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col d-xl-flex align-items-xl-center">
+                                            <p>Picture</p>
+                                        </div>
+                                        <div class="col d-xl-flex align-items-xl-center"><input type="file"
+                                                id="box_picture"></div>
+                                        <div class="col d-xl-flex align-items-xl-center"></div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col">
+                                            <div class="accordion" role="tablist" id="accordion-4">
+                                                <div class="accordion-item">
+                                                    <h2 class="accordion-header" role="tab"><button
+                                                            class="accordion-button" data-bs-toggle="collapse"
+                                                            data-bs-target="#accordion-4 .item-1" aria-expanded="true"
+                                                            aria-controls="accordion-4 .item-1">Items</button></h2>
+                                                    <div class="accordion-collapse collapse show item-1" role="tabpanel"
+                                                        data-bs-parent="#accordion-4">
+                                                        <div class="accordion-body" id="box_item_body">
+                                                            <div class="row"
+                                                                style="border-bottom: 2px dotted var(--bs-gray-400) ;">
+                                                                <div class="col d-xl-flex align-items-xl-center">
+                                                                    <p>[item name]</p>
+                                                                </div>
+                                                                <div
+                                                                    class="col d-xl-flex justify-content-xl-end align-items-xl-center">
+                                                                    <input class="form-range" type="range">
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col">
+                                            <div class="accordion" role="tablist" id="accordion-5">
+                                                <div class="accordion-item">
+                                                    <h2 class="accordion-header" role="tab"><button
+                                                            class="accordion-button" data-bs-toggle="collapse"
+                                                            data-bs-target="#accordion-5 .item-1" aria-expanded="true"
+                                                            aria-controls="accordion-5 .item-1">inner box</button></h2>
+                                                    <div class="accordion-collapse collapse show item-1" role="tabpanel"
+                                                        data-bs-parent="#accordion-5">
+                                                        <div class="accordion-body" id="box_inner_body">
+                                                            <div class="row"
+                                                                style="border-bottom: 2px dotted var(--bs-gray-400) ;">
+                                                                <div class="col d-xl-flex align-items-xl-center">
+                                                                    <p>[box name]</p>
+                                                                </div>
+                                                                <div
+                                                                    class="col d-xl-flex justify-content-xl-end align-items-xl-center">
+                                                                    <input type="checkbox">
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col d-xl-flex justify-content-xl-end align-items-xl-center"><button
+                                                class="btn btn-primary save" type="button"
+                                                style="width: 50%;background: var(--bs-blue);"
+                                                id="box_save">save</button></div>
+                                        <div class="col d-xl-flex justify-content-xl-start align-items-xl-center">
+                                            <button class="btn btn-primary reset" type="button"
+                                                style="width: 50%;background: var(--bs-blue);"
+                                                id="box_reset">reset</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="tab-pane" role="tabpanel" id="tab-3">
+                                    <div class="row">
+                                        <div
+                                            class="col d-lg-flex d-xl-flex align-items-lg-center align-items-xl-center">
+                                            <p>Name:</p>
+                                        </div>
+                                        <div class="col d-xl-flex align-items-xl-center"><input class="form-control-sm"
+                                                type="text" placeholder="name" autocomplete="on" id="instruction_name">
+                                        </div>
+                                        <div class="col d-xl-flex align-items-xl-center"></div>
+                                    </div>
+                                    <div class="row">
+                                        <div
+                                            class="col d-lg-flex d-xl-flex align-items-lg-center align-items-xl-center">
+                                            <p>pdf_file:</p>
+                                        </div>
+                                        <div class="col d-xl-flex align-items-xl-center"><input type="file"
+                                                id="instruction_pdf"></div>
+                                        <div class="col d-xl-flex align-items-xl-center"></div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col">
+                                            <div class="accordion" role="tablist" id="accordion-6">
+                                                <div class="accordion-item">
+                                                    <h2 class="accordion-header" role="tab"><button
+                                                            class="accordion-button" data-bs-toggle="collapse"
+                                                            data-bs-target="#accordion-6 .item-1" aria-expanded="true"
+                                                            aria-controls="accordion-6 .item-1">items</button></h2>
+                                                    <div class="accordion-collapse collapse show item-1" role="tabpanel"
+                                                        data-bs-parent="#accordion-6">
+                                                        <div class="accordion-body" id="instruction_item_body">
+                                                            <div class="row"
+                                                                style="border-bottom: 2px dotted var(--bs-gray-400) ;">
+                                                                <div
+                                                                    class="col d-lg-flex d-xl-flex align-items-lg-center align-items-xl-center">
+                                                                    <p>[item name]</p>
+                                                                </div>
+                                                                <div
+                                                                    class="col d-lg-flex d-xl-flex justify-content-lg-end align-items-lg-center justify-content-xl-end align-items-xl-center">
+                                                                    <input type="checkbox">
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col">
+                                            <div class="accordion" role="tablist" id="accordion-7">
+                                                <div class="accordion-item">
+                                                    <h2 class="accordion-header" role="tab"><button
+                                                            class="accordion-button" data-bs-toggle="collapse"
+                                                            data-bs-target="#accordion-7 .item-1" aria-expanded="true"
+                                                            aria-controls="accordion-7 .item-1">box</button></h2>
+                                                    <div class="accordion-collapse collapse show item-1" role="tabpanel"
+                                                        data-bs-parent="#accordion-7">
+                                                        <div class="accordion-body" id="instruction_box_body">
+                                                            <div class="row"
+                                                                style="border-bottom: 2px dotted var(--bs-gray-400) ;">
+                                                                <div
+                                                                    class="col d-lg-flex d-xl-flex align-items-lg-center align-items-xl-center">
+                                                                    <p>[box_name]</p>
+                                                                </div>
+                                                                <div
+                                                                    class="col d-lg-flex d-xl-flex justify-content-lg-end align-items-lg-center justify-content-xl-end align-items-xl-center">
+                                                                    <input type="checkbox">
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col">
+                                            <div class="accordion" role="tablist" id="accordion-10">
+                                                <div class="accordion-item">
+                                                    <h2 class="accordion-header" role="tab"><button
+                                                            class="accordion-button" data-bs-toggle="collapse"
+                                                            data-bs-target="#accordion-10 .item-1" aria-expanded="true"
+                                                            aria-controls="accordion-10 .item-1">connections</button>
+                                                    </h2>
+                                                    <div class="accordion-collapse collapse show item-1" role="tabpanel"
+                                                        data-bs-parent="#accordion-10">
+                                                        <div class="accordion-body" id="instruction_connection_body">
+                                                            <div class="row">
+                                                                <div class="col d-lg-flex d-xl-flex align-items-lg-center align-items-xl-center"
+                                                                    style="border-bottom: 2px dotted var(--bs-gray-400) ;">
+                                                                    <p>[connections name]</p>
+                                                                </div>
+                                                                <div
+                                                                    class="col d-lg-flex d-xl-flex justify-content-lg-end align-items-lg-center justify-content-xl-end align-items-xl-center">
+                                                                    <input type="checkbox">
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col">
+                                            <div class="row">
+                                                <div class="col">
+                                                    <p>Instruction text:</p>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col d-xl-flex align-items-xl-center"><textarea
+                                                        style="width: 100%;height: 70px;"
+                                                        id="instruction_text"></textarea></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col d-xl-flex justify-content-xl-end align-items-xl-center"><button
+                                                class="btn btn-primary save" type="button"
+                                                style="width: 50%;background: var(--bs-blue);"
+                                                id="instruction_save">save</button></div>
+                                        <div class="col d-xl-flex justify-content-xl-start align-items-xl-center">
+                                            <button class="btn btn-primary reset" type="button"
+                                                style="width: 50%;background: var(--bs-blue);"
+                                                id="instruction_reset">reset</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="tab-pane" role="tabpanel" id="tab-4">
+                                    <div class="row">
+                                        <div class="col d-xl-flex align-items-xl-center">
+                                            <p>location:</p>
+                                        </div>
+                                        <div class="col d-xl-flex align-items-xl-center"><input class="form-control-sm"
+                                                type="text" placeholder="location" autocomplete="on"
+                                                id="in_use_location"></div>
+                                        <div class="col d-xl-flex align-items-xl-center"></div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col d-xl-flex align-items-xl-center">
+                                            <p>notes:</p>
+                                        </div>
+                                        <div class="col d-xl-flex align-items-xl-center"><input class="form-control-sm"
+                                                type="text" placeholder="notes" autocomplete="on" id="in_use_notes">
+                                        </div>
+                                        <div class="col d-xl-flex align-items-xl-center"></div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col">
+                                            <div class="accordion" role="tablist" id="accordion-8">
+                                                <div class="accordion-item">
+                                                    <h2 class="accordion-header" role="tab"><button
+                                                            class="accordion-button" data-bs-toggle="collapse"
+                                                            data-bs-target="#accordion-8 .item-1" aria-expanded="true"
+                                                            aria-controls="accordion-8 .item-1">Items</button></h2>
+                                                    <div class="accordion-collapse collapse show item-1" role="tabpanel"
+                                                        data-bs-parent="#accordion-8">
+                                                        <div class="accordion-body" id="in_use_items_body">
+                                                            <div class="accordion" role="tablist" id="accordion-9">
+                                                                <div class="accordion-item">
+                                                                    <h2 class="accordion-header" role="tab"><button
+                                                                            class="accordion-button"
+                                                                            data-bs-toggle="collapse"
+                                                                            data-bs-target="#accordion-9 .item-1"
+                                                                            aria-expanded="true"
+                                                                            aria-controls="accordion-9 .item-1">[Item_name]</button>
+                                                                    </h2>
+                                                                    <div class="accordion-collapse collapse show item-1"
+                                                                        role="tabpanel" data-bs-parent="#accordion-9">
+                                                                        <div class="accordion-body">
+                                                                            <div class="row"
+                                                                                style="border-bottom: 2px dotted var(--bs-gray-400) ;">
+                                                                                <div
+                                                                                    class="col d-xl-flex align-items-xl-center">
+                                                                                    <p>[Box_name]</p>
+                                                                                </div>
+                                                                                <div
+                                                                                    class="col d-xl-flex justify-content-xl-end align-items-xl-center">
+                                                                                    <input class="form-range"
+                                                                                        type="range">
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col d-xl-flex justify-content-xl-end align-items-xl-center"><button
+                                                class="btn btn-primary save" type="button"
+                                                style="width: 50%;background: var(--bs-blue);"
+                                                id="in_use_save">save</button></div>
+                                        <div class="col d-xl-flex justify-content-xl-start align-items-xl-center">
+                                            <button class="btn btn-primary reset" type="button"
+                                                style="width: 50%;background: var(--bs-blue);"
+                                                id="in_use_reset">reset</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="tab-pane" role="tabpanel" id="tab-5">
+                                    <div class="row">
+                                        <div class="col d-xl-flex align-items-xl-center">
+                                            <p>name:</p>
+                                        </div>
+                                        <div class="col"><input class="form-control-sm" type="text" placeholder="name"
+                                                autocomplete="on" id="connection_name"></div>
+                                        <div class="col"></div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col d-xl-flex align-items-xl-center">
+                                            <p>gender:</p>
+                                        </div>
+                                        <div class="col d-xl-flex align-items-xl-center">
+                                            <div class="row" style="width: 50%;">
+                                                <div class="col-auto d-xl-flex align-items-xl-center">
+                                                    <div class="form-check"><input class="form-check-input" type="radio"
+                                                            id="formCheck-4" name="gender" checked=""
+                                                            id="connection_gender_male"><label class="form-check-label"
+                                                            for="formCheck-1">male</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-auto d-xl-flex align-items-xl-center">
+                                                    <div class="form-check"><input class="form-check-input" type="radio"
+                                                            id="formCheck-5" name="gender"
+                                                            id="connection_gender_female"><label
+                                                            class="form-check-label" for="formCheck-2">female</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-auto d-xl-flex align-items-xl-center">
+                                                    <div class="form-check"><input class="form-check-input" type="radio"
+                                                            id="formCheck-3" name="gender"
+                                                            id="connection_gender_both"><label class="form-check-label"
+                                                            for="formCheck-2">both</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col"></div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col d-xl-flex align-items-xl-center">
+                                            <p>note:</p>
+                                        </div>
+                                        <div class="col d-xl-flex align-items-xl-center"><input class="form-control-sm"
+                                                type="text" placeholder="note" autocomplete="on" id="connection_note">
+                                        </div>
+                                        <div class="col"></div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col d-xl-flex align-items-xl-center">
+                                            <p>category:</p>
+                                        </div>
+                                        <div class="col d-xl-flex align-items-xl-center"><select>
+                                                <optgroup label="This is a group" id="connection_category">
+                                                    <option value="1" selected="">This is item 1</option>
+                                                </optgroup>
+                                            </select></div>
+                                        <div class="col"><button class="btn btn-primary" type="button"
+                                                style="background: var(--bs-blue);" id="category_add">Add
+                                                Category</button><input class="form-control-sm d-none" type="text"
+                                                placeholder="name" autocomplete="on" id="category_name"></div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col">
+                                            <div class="accordion" role="tablist" id="accordion-11">
+                                                <div class="accordion-item">
+                                                    <h2 class="accordion-header" role="tab"><button
+                                                            class="accordion-button" data-bs-toggle="collapse"
+                                                            data-bs-target="#accordion-11 .item-1" aria-expanded="true"
+                                                            aria-controls="accordion-11 .item-1">compatible</button>
+                                                    </h2>
+                                                    <div class="accordion-collapse collapse show item-1" role="tabpanel"
+                                                        data-bs-parent="#accordion-11">
+                                                        <div class="accordion-body" id="connection_compatible_body">
+                                                            <div class="row"
+                                                                style="border-bottom: 2px dotted var(--bs-gray-400) ;">
+                                                                <div class="col d-xl-flex align-items-xl-center">
+                                                                    <p>[connection_name]</p>
+                                                                </div>
+                                                                <div
+                                                                    class="col d-xl-flex justify-content-xl-end align-items-xl-center">
+                                                                    <input type="checkbox">
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col d-xl-flex justify-content-xl-end align-items-xl-center"><button
+                                                class="btn btn-primary save" type="button"
+                                                style="width: 50%;background: var(--bs-blue);"
+                                                id="connection_save">save</button></div>
+                                        <div class="col d-xl-flex justify-content-xl-start align-items-xl-center">
+                                            <button class="btn btn-primary reset" type="button"
+                                                style="width: 50%;background: var(--bs-blue);"
+                                                id="connection_reset">reset</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="tab-pane" role="tabpanel" id="tab-6">
+                                    <div class="row">
+                                        <div class="col"><select>
+                                                <optgroup label="This is a group">
+                                                    <option value="12" selected="">This is item 1</option>
+                                                    <option value="13">This is item 2</option>
+                                                    <option value="14">This is item 3</option>
+                                                </optgroup>
+                                            </select></div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col">
+                                            <div class="table-responsive">
+                                                <table class="table">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>id</th>
+                                                            <th>name</th>
+                                                            <th>outer box</th>
+                                                            <th>color</th>
+                                                            <th>remove</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr>
+                                                            <td>Cell 1</td>
+                                                            <td>Cell 2</td>
+                                                            <td>Cell 3</td>
+                                                            <td>Cell 4</td>
+                                                            <td><button class="btn btn-primary" type="button"
+                                                                    style="width: 100%;background: var(--bs-blue);">remove</button>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            <div class="table-responsive">
+                                                <table class="table">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>id</th>
+                                                            <th>name</th>
+                                                            <th>outer box (if null, inner boxes)</th>
+                                                            <th>color</th>
+                                                            <th>remove</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr>
+                                                            <td>Cell 1</td>
+                                                            <td>Cell 2</td>
+                                                            <td>Cell 3</td>
+                                                            <td>Cell 4</td>
+                                                            <td><button class="btn btn-primary" type="button"
+                                                                    style="width: 100%;background: var(--bs-blue);">remove</button>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            <div class="table-responsive">
+                                                <table class="table">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>id</th>
+                                                            <th>name</th>
+                                                            <th>used</th>
+                                                            <th>pdf</th>
+                                                            <th>remove</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr>
+                                                            <td>Cell 1</td>
+                                                            <td>Cell 2</td>
+                                                            <td>Cell 3</td>
+                                                            <td>Cell 4</td>
+                                                            <td><button class="btn btn-primary" type="button"
+                                                                    style="width: 100%;background: var(--bs-blue);">remove</button>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            <div class="table-responsive">
+                                                <table class="table">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>name</th>
+                                                            <th>type</th>
+                                                            <th>quantity</th>
+                                                            <th>outer box</th>
+                                                            <th>location</th>
+                                                            <th>remove</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr>
+                                                            <td>Cell 1</td>
+                                                            <td>Cell 2</td>
+                                                            <td>Cell 3</td>
+                                                            <td>Cell 4</td>
+                                                            <td>Cell 5</td>
+                                                            <td><button class="btn btn-primary" type="button"
+                                                                    style="width: 100%;background: var(--bs-blue);">remove</button>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            <div class="table-responsive">
+                                                <table class="table">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>id</th>
+                                                            <th>name</th>
+                                                            <th>items</th>
+                                                            <th>description</th>
+                                                            <th>remove</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr>
+                                                            <td>Cell 1</td>
+                                                            <td>Cell 2</td>
+                                                            <td>Cell 3</td>
+                                                            <td>Cell 4</td>
+                                                            <td><button class="btn btn-primary" type="button"
+                                                                    style="width: 100%;background: var(--bs-blue);">remove</button>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            <div class="table-responsive">
+                                                <table class="table">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>id</th>
+                                                            <th>name</th>
+                                                            <th>Pages</th>
+                                                            <th>canchange</th>
+                                                            <th>remove</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr>
+                                                            <td>Cell 1</td>
+                                                            <td>Cell 2</td>
+                                                            <td>Cell 3</td>
+                                                            <td>Cell 4</td>
+                                                            <td><button class="btn btn-primary" type="button"
+                                                                    style="width: 100%;background: var(--bs-blue);">remove</button>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            <div class="table-responsive">
+                                                <table class="table">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>id</th>
+                                                            <th>name</th>
+                                                            <th>gender</th>
+                                                            <th>note</th>
+                                                            <th>remove</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr>
+                                                            <td>Cell 1</td>
+                                                            <td>Cell 2</td>
+                                                            <td>Cell 3</td>
+                                                            <td>Cell 4</td>
+                                                            <td><button class="btn btn-primary" type="button"
+                                                                    style="width: 100%;background: var(--bs-blue);">remove</button>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            <div class="table-responsive">
+                                                <table class="table">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>id</th>
+                                                            <th>name</th>
+                                                            <th>used</th>
+                                                            <th>remove</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr>
+                                                            <td>Cell 1</td>
+                                                            <td>Cell 2</td>
+                                                            <td>Cell 3</td>
+                                                            <td><button class="btn btn-primary" type="button"
+                                                                    style="width: 100%;background: var(--bs-blue);">remove</button>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div><!-- End: 1 Row 1 Column -->
+        </div>
+    </div><!-- Start: Footer Clean -->
+    <footer class="footer-clean">
+        <div class="container">
+            <div class="row justify-content-center">
+                <!-- Start: About -->
+                <div class="col-3 col-sm-4 col-md-3 item">
+                    <h3>Credit</h3>
+                    <ul>
+                        <li>Bennet Richter</li>
+                    </ul>
+                </div><!-- End: About -->
+                <!-- Start: Social Icons -->
+                <div
+                    class="col-3 col-lg-3 d-xl-flex justify-content-center align-items-center align-content-center align-self-center justify-content-xl-center align-items-xl-start item social">
+                    <a class="text-center d-xl-flex justify-content-center align-items-center align-content-center align-self-center justify-content-xl-center align-items-xl-end"
+                        href="https://github.com/bnnt29/Inventory_manager"><i class="fa fa-github"
+                            aria-hidden="true"></i></a>
+                </div><!-- End: Social Icons -->
+            </div>
+        </div>
+    </footer><!-- End: Footer Clean -->
+    <script src="../bootstrap/js/bootstrap.min.js"></script>
+    <script src="https://use.fontawesome.com/360f200af7.js"></script>
+    <script src="../js/objects.js"></script>
+</body>
+
+</html>
