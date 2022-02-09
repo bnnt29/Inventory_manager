@@ -1,36 +1,17 @@
-function opentab(evt, tabName) {
-    // Declare all variables
-    var i, tabcontent, tablinks;
-
-    // Get all elements with class="tabcontent" and hide them
-    tabcontent = document.getElementsByClassName("tabcontent");
-    for (i = 0; i < tabcontent.length; i++) {
-        tabcontent[i].style.display = "none";
-    }
-
-    // Get all elements with class="tablinks" and remove the class "active"
-    tablinks = document.getElementsByClassName("tablinks");
-    for (i = 0; i < tablinks.length; i++) {
-        tablinks[i].className = tablinks[i].className.replace(" active", "");
-    }
-
-    // Show the current tab, and add an "active" class to the button that opened the tab
-    document.getElementById(tabName).style.display = "block";
-    evt.currentTarget.className += " active";
+function onsizechange(a) {
+    let a = document.getElementsByClassName("")
 }
-function init_collapse() {
-    let coll = document.getElementsByClassName("collapsible");
 
-    for (let i = 0; i < coll.length; i++) {
-        coll[i].addEventListener("click", function () {
-            let content = this.nextElementSibling;
-            if (content.style.display === "block") {
-                content.style.display = "none";
-            } else {
-                content.style.display = "block";
-            }
+function addsize() {
+    var ip = location.host;
+    var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
+    socket.once('connect', () => {
+        socket.once('getouter_box', (data) => {
+            socket.once('getconnection', (data) => {
+
+            });
         });
-    }
+    });
 }
 
 function getinstructions() {
@@ -347,71 +328,130 @@ function refresh() {
 }
 
 function additem() {
-    var name = document.getElementById("item_name").value;
+    let name = document.getElementById("item_name").value;
     document.getElementById("item_name").value = "";
-    var instructions = parseInt(document.getElementById("item_instruction").value);
+    let instructions = parseInt(document.getElementById("item_instruction").value);
     document.getElementById("item_instruction").value = "Instruction";
-    var size = parseFloat(document.getElementById("item_size").value);
-    document.getElementById("item_size").value = "";
-    var unit_size = document.getElementById("unit_size").value;
-    document.getElementById("unit_size").value = "mm";
-    var quantity = parseFloat(document.getElementById("item_quantity").value);
-    document.getElementById("item_quantity").value = "";
-    var color = document.getElementById("item_color").value;
+    let color = document.getElementById("item_color").value;
     document.getElementById("item_color").value = "#FFFFFF";
-    var pic = document.getElementById("item_pic").files;
-    var weight = parseFloat(document.getElementById("item_weight").value);
-    document.getElementById("item_weight").value = "";
-    var unit_weight = document.getElementById("unit_weight").value;
-    document.getElementById("unit_weight").value = "g";
-    var price = parseFloat(document.getElementById("item_price").value);
-    document.getElementById("item_price").value = "";
+    let pictures = document.getElementById("item_picture").files;
+
+    let size_count = document.getElementsByClassName("item_size_count").length;
+    let size_sizesX = [];
+    document.getElementsByClassName("size_sizesX").forEach((sizex) => {
+        if (sizex.value == null || sizex.value.length == 0 || sizex.value == "") {
+            size_sizesX = [...size_sizesX, sizex.placeholder];
+        } else {
+            size_sizesX = [...size_sizesX, sizex.value];
+        }
+    });
+    let size_sizesY = [];
+    document.getElementsByClassName("size_sizesY").forEach((sizey) => {
+        if (sizey.value == null || sizey.value.length == 0 || sizey.value == "") {
+            size_sizesY = [...size_sizesY, sizey.placeholder];
+        } else {
+            size_sizesY = [...size_sizesY, sizey.value];
+        }
+        size_sizesY = [...size_sizesY, sizey.value];
+    });
+    let size_sizesZ = [];
+    document.getElementsByClassName("size_sizesZ").forEach((sizez) => {
+        if (sizez.value == null || sizez.value.length == 0 || sizez.value == "") {
+            size_sizesZ = [...size_sizesZ, sizez.placeholder];
+        } else {
+            size_sizesZ = [...size_sizesZ, sizez.value];
+        }
+    });
+    let size_quantity = [];
+    document.getElementsByClassName("size_quantity").forEach((quantity) => {
+        if (quantity.value == null || quantity.value.length == 0 || quantity.value == "") {
+            size_quantity = [...size_quantity, quantity.placeholder];
+        } else {
+            size_quantity = [...size_quantity, quantity.value];
+        }
+    });
+    let size_weight = [];
+    document.getElementsByClassName("size_weight").forEach((weight) => {
+        if (weight.value == null || weight.value.length == 0 || weight.value == "") {
+            size_weight = [...size_weight, weight.placeholder];
+        } else {
+            size_weight = [...size_weight, weight.value];
+        }
+    });
+    let size_price = [];
+    document.getElementsByClassName("size_price").forEach((price) => {
+        if (price.value == null || price.value.length == 0 || price.value == "") {
+            size_price = [...size_price, price.placeholder];
+        } else {
+            size_price = [...size_price, price.value];
+        }
+    });
+    let size_ip = [];
+    document.getElementsByClassName("size_ip").forEach((ip) => {
+        if (ip.value == null || ip.value.length == 0 || ip.value == "") {
+            size_ip = [...size_ip, ip.placeholder];
+        } else {
+            size_ip = [...size_ip, ip.value];
+        }
+    });
+    let size_connection = [];
+    document.getElementsByClassName("size_connection").forEach((connection) => {
+        let save = [];
+        connection.innerHTML.getElementsByClassName("size_connection_count").forEach((connection_count) => {
+            if (connection_count.value == null || connection_count.value.length == 0 || connection_count.value == "") {
+                save = [...save, [connection_count.getAttribute('data-id'), connection_count.placeholder]];
+            } else {
+                save = [...save, [connection_count.getAttribute('data-id'), connection_count.value]];
+            }
+        });
+        size_connection = [...size_connection, save];
+    });
+
+    let size_outer_Box = [];
+    document.getElementsByClassName("size_outer_box").forEach((connection) => {
+        let save = [];
+        connection.innerHTML.getElementsByClassName("outer_box_count").forEach((outer_box_count) => {
+            if (outer_box_count.value == null || outer_box_count.value.length == 0 || outer_box_count.value == "") {
+                save = [...save, [outer_box_count.getAttribute('data-id'), outer_box_count.placeholder]];
+            } else {
+                save = [...save, [outer_box_count.getAttribute('data-id'), outer_box_count.value]];
+            }
+        });
+        size_outer_Box = [...size_outer_Box, save];
+    });
     if (name != "") {
         var ip = location.host;
         var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
         socket.once('connect', () => {
-            socket.once('getsize_Unit', (data) => {
-                socket.once('getweight_Unit', (dat) => {
-                    data.forEach((values) => {
-                        if (unit_size === values.name) {
-                            size = size * parseFloat(values.multiplicator);
-                        }
-                    });
-                    dat.forEach((values) => {
-                        if (unit_weight === values.name) {
-                            weight = weight * parseFloat(values.multiplicator);
-                        }
-                    });
-                    socket.emit('item_data', [name, [outer_box], instructions, [size], color, [quantity], [weight], [price]]);
-                    socket.once("successi", (data) => {
-                        for (let e = 0; e < pic.length; e++) {
-                            let r = new FileReader();
-                            r.addEventListener("loadend", function () {
-                                let picres = r.result;
-                                socket.emit('setitempic', [data, name, picres.length]);
-                                console.log(picres.length);
-                                socket.on("pready" + data + "&" + name, (datas) => {
-                                    socket.emit("pback" + data + "&" + name, [datas, picres.slice(0 + (datas * 9900), 9900 * (datas + 1))]);
-                                    if (datas + 1 >= picres.size / 9900) {
-                                        console.log("allsended");
-                                    }
-                                });
-                            });
-                            r.readAsDataURL(pic[e]);
-                        }
-                        socket.once("ptransferred" + data + false + "&" + name, (datas) => {
-                            if (datas === false) {
-                                socket.emit("ptransferred" + data + true + "&" + name, true);
-                                socket.removeAllListeners("pready" + data + "&" + name);
+            socket.emit('item_data', [name, instructions, color, size_count, size_sizesX, size_sizesY, size_sizesZ, size_quantity, size_outer_Box, size_weight, size_price, size_ip, size_connection]);
+            socket.once("successi", (data) => {
+                for (let e = 0; e < pictures.length; e++) {
+                    let r = new FileReader();
+                    r.addEventListener("loadend", function () {
+                        let picres = r.result;
+                        socket.emit('setitempic', [data, name, picres.length, e]);
+                        socket.on("pready" + data + "&" + name + "&" + e, (datas) => {
+                            socket.emit("pback" + data + "&" + name + "&" + e, [datas, picres.slice(0 + (datas * 9900), 9900 * (datas + 1))]);
+                            if (datas + 1 >= picres.size / 9900) {
+                                console.log("allsended");
                             }
                         });
-                        socket.once("pfin" + data + "&" + name, (dat) => {
-                            document.getElementById("item_pic_f").reset();
-                            location.reload();
+                        socket.once("ptransferred" + data + false + "&" + name + "&" + e, (datas) => {
+                            if (datas === false) {
+                                socket.emit("ptransferred" + data + true + "&" + name + "&" + e, true);
+                                socket.removeAllListeners("pready" + data + "&" + name + "&" + e);
+                            }
                         });
                     });
+                    r.readAsDataURL(pic[e]);
+                }
+                socket.once("pfin" + data + "&" + name, (dat) => {
+                    if (dat >= pictures.length) {
+                        document.getElementById("item_picture").reset();
+                        location.reload();
+                    }
                 });
-            })
+            });
         });
     }
 }

@@ -5,10 +5,10 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
     <title>Inventory Manager</title>
-    <link rel="stylesheet" href="../bootstrap/css/bootstrap.min.css">
-    <link rel="stylesheet" href="../fonts/font-awesome.min.css">
-    <link rel="stylesheet" href="../fonts/ionicons.min.css">
-    <link rel="stylesheet" href="../css/styles.min.css">
+    <link rel="stylesheet" href="assets/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/fonts/font-awesome.min.css">
+    <link rel="stylesheet" href="assets/fonts/ionicons.min.css">
+    <link rel="stylesheet" href="assets/css/styles.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/baguettebox.js/1.10.0/baguetteBox.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Swiper/6.4.8/swiper-bundle.min.css">
 </head>
@@ -46,7 +46,7 @@
     <div class="row">
         <div class="col-auto d-xl-flex align-self-start align-items-xl-center">
             <div>
-                <script type="text/javascript" src="js/qrcode.js"></script>
+                <script type="text/javascript" src="qrcode.js"></script>
                 <div id="qrcode" style="width:100px; height:100px; margin:15px;">
                     <script type="text/javascript">
                         var qrcode = new QRCode(document.getElementById("qrcode"), {
@@ -128,23 +128,21 @@
                                         class="fa fa-save"></i></button></div>
                         </div>
                         <div class="row">
-                            <div class="col d-xl-flex align-items-xl-center">
-                                <p>outer Box:</p>
+                            <div class="col d-xl-flex justify-content-xl-start align-items-xl-center">
+                                <p>Pictures (related to currently shown picture):</p>
                             </div>
-                            <div class="col-4 d-xl-flex align-items-xl-center">
-                                <p>[outer Box]</p><select class="d-none">
-                                    <optgroup label="This is a group">
-                                        <option value="12" selected="">This is item 1</option>
-                                        <option value="13">This is item 2</option>
-                                        <option value="14">This is item 3</option>
-                                    </optgroup>
-                                </select>
+                            <div class="col d-xl-flex justify-content-xl-start align-items-xl-center"><input type="file"
+                                    style="width: 50%;"></div>
+                            <div class="col-4 d-xl-flex justify-content-xl-start align-items-xl-center">
+                                <div class="row" style="width: 100%;">
+                                    <div class="col-6 d-xl-flex justify-content-xl-center align-items-xl-center"><button
+                                            class="btn btn-primary d-xl-flex" type="button"
+                                            style="background: var(--bs-blue);">add</button></div>
+                                    <div class="col-6 d-xl-flex justify-content-xl-center align-items-xl-center"><button
+                                            class="btn btn-primary" type="button"
+                                            style="background: var(--bs-blue);">remove</button></div>
+                                </div>
                             </div>
-                            <div class="col-4 d-xl-flex align-items-xl-center"><button class="btn btn-primary"
-                                    type="button" style="background: var(--bs-blue);"><i
-                                        class="fa fa-pencil"></i></button><button class="btn btn-primary d-none"
-                                    type="button" style="background: var(--bs-blue);"><i
-                                        class="fa fa-save"></i></button></div>
                         </div>
                         <div class="row">
                             <div class="col-auto" style="width: 100%;">
@@ -200,7 +198,7 @@
                                                             style="width: 100%;background: var(--bs-blue);">Button</button>
                                                     </div>
                                                 </div>
-                                                <div id="accordion-5" class="accordion" role="tablist">
+                                                <div class="accordion" role="tablist" id="accordion-5">
                                                     <div class="accordion-item">
                                                         <h2 class="accordion-header" role="tab"><button
                                                                 class="accordion-button" data-bs-toggle="collapse"
@@ -211,7 +209,7 @@
                                                             role="tabpanel" data-bs-parent="#accordion-5">
                                                             <div class="accordion-body">
                                                                 <div class="row"
-                                                                    style="border-bottom: 2px dotted var(--bs-gray-400);">
+                                                                    style="border-bottom: 2px dotted var(--bs-gray-400) ;">
                                                                     <div class="col d-xl-flex align-items-xl-center">
                                                                         <p>SizeX:</p>
                                                                     </div>
@@ -220,15 +218,15 @@
                                                                             <div
                                                                                 class="col d-xl-flex align-items-xl-center">
                                                                                 <p>[sizex]</p><input class="d-none"
-                                                                                    type="number" />
+                                                                                    type="number">
                                                                             </div>
                                                                             <div
                                                                                 class="col d-xl-flex align-items-xl-center">
                                                                                 <p>[size_unit]</p><select
                                                                                     class="d-none">
                                                                                     <optgroup label="This is a group">
-                                                                                        <option value="12" selected>This
-                                                                                            is item 1</option>
+                                                                                        <option value="12" selected="">
+                                                                                            This is item 1</option>
                                                                                         <option value="13">This is item
                                                                                             2</option>
                                                                                         <option value="14">This is item
@@ -247,7 +245,7 @@
                                                                                 class="fa fa-save"></i></button></div>
                                                                 </div>
                                                                 <div class="row"
-                                                                    style="border-bottom: 2px dotted var(--bs-gray-400);">
+                                                                    style="border-bottom: 2px dotted var(--bs-gray-400) ;">
                                                                     <div class="col d-xl-flex align-items-xl-center">
                                                                         <p>SizeY:</p>
                                                                     </div>
@@ -256,15 +254,15 @@
                                                                             <div
                                                                                 class="col d-xl-flex align-items-xl-center">
                                                                                 <p>[sizey]</p><input class="d-none"
-                                                                                    type="number" />
+                                                                                    type="number">
                                                                             </div>
                                                                             <div
                                                                                 class="col d-xl-flex align-items-xl-center">
                                                                                 <p>[size_unit]</p><select
                                                                                     class="d-none">
                                                                                     <optgroup label="This is a group">
-                                                                                        <option value="12" selected>This
-                                                                                            is item 1</option>
+                                                                                        <option value="12" selected="">
+                                                                                            This is item 1</option>
                                                                                         <option value="13">This is item
                                                                                             2</option>
                                                                                         <option value="14">This is item
@@ -283,7 +281,7 @@
                                                                                 class="fa fa-save"></i></button></div>
                                                                 </div>
                                                                 <div class="row"
-                                                                    style="border-bottom: 2px dotted var(--bs-gray-400);">
+                                                                    style="border-bottom: 2px dotted var(--bs-gray-400) ;">
                                                                     <div class="col d-xl-flex align-items-xl-center">
                                                                         <p>SizeZ:</p>
                                                                     </div>
@@ -292,15 +290,15 @@
                                                                             <div
                                                                                 class="col d-xl-flex align-items-xl-center">
                                                                                 <p>[sizez]</p><input class="d-none"
-                                                                                    type="number" />
+                                                                                    type="number">
                                                                             </div>
                                                                             <div
                                                                                 class="col d-xl-flex align-items-xl-center">
                                                                                 <p>[size_unit]</p><select
                                                                                     class="d-none">
                                                                                     <optgroup label="This is a group">
-                                                                                        <option value="12" selected>This
-                                                                                            is item 1</option>
+                                                                                        <option value="12" selected="">
+                                                                                            This is item 1</option>
                                                                                         <option value="13">This is item
                                                                                             2</option>
                                                                                         <option value="14">This is item
@@ -319,7 +317,7 @@
                                                                                 class="fa fa-save"></i></button></div>
                                                                 </div>
                                                                 <div class="row"
-                                                                    style="border-bottom: 2px dotted var(--bs-gray-400);">
+                                                                    style="border-bottom: 2px dotted var(--bs-gray-400) ;">
                                                                     <div class="col d-xl-flex align-items-xl-center">
                                                                         <p>Price:</p>
                                                                     </div>
@@ -328,7 +326,7 @@
                                                                             <div
                                                                                 class="col d-xl-flex align-items-xl-center">
                                                                                 <p>[price]</p><input class="d-none"
-                                                                                    type="number" />
+                                                                                    type="number">
                                                                             </div>
                                                                             <div
                                                                                 class="col d-xl-flex align-items-xl-center">
@@ -344,7 +342,7 @@
                                                                                 class="fa fa-save"></i></button></div>
                                                                 </div>
                                                                 <div class="row"
-                                                                    style="border-bottom: 2px dotted var(--bs-gray-400);">
+                                                                    style="border-bottom: 2px dotted var(--bs-gray-400) ;">
                                                                     <div class="col d-xl-flex align-items-xl-center">
                                                                         <p>Weight:</p>
                                                                     </div>
@@ -353,15 +351,15 @@
                                                                             <div
                                                                                 class="col d-xl-flex align-items-xl-center">
                                                                                 <p>[weight]</p><input class="d-none"
-                                                                                    type="number" />
+                                                                                    type="number">
                                                                             </div>
                                                                             <div
                                                                                 class="col d-xl-flex align-items-xl-center">
                                                                                 <p>[weight_unit]</p><select
                                                                                     class="d-none">
                                                                                     <optgroup label="This is a group">
-                                                                                        <option value="12" selected>This
-                                                                                            is item 1</option>
+                                                                                        <option value="12" selected="">
+                                                                                            This is item 1</option>
                                                                                         <option value="13">This is item
                                                                                             2</option>
                                                                                         <option value="14">This is item
@@ -380,12 +378,12 @@
                                                                                 class="fa fa-save"></i></button></div>
                                                                 </div>
                                                                 <div class="row"
-                                                                    style="border-bottom: 2px dotted var(--bs-gray-400);">
+                                                                    style="border-bottom: 2px dotted var(--bs-gray-400) ;">
                                                                     <div class="col d-xl-flex align-items-xl-center">
                                                                         <p>IP:</p>
                                                                     </div>
                                                                     <div class="col-4 d-xl-flex align-items-xl-center">
-                                                                        <p>[IP]</p><input class="d-none" type="text" />
+                                                                        <p>[IP]</p><input class="d-none" type="text">
                                                                     </div>
                                                                     <div class="col-4 d-xl-flex align-items-xl-center">
                                                                         <button class="btn btn-primary" type="button"
@@ -397,8 +395,8 @@
                                                                 </div>
                                                                 <div class="row">
                                                                     <div class="col">
-                                                                        <div id="accordion-3" class="accordion"
-                                                                            role="tablist">
+                                                                        <div class="accordion" role="tablist"
+                                                                            id="accordion-3">
                                                                             <div class="accordion-item">
                                                                                 <h2 class="accordion-header" role="tab">
                                                                                     <button class="accordion-button"
@@ -412,7 +410,7 @@
                                                                                     data-bs-parent="#accordion-3">
                                                                                     <div class="accordion-body">
                                                                                         <div class="row"
-                                                                                            style="border-bottom: 2px dotted var(--bs-gray-400);">
+                                                                                            style="border-bottom: 2px dotted var(--bs-gray-400) ;">
                                                                                             <div
                                                                                                 class="col d-xl-flex align-items-xl-center">
                                                                                                 <p>[Box name]</p>
@@ -421,7 +419,7 @@
                                                                                                 class="col d-xl-flex align-items-xl-center">
                                                                                                 <p>[quantity]</p><input
                                                                                                     class="d-none"
-                                                                                                    type="number" />
+                                                                                                    type="number">
                                                                                             </div>
                                                                                             <div
                                                                                                 class="col d-xl-flex align-items-xl-center">
@@ -476,11 +474,10 @@
             </div>
         </div>
     </footer><!-- End: Footer Clean -->
-    <script src="../bootstrap/js/bootstrap.min.js"></script>
+    <script src="assets/bootstrap/js/bootstrap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/baguettebox.js/1.10.0/baguetteBox.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Swiper/6.4.8/swiper-bundle.min.js"></script>
-    <script src="https://use.fontawesome.com/360f200af7.js"></script>
-    <script src="../js/item.js"></script>
+    <script src="assets/js/script.min.js"></script>
 </body>
 
 </html>

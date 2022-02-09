@@ -443,17 +443,18 @@ function setobjpic(data, socket, item) {
     let adresse = data[0];
     let picture;
     let picsize = parseInt(data[2]);
-    socket.emit("pready" + adresse + "&" + data[1], 0);
-    socket.on("pback" + adresse + "&" + data[1], (datas) => {
+    let e = parseInt(data[3]);
+    socket.emit("pready" + adresse + "&" + data[1] + "&" + e, 0);
+    socket.on("pback" + adresse + "&" + data[1] + "&" + e, (datas) => {
         picture += datas[1];
         if (picture.length + 1 <= picsize) {
-            socket.emit("pready" + adresse + "&" + data[1], (parseInt(datas[0]) + 1));
+            socket.emit("pready" + adresse + "&" + data[1] + "&" + e, (parseInt(datas[0]) + 1));
         } else {
-            socket.emit("ptransferred" + adresse + false + "&" + data[1], false);
+            socket.emit("ptransferred" + adresse + false + "&" + data[1] + "&" + e, false);
         }
     });
-    socket.once("ptransferred" + adresse + true + "&" + data[1], (q) => {
-        socket.removeAllListeners("pback" + adresse + "&" + data[1]);
+    socket.once("ptransferred" + adresse + true + "&" + data[1] + "&" + e, (q) => {
+        socket.removeAllListeners("pback" + adresse + "&" + data[1] + "&" + e);
         if (q === true) {
             if (picture.length >= 0) {
                 sql.recreateDb(function (datas) {
@@ -469,7 +470,7 @@ function setobjpic(data, socket, item) {
                                             let dat = [object[0].id, datas[0].id];
                                             sql.insert("INSERT OR IGNORE INTO item_picture (item_id, picture_id) VALUES (?, ?)", dat, (callback) => {
                                                 reload_data();
-                                                socket.emit("pfin" + adresse + "&" + object[0].name, true);
+                                                socket.emit("pfin" + adresse + "&" + object[0].name, e);
                                             });
                                         });
                                     });
@@ -485,7 +486,7 @@ function setobjpic(data, socket, item) {
                                             let dat = [object.id, datas[0].id];
                                             sql.insert("INSERT OR IGNORE INTO box_picture (box_id, picture_id) VALUES (?, ?)", dat, (callback) => {
                                                 reload_data();
-                                                socket.emit("pfin" + adresse + "&" + object.name, true);
+                                                socket.emit("pfin" + adresse + "&" + object.name, e);
                                             });
                                         });
                                     });
@@ -615,31 +616,45 @@ function addinstruction(data) {
 }
 
 function additem(data, overcallback) {
-    let dat = [data[0], data[2], data[4]];
+    let dat = [data[0], data[1], data[2]];
     console.log(dat);
     sql.insert("INSERT OR IGNORE INTO item (name, instructions_id, color) VALUES (?, ?, ?)", dat, (q) => {
         reload_data();
         sql.recreateDb((db) => {
             sql.read(db, "SELECT * FROM item WHERE name ='" + data[0] + "' ORDER BY id DESC", (values) => {
-                for (let i = 0; i < data[5].length; i++) {
-                    let dat = [values[0].id, data[3][i], data[5][i], data[7][i], data[6][i]];
-                    console.log(data);
-                    sql.insert("INSERT OR IGNORE INTO item_sizes (item_id, size, total_quantity, price, weight) VALUES (?, ?, ?, ?, ?)", dat, (callback) => {
-                        reload_data();
+                for (let i = 0; i < parseInt(data[4]); i++) {
+                    let dat = [values[0].id, data[5][i], data[6][i], data[7][i], data[8][i], data[11][i], data[10][i], data[12][i]];
+                    console.log(dat);
+                    sql.insert("INSERT OR IGNORE INTO item_sizes (item_id, sizeX, sizeY, sizeZ, quantity, price, weight, IP) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", dat, (callback) => {
                         sql.recreateDb((db) => {
-                            sql.read(db, "SELECT * FROM item_sizes_box WHERE item_sizes_id ='" + values[0].id + "' AND Box_id='1' ORDER BY id DESC", (d) => {
-                                if (d.length == 0) {
+                            sql.read(db, "SELECT * FROM item_sizes WHERE item_id ='" + values[0].id + "' AND sizex='" + data[5][i] + "' ORDER BY id DESC", (d) => {
+                                for (let e = 0; e < data[9][i].length; e++) {
                                     sql.recreateDb((db) => {
-                                        sql.read(db, "SELECT * FROM item_sizes WHERE item_id ='" + values[0].id + "' AND size='" + data[3][i] + "' ORDER BY id DESC", (d) => {
-                                            let dat = [d.id, data[1][i], data[5][i]];
-                                            sql.insert("INSERT OR IGNORE INTO item_sizes_box (item_sizes_id, box_id, quantity) VALUES (?, ?, ?)", dat, (callback) => {
-                                                reload_data();
-                                            });
+                                        let box_id = parseInt(data[9][i][e][0])
+                                        sql.read(db, "SELECT * FROM box WHERE id ='" + box_id + "' ORDER BY id DESC", (da) => {
+                                            if (da.length == 1) {
+                                                let dat = [d.id, box_id, data[9][i][e][1]];
+                                                sql.insert("INSERT OR IGNORE INTO item_sizes_box (item_sizes_id, box_id, quantity) VALUES (?, ?, ?)", dat, (callback) => { });
+                                            } else {
+                                                console.log("No Box with id:" + box_id + " available");
+                                            }
                                         });
                                     });
-                                } else if (d.length > 1) {
-                                    console.log("An error occured");
-                                    reload_data();
+                                }
+                                for (let e = 0; e < data[9][i].length; e++) {
+                                    sql.recreateDb((db) => {
+                                        let con_id = parseInt(data[13][i][e][0])
+                                        sql.read(db, "SELECT * FROM connection WHERE id ='" + con_id + "' ORDER BY id DESC", (da) => {
+                                            if (da.length == 1) {
+                                                let dat = [con_id, d.id, , data[13][i][e][1]];
+                                                sql.insert("INSERT OR IGNORE INTO item_sizes_box (connection_id, item_sizes_id, count) VALUES (?, ?, ?)", dat, (callback) => {
+                                                    reload_data();
+                                                });
+                                            } else {
+                                                console.log("No Connection with id:" + con_id + " available");
+                                            }
+                                        });
+                                    });
                                 }
                             });
                         });

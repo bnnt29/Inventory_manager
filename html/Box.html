@@ -5,10 +5,10 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
     <title>Inventory Manager</title>
-    <link rel="stylesheet" href="../bootstrap/css/bootstrap.min.css">
-    <link rel="stylesheet" href="../fonts/font-awesome.min.css">
-    <link rel="stylesheet" href="../fonts/ionicons.min.css">
-    <link rel="stylesheet" href="../css/styles.min.css">
+    <link rel="stylesheet" href="assets/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/fonts/font-awesome.min.css">
+    <link rel="stylesheet" href="assets/fonts/ionicons.min.css">
+    <link rel="stylesheet" href="assets/css/styles.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/baguettebox.js/1.10.0/baguetteBox.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Swiper/6.4.8/swiper-bundle.min.css">
 </head>
@@ -46,7 +46,7 @@
     <div class="row">
         <div class="col-auto d-xl-flex align-self-start align-items-xl-center">
             <div>
-                <script type="text/javascript" src="js/qrcode.js"></script>
+                <script type="text/javascript" src="qrcode.js"></script>
                 <div id="qrcode" style="width:100px; height:100px; margin:15px;">
                     <script type="text/javascript">
                         var qrcode = new QRCode(document.getElementById("qrcode"), {
@@ -136,7 +136,7 @@
                                     class="btn btn-primary d-none" type="button" style="background: var(--bs-blue);"><i
                                         class="fa fa-save"></i></button></div>
                         </div>
-                        <div class="row">
+                        <div class="row" style="border-bottom: 2px dotted var(--bs-gray-400) ;">
                             <div class="col">
                                 <p>Weight:</p>
                             </div>
@@ -147,6 +147,23 @@
                                     style="background: var(--bs-blue);"><i class="fa fa-pencil"></i></button><button
                                     class="btn btn-primary d-none" type="button" style="background: var(--bs-blue);"><i
                                         class="fa fa-save"></i></button></div>
+                        </div>
+                        <div class="row">
+                            <div class="col d-xl-flex justify-content-xl-start align-items-xl-center">
+                                <p>Pictures (related to currently shown picture):</p>
+                            </div>
+                            <div class="col d-xl-flex justify-content-xl-start align-items-xl-center"><input type="file"
+                                    style="width: 50%;"></div>
+                            <div class="col-4 d-xl-flex justify-content-xl-start align-items-xl-center">
+                                <div class="row" style="width: 100%;">
+                                    <div class="col-6 d-xl-flex justify-content-xl-center align-items-xl-center"><button
+                                            class="btn btn-primary d-xl-flex" type="button"
+                                            style="background: var(--bs-blue);">add</button></div>
+                                    <div class="col-6 d-xl-flex justify-content-xl-center align-items-xl-center"><button
+                                            class="btn btn-primary" type="button"
+                                            style="background: var(--bs-blue);">remove</button></div>
+                                </div>
+                            </div>
                         </div>
                         <div class="row">
                             <div class="col-auto" style="width: 100%;">
@@ -273,11 +290,10 @@
             </div>
         </div>
     </footer><!-- End: Footer Clean -->
-    <script src="../bootstrap/js/bootstrap.min.js"></script>
+    <script src="assets/bootstrap/js/bootstrap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/baguettebox.js/1.10.0/baguetteBox.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Swiper/6.4.8/swiper-bundle.min.js"></script>
-    <script src="https://use.fontawesome.com/360f200af7.js"></script>
-    <script src="../js/box.js"></script>
+    <script src="assets/js/script.min.js"></script>
 </body>
 
 </html>
