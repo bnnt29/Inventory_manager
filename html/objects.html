@@ -10,7 +10,6 @@
     <title>Inventory Manager</title>
     <link rel="stylesheet" href="../css/objects.css">
     <link rel="stylesheet" href="../bootstrap/css/bootstrap.min.css">
-    <link rel="stylesheet" href="../fonts/font-awesome.min.css">
     <link rel="stylesheet" href="../fonts/ionicons.min.css">
     <link rel="stylesheet" href="../css/styles.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/baguettebox.js/1.10.0/baguetteBox.min.css">
@@ -35,8 +34,8 @@
                                 class="fa fa-search"></i></label><input class="form-control search-field" type="search"
                             id="search-field" name="search"></div>
                 </form><button class="btn btn-light active action-button" type="button"
-                    style="background: var(--bs-blue);"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em"
-                        fill="currentColor" viewBox="0 0 16 16" class="bi bi-arrow-clockwise">
+                    style="background: var(--bs-blue);" onclick="refresh()"><svg xmlns="http://www.w3.org/2000/svg"
+                        width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16" class="bi bi-arrow-clockwise">
                         <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z">
                         </path>
                         <path
@@ -103,9 +102,9 @@
                                         <div class="col d-xl-flex align-items-xl-center">
                                             <p>Instructions:</p>
                                         </div>
-                                        <div class="col d-xl-flex align-items-xl-center"><select style="width: 50%;">
+                                        <div class="col d-xl-flex align-items-xl-center"><select style="width: 50%;"
+                                                title="Instruction">
                                                 <optgroup label="Instructions" id="item_instruction">
-                                                    <option value="1" selected="">This is item 1</option>
                                                 </optgroup>
                                             </select></div>
                                         <div class="col d-xl-flex align-items-xl-center"></div>
@@ -128,36 +127,37 @@
                                     </div>
                                     <div class="row">
                                         <div class="col">
-                                            <div class="accordion" role="tablist" id="accordion-1">
+                                            <div class="accordion" role="tablist" id="accordion-0">
                                                 <div class="accordion-item" id="size_accordion_container">
                                                     <h2 class="accordion-header" role="tab"><button
                                                             class="accordion-button" data-bs-toggle="collapse"
-                                                            data-bs-target="#accordion-1 .item-1" aria-expanded="true"
-                                                            aria-controls="accordion-1 .item-1">Size</button></h2>
-                                                    <div class="accordion-collapse collapse show item-1" role="tabpanel"
+                                                            data-bs-target="#accordion-1 .item-0" aria-expanded="true"
+                                                            aria-controls="accordion-1 .item-0">Size</button></h2>
+                                                    <div class="accordion-collapse collapse show item-0" role="tabpanel"
                                                         data-bs-parent="#accordion-1">
                                                         <div class="accordion-body" id="item_size_body-1">
                                                             <div class="row">
                                                                 <div class="col"><button class="btn btn-primary"
                                                                         type="button"
                                                                         style="width: 100%;background: var(--bs-blue);"
-                                                                        id="item_size_button">new
+                                                                        id="item_size_button" onclick="addsize()">new
                                                                         size</button></div>
                                                             </div>
-                                                            <div class="accordion" role="tablist" id="accordion-2">
+                                                            <div class="accordion item_selecter 0" role="tablist"
+                                                                id="size-x-0" style="display: none;">
                                                                 <div class="accordion-item">
                                                                     <h2 class="accordion-header" role="tab"><button
-                                                                            class="accordion-button"
-                                                                            data-bs-toggle="collapse"
-                                                                            data-bs-target="#accordion-2 .item-1"
+                                                                            class="accordion-button item_selecter 1"
+                                                                            id="size-x-0-0" data-bs-toggle="collapse"
+                                                                            data-bs-target="#size-x-0 .item-1"
                                                                             aria-expanded="true"
-                                                                            aria-controls="accordion-2 .item-1">[size]</button>
+                                                                            aria-controls="size-x-0 .item-1">[size]</button>
                                                                     </h2>
-                                                                    <div class="accordion-collapse collapse show item-1"
-                                                                        role="tabpanel" data-bs-parent="#accordion-2">
+                                                                    <div class="accordion-collapse collapse show item_selecter 2"
+                                                                        id="size-x-0-1" role="tabpanel"
+                                                                        data-bs-parent="#size-x-0">
                                                                         <div class="accordion-body">
-                                                                            <div class="row"
-                                                                                style="border-bottom: 2px dotted var(--bs-gray-400) ;">
+                                                                            <div class="row">
                                                                                 <div class="col">
                                                                                     <div class="row">
                                                                                         <div class="col-auto">
@@ -169,10 +169,9 @@
                                                                                                 <div
                                                                                                     class="col text-nowrap d-xl-flex align-items-xl-center">
                                                                                                     <input
-                                                                                                        class="size_sizesX"
+                                                                                                        class="size_sizesX size_sizes"
                                                                                                         type="number"
-                                                                                                        placeholder="0"
-                                                                                                        onchange="">
+                                                                                                        placeholder="0">
                                                                                                 </div>
                                                                                             </div>
                                                                                         </div>
@@ -185,7 +184,7 @@
                                                                                                 <div
                                                                                                     class="col text-nowrap d-xl-flex align-items-xl-center">
                                                                                                     <input
-                                                                                                        class="size_sizesY"
+                                                                                                        class="size_sizesY size_sizes"
                                                                                                         type="number"
                                                                                                         placeholder="0">
                                                                                                 </div>
@@ -200,7 +199,7 @@
                                                                                                 <div
                                                                                                     class="col text-nowrap d-xl-flex align-items-xl-center">
                                                                                                     <input
-                                                                                                        class="size_sizesZ"
+                                                                                                        class="size_sizesZ size_sizes"
                                                                                                         type="number"
                                                                                                         placeholder="0">
                                                                                                 </div>
@@ -269,38 +268,46 @@
                                                                                     </div>
                                                                                     <div class="row">
                                                                                         <div class="col">
-                                                                                            <div class="accordion"
+                                                                                            <div class="accordion item_selecter 3"
                                                                                                 role="tablist"
-                                                                                                id="accordion-3">
+                                                                                                id="size-x-1">
                                                                                                 <div
                                                                                                     class="accordion-item">
                                                                                                     <h2 class="accordion-header"
                                                                                                         role="tab">
                                                                                                         <button
-                                                                                                            class="accordion-button"
+                                                                                                            class="accordion-button item_selecter 4"
+                                                                                                            id="size-x-1-0"
                                                                                                             data-bs-toggle="collapse"
-                                                                                                            data-bs-target="#accordion-3 .item-1"
+                                                                                                            data-bs-target="#size-x-1 .item-1"
                                                                                                             aria-expanded="true"
-                                                                                                            aria-controls="accordion-3 .item-1">outer
+                                                                                                            aria-controls="size-x-1 .item-1">outer
                                                                                                             Box</button>
                                                                                                     </h2>
-                                                                                                    <div class="accordion-collapse collapse show item-1"
+                                                                                                    <div class="accordion-collapse collapse show item_selecter 5"
+                                                                                                        id="size-x-1-1"
                                                                                                         role="tabpanel"
-                                                                                                        data-bs-parent="#accordion-3">
+                                                                                                        data-bs-parent="#size-x-1">
                                                                                                         <div
                                                                                                             class="accordion-body size_outer_box">
-                                                                                                            <div
-                                                                                                                class="row row-cols-1">
+                                                                                                            <div class="row row-cols-1"
+                                                                                                                style="display: none;">
                                                                                                                 <div
                                                                                                                     class="col-6 d-xl-flex align-items-xl-center">
-                                                                                                                    <p>[Box
+                                                                                                                    <p
+                                                                                                                        class="box_name">
+                                                                                                                        [Box
                                                                                                                         name]
                                                                                                                     </p>
                                                                                                                 </div>
                                                                                                                 <div
                                                                                                                     class="col-6 d-xl-flex justify-content-xl-end align-items-xl-center">
-                                                                                                                    <input class="outer_box_count" data-id="0"
-                                                                                                                        type="number" placeholder="0" >
+                                                                                                                    <input
+                                                                                                                        class="outer_box_count"
+                                                                                                                        data-id="0"
+                                                                                                                        type="number"
+                                                                                                                        placeholder="0"
+                                                                                                                        readonly>
                                                                                                                 </div>
                                                                                                             </div>
                                                                                                         </div>
@@ -311,30 +318,34 @@
                                                                                     </div>
                                                                                     <div class="row">
                                                                                         <div class="col">
-                                                                                            <div class="accordion"
+                                                                                            <div class="accordion item_selecter 6"
                                                                                                 role="tablist"
-                                                                                                id="accordion-4">
+                                                                                                id="size-x-2">
                                                                                                 <div
                                                                                                     class="accordion-item">
                                                                                                     <h2 class="accordion-header"
                                                                                                         role="tab">
                                                                                                         <button
-                                                                                                            class="accordion-button"
+                                                                                                            class="accordion-button item_selecter 7"
+                                                                                                            id="size-x-2-0"
                                                                                                             data-bs-toggle="collapse"
-                                                                                                            data-bs-target="#accordion-4 .item-1"
+                                                                                                            data-bs-target="#size-x-2 .item-1"
                                                                                                             aria-expanded="true"
-                                                                                                            aria-controls="accordion-4 .item-1">connections</button>
+                                                                                                            aria-controls="size-x-2 .item-1">connections</button>
                                                                                                     </h2>
-                                                                                                    <div class="accordion-collapse collapse show item-1"
+                                                                                                    <div class="accordion-collapse collapse show item_selecter 8"
+                                                                                                        id="size-x-2-1"
                                                                                                         role="tabpanel"
-                                                                                                        data-bs-parent="#accordion-4">
+                                                                                                        data-bs-parent="#size-x-2">
                                                                                                         <div
                                                                                                             class="accordion-body size_connection">
-                                                                                                            <div
-                                                                                                                class="row row-cols-1">
+                                                                                                            <div class="row row-cols-1"
+                                                                                                                style="display: none;">
                                                                                                                 <div
                                                                                                                     class="col-6 d-xl-flex align-items-xl-center">
-                                                                                                                    <p>[connections
+                                                                                                                    <p
+                                                                                                                        class="connection_name">
+                                                                                                                        [connections
                                                                                                                         name]
                                                                                                                     </p>
                                                                                                                 </div>
@@ -368,8 +379,8 @@
                                     <div class="row">
                                         <div class="col d-xl-flex justify-content-xl-end align-items-xl-center"><button
                                                 class="btn btn-primary save" type="button"
-                                                style="width: 50%;background: var(--bs-blue);"
-                                                id="item_save">save</button></div>
+                                                style="width: 50%;background: var(--bs-blue);" id="item_save"
+                                                onclick="additem()">save</button></div>
                                         <div class="col d-xl-flex justify-content-xl-start align-items-xl-center">
                                             <button class="btn btn-primary reset" type="button"
                                                 style="width: 50%;background: var(--bs-blue);"
@@ -390,9 +401,8 @@
                                         <div class="col d-xl-flex align-items-xl-center">
                                             <p>outer box:</p>
                                         </div>
-                                        <div class="col d-xl-flex align-items-xl-center"><select>
-                                                <optgroup label="This is a group" id="box_outer">
-                                                    <option value="1" selected="">This is item 1</option>
+                                        <div class="col d-xl-flex align-items-xl-center"><select title="outer_box">
+                                                <optgroup label="outer box" id="box_outer_box">
                                                 </optgroup>
                                             </select></div>
                                         <div class="col d-xl-flex align-items-xl-center"></div>
@@ -417,9 +427,8 @@
                                         <div class="col d-xl-flex align-items-xl-center">
                                             <p>Instructions:</p>
                                         </div>
-                                        <div class="col d-xl-flex align-items-xl-center"><select>
-                                                <optgroup label="This is a group" id="box_instruction">
-                                                    <option value="1" selected="">This is item 1</option>
+                                        <div class="col d-xl-flex align-items-xl-center"><select title="Instruction">
+                                                <optgroup label="Instructions" id="box_instruction">
                                                 </optgroup>
                                             </select></div>
                                         <div class="col d-xl-flex align-items-xl-center"></div>
@@ -453,13 +462,17 @@
                                                         data-bs-parent="#accordion-5">
                                                         <div class="accordion-body" id="box_item_body">
                                                             <div class="row"
-                                                                style="border-bottom: 2px dotted var(--bs-gray-400) ;">
+                                                                style="border-bottom: 2px dotted var(--bs-gray-400); display: none;">
                                                                 <div class="col d-xl-flex align-items-xl-center">
-                                                                    <p>[item name]</p>
+                                                                    <p class="box_item_name">[item name]</p>
                                                                 </div>
                                                                 <div
                                                                     class="col d-xl-flex justify-content-xl-end align-items-xl-center">
-                                                                    <input class="form-range" type="range">
+                                                                    <input
+                                                                        class="range-slider__range box_outer_item_count form-range"
+                                                                        type="range" value="0" min="0" max="0" step="1">
+                                                                    <span class="range-slider__value"
+                                                                        id="test_id_range">0</span>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -480,13 +493,14 @@
                                                         data-bs-parent="#accordion-6">
                                                         <div class="accordion-body" id="box_inner_body">
                                                             <div class="row"
-                                                                style="border-bottom: 2px dotted var(--bs-gray-400) ;">
+                                                                style="border-bottom: 2px dotted var(--bs-gray-400); display: none;">
                                                                 <div class="col d-xl-flex align-items-xl-center">
-                                                                    <p>[box name]</p>
+                                                                    <p class="box_inner_box_name">[box name]</p>
                                                                 </div>
                                                                 <div
                                                                     class="col d-xl-flex justify-content-xl-end align-items-xl-center">
-                                                                    <input type="checkbox">
+                                                                    <input type="checkbox"
+                                                                        class="box_inner_box_checkbox">
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -539,14 +553,15 @@
                                                         data-bs-parent="#accordion-7">
                                                         <div class="accordion-body" id="instruction_item_body">
                                                             <div class="row"
-                                                                style="border-bottom: 2px dotted var(--bs-gray-400) ;">
+                                                                style="border-bottom: 2px dotted var(--bs-gray-400); display: none;">
                                                                 <div
                                                                     class="col d-lg-flex d-xl-flex align-items-lg-center align-items-xl-center">
-                                                                    <p>[item name]</p>
+                                                                    <p class="instruction_item_name">[item name]</p>
                                                                 </div>
                                                                 <div
                                                                     class="col d-lg-flex d-xl-flex justify-content-lg-end align-items-lg-center justify-content-xl-end align-items-xl-center">
-                                                                    <input type="checkbox">
+                                                                    <input type="checkbox"
+                                                                        class="instruction_item_checkbox">
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -567,14 +582,15 @@
                                                         data-bs-parent="#accordion-8">
                                                         <div class="accordion-body" id="instruction_box_body">
                                                             <div class="row"
-                                                                style="border-bottom: 2px dotted var(--bs-gray-400) ;">
+                                                                style="border-bottom: 2px dotted var(--bs-gray-400); display: none;">
                                                                 <div
                                                                     class="col d-lg-flex d-xl-flex align-items-lg-center align-items-xl-center">
-                                                                    <p>[box_name]</p>
+                                                                    <p class="instruction_box_name">[box_name]</p>
                                                                 </div>
                                                                 <div
                                                                     class="col d-lg-flex d-xl-flex justify-content-lg-end align-items-lg-center justify-content-xl-end align-items-xl-center">
-                                                                    <input type="checkbox">
+                                                                    <input type="checkbox"
+                                                                        class="instruction_box_checkbox">
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -595,14 +611,17 @@
                                                     <div class="accordion-collapse collapse show item-1" role="tabpanel"
                                                         data-bs-parent="#accordion-10">
                                                         <div class="accordion-body" id="instruction_connection_body">
-                                                            <div class="row">
-                                                                <div class="col d-lg-flex d-xl-flex align-items-lg-center align-items-xl-center"
-                                                                    style="border-bottom: 2px dotted var(--bs-gray-400) ;">
-                                                                    <p>[connections name]</p>
+                                                            <div class="row"
+                                                                style="border-bottom: 2px dotted var(--bs-gray-400); display: none;">
+                                                                <div
+                                                                    class="col d-lg-flex d-xl-flex align-items-lg-center align-items-xl-center">
+                                                                    <p class="Instruction_connection_name">[connections
+                                                                        name]</p>
                                                                 </div>
                                                                 <div
                                                                     class="col d-lg-flex d-xl-flex justify-content-lg-end align-items-lg-center justify-content-xl-end align-items-xl-center">
-                                                                    <input type="checkbox">
+                                                                    <input type="checkbox"
+                                                                        class="instruction_connection_checkbox">
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -666,29 +685,59 @@
                                                             aria-controls="accordion-11 .item-1">Items</button></h2>
                                                     <div class="accordion-collapse collapse show item-1" role="tabpanel"
                                                         data-bs-parent="#accordion-11">
-                                                        <div class="accordion-body" id="in_use_items_body">
-                                                            <div class="accordion" role="tablist" id="accordion-12">
+                                                        <div class="accordion-body" id="in_use_items_body-1">
+                                                            <div class="accordion in_use_selecter 0" role="tablist"
+                                                                id="in_use-x-0" style="display: none;">
                                                                 <div class="accordion-item">
                                                                     <h2 class="accordion-header" role="tab"><button
-                                                                            class="accordion-button"
+                                                                            class="accordion-button in_use_selecter in_use_item_name 1"
                                                                             data-bs-toggle="collapse"
-                                                                            data-bs-target="#accordion-12 .item-1"
+                                                                            data-bs-target="#in_use-x .item-2"
                                                                             aria-expanded="true"
-                                                                            aria-controls="accordion-12 .item-1">[Item_name]</button>
+                                                                            aria-controls="in_use-x .item-2">[Item_name]</button>
                                                                     </h2>
-                                                                    <div class="accordion-collapse collapse show item-1"
-                                                                        role="tabpanel" data-bs-parent="#accordion-12">
+                                                                    <div class="accordion-collapse collapse show item-2 in_use_selecter 3"
+                                                                        role="tabpanel" data-bs-parent="#in_use-x">
                                                                         <div class="accordion-body">
-                                                                            <div class="row"
-                                                                                style="border-bottom: 2px dotted var(--bs-gray-400) ;">
-                                                                                <div
-                                                                                    class="col d-xl-flex align-items-xl-center">
-                                                                                    <p>[Box_name]</p>
-                                                                                </div>
-                                                                                <div
-                                                                                    class="col d-xl-flex justify-content-xl-end align-items-xl-center">
-                                                                                    <input class="form-range"
-                                                                                        type="range">
+                                                                            <div class="accordion in_use_selecter 0" role="tablist"
+                                                                                id="accordion-13">
+                                                                                <div class="accordion-item">
+                                                                                    <h2 class="accordion-header"
+                                                                                        role="tab"><button
+                                                                                            class="accordion-button in_use_selecter in_use_item_size 1"
+                                                                                            data-bs-toggle="collapse"
+                                                                                            data-bs-target="#accordion-13 .item-3"
+                                                                                            aria-expanded="true"
+                                                                                            aria-controls="accordion-13 .item-3">[Item_size]</button>
+                                                                                    </h2>
+                                                                                    <div class="accordion-collapse collapse show item-3 in_use_selecter 2"
+                                                                                        role="tabpanel"
+                                                                                        data-bs-parent="#accordion-13">
+                                                                                        <div class="accordion-body"
+                                                                                            id="in_use_items_body">
+                                                                                            <div class="row"
+                                                                                                style="border-bottom: 2px dotted var(--bs-gray-400) ;">
+                                                                                                <div
+                                                                                                    class="col d-xl-flex align-items-xl-center">
+                                                                                                    <p
+                                                                                                        class="in_use_box_name">
+                                                                                                        [Box_name]</p>
+                                                                                                </div>
+                                                                                                <div
+                                                                                                    class="col d-xl-flex justify-content-xl-end align-items-xl-center">
+                                                                                                    <input
+                                                                                                        class="range-slider__range box_outer_item_count form-range"
+                                                                                                        type="range"
+                                                                                                        value="0"
+                                                                                                        min="0" max="0"
+                                                                                                        step="1">
+                                                                                                    <span
+                                                                                                        class="range-slider__value"
+                                                                                                        id="test_id_range">0</span>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    </div>
                                                                                 </div>
                                                                             </div>
                                                                         </div>
@@ -1050,9 +1099,15 @@
             </div>
         </div>
     </footer><!-- End: Footer Clean -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
     <script src="../bootstrap/js/bootstrap.min.js"></script>
     <script src="https://use.fontawesome.com/360f200af7.js"></script>
     <script src="../js/objects.js"></script>
+    <script>
+        window.onload = function () {
+            init();
+        };
+    </script>
 </body>
 
 </html>

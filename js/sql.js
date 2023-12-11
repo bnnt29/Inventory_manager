@@ -30,10 +30,10 @@ function createTables() {
     db.run("CREATE TABLE IF NOT EXISTS version (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE, version STRING (200) NOT NULL);");
     db.run("CREATE TABLE IF NOT EXISTS box (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE, name STRING (200) NOT NULL UNIQUE, color STRING (200), weight INTEGER (100), location STRING (200), instructions_id INTEGER (100) REFERENCES instructions (id));");
     db.run("CREATE TABLE IF NOT EXISTS box_box (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE, inner_box_id INTEGER (100) NOT NULL REFERENCES box (id), outer_box_id INTEGER (100) NOT NULL REFERENCES box (id));");
-    db.run("CREATE TABLE IF NOT EXISTS in_use (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE, item_sizes_id INTEGER  NOT NULL REFERENCES item_sizes (id), box_id   INTEGER (100) NOT NULL REFERENCES box (id), location STRING (100), quantity INTEGER (100) NOT NULL, notes STRING (100));");
+    db.run("CREATE TABLE IF NOT EXISTS in_use (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE, item_sizes_id INTEGER  NOT NULL REFERENCES item_sizes (id), box_id INTEGER (100) NOT NULL REFERENCES box (id), location STRING (100), quantity INTEGER (100) NOT NULL, note STRING (200));");
     db.run("CREATE TABLE IF NOT EXISTS instructions (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE, name STRING (100) NOT NULL UNIQUE, txtdocument STRING (200), pdfdocument_path STRING (200));");
     db.run("CREATE TABLE IF NOT EXISTS item (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE, name STRING (100) NOT NULL UNIQUE, instructions_id INTEGER (100) REFERENCES instructions (id), color STRING (200));");
-    db.run("CREATE TABLE IF NOT EXISTS item_sizes (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE, item_id INTEGER NOT NULL REFERENCES item (id), sizeX INTEGER (100), sizeY INTEGER (100), sizeZ INTEGER (100), quantity INTEGER (100) NOT NULL, price INTEGER (100), weight INTEGER (100), IP STRING (40));");
+    db.run("CREATE TABLE IF NOT EXISTS item_sizes (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE, item_id INTEGER NOT NULL REFERENCES item (id), sizeX INTEGER (100), sizeY INTEGER (100), sizeZ INTEGER (100), quantity INTEGER (100) NOT NULL, price INTEGER (100), weight INTEGER (100), IP STRING (40), note STRING (200));");
     db.run("CREATE TABLE IF NOT EXISTS item_sizes_box (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE, item_sizes_id INTEGER NOT NULL REFERENCES item_sizes (id), box_id INTEGER (100) REFERENCES box (id) NOT NULL, quantity INTEGER (100) NOT NULL);");
     db.run("CREATE TABLE IF NOT EXISTS item_picture (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE, item_id INTEGER NOT NULL REFERENCES item (id), picture_id INTEGER (100) REFERENCES picture (id) NOT NULL);");
     db.run("CREATE TABLE IF NOT EXISTS box_picture (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE, box_id INTEGER NOT NULL REFERENCES box (id), picture_id INTEGER (100) REFERENCES picture (id) NOT NULL);");
@@ -49,24 +49,6 @@ function createTables() {
     db.run("CREATE TABLE IF NOT EXISTS connection_item_sizes (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE, connection_id INTEGER NOT NULL REFERENCES connection (id), item_sizes_id INTEGER NOT NULL REFERENCES item_sizes (id), count INTEGER (100) NOT NULL);", closeDb(false, db));
 }
 function insertunit() {
-    for (var i = 0; i < size_unit.length; i += 2) {
-        recreateDb(function (db) {
-            var stmt = db.prepare("INSERT OR IGNORE INTO size_unit (name, multiplicator) VALUES (?, ?)");
-            stmt.run(size_unit[i], size_unit[i + 1]);
-            stmt.finalize(() => {
-                closedb(db);
-            });
-        });
-    }
-    for (var i = 0; i < weight_unit.length; i += 2) {
-        recreateDb(function (db) {
-            var stmt = db.prepare("INSERT OR IGNORE INTO weight_unit (name, multiplicator) VALUES (?, ?)");
-            stmt.run(weight_unit[i], weight_unit[i + 1]);
-            stmt.finalize(() => {
-                closedb(db);
-            });
-        });
-    }
     insertdefaults();
 }
 

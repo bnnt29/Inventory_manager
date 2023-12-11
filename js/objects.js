@@ -1,315 +1,316 @@
-function onsizechange(a) {
-    let a = document.getElementsByClassName("")
+var accordion_count = 0;
+
+function init() {
+    addsize();
+    getinstructions();
+    getbox();
+    getitem();
+    getinnerbox();
+    getconnection();
+    getitembox();
 }
 
 function addsize() {
     var ip = location.host;
     var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
     socket.once('connect', () => {
-        socket.once('getouter_box', (data) => {
-            socket.once('getconnection', (data) => {
+        socket.once('getouter_box', (box) => {
+            socket.once('getconnection', (connection) => {
+                let outer_accordion = document.getElementById("size-x-0");
+                outer_accordion = outer_accordion.cloneNode(true);
+                outer_accordion.id = "size-" + accordion_count + "-0";
+                outer_accordion.classList.add("item_size_count");
+                let elements = outer_accordion.getElementsByClassName("item_selecter");
 
+                elements[0].id = "size-" + accordion_count + "-" + 0 + "-" + 0;
+                elements[0].dataset.bsTarget = "#size-" + accordion_count + "-" + 0 + " .item-1";
+                elements[0].setAttribute("aria-controls", "size-" + accordion_count + "-" + 0 + " .item-1");
+                elements[1].id = "size-" + accordion_count + "-" + 0 + "-" + 1;
+                elements[1].setAttribute("data-bs-parent", "#size-" + accordion_count + "-" + 0);
+                elements[1].classList.add("item-1");
+
+                elements[2].id = "size-" + accordion_count + "-" + 1;
+                elements[3].id = "size-" + accordion_count + "-" + 1 + "-" + 0;
+                elements[3].dataset.bsTarget = "#size-" + accordion_count + "-" + 1 + " .item-2";
+                elements[3].setAttribute("aria-controls", "size-" + accordion_count + "-" + 1 + " .item-2");
+                elements[4].id = "size-" + accordion_count + "-" + 1 + "-" + 1;
+                elements[4].setAttribute("data-bs-parent", "#size-" + accordion_count + "-" + 1);
+                elements[4].classList.add("item-2");
+
+                elements[5].id = "size-" + accordion_count + "-" + 2;
+                elements[6].id = "size-" + accordion_count + "-" + 2 + "-" + 0;
+                elements[6].dataset.bsTarget = "#size-" + accordion_count + "-" + 2 + " .item-3";
+                elements[6].setAttribute("aria-controls", "size-" + accordion_count + "-" + 2 + " .item-3");
+                elements[7].id = "size-" + accordion_count + "-" + 2 + "-" + 1;
+                elements[7].setAttribute("data-bs-parent", "#size-" + accordion_count + "-" + 2);
+                elements[7].classList.add("item-3");
+
+                outer_accordion.getElementsByClassName("size_sizes")[0].id = "size_sizes-" + accordion_count + "-X";
+                outer_accordion.getElementsByClassName("size_sizes")[1].id = "size_sizes-" + accordion_count + "-Y";
+                outer_accordion.getElementsByClassName("size_sizes")[2].id = "size_sizes-" + accordion_count + "-Z";
+
+                let box_container = outer_accordion.getElementsByClassName("size_outer_box")[0];
+                if (box.length > 0) {
+                    box.forEach((d) => {
+                        let row = box_container.firstElementChild.cloneNode(true);
+                        row.getElementsByClassName("box_name")[0].innerHTML = d.name;
+                        row.getElementsByClassName("outer_box_count")[0].dataset.id = d.id;
+                        row.style.display = "";
+                        if (d.name === "default") {
+                            row.getElementsByClassName("outer_box_count")[0].placeholder = 1;
+                            row.getElementsByClassName("outer_box_count")[0].id = "size_default_outer_box-" + accordion_count;
+                        }
+                        box_container.appendChild(row);
+                    });
+                } else {
+                    let p = document.createElement("p");
+                    p.innerHTML = "No box found";
+                    box_container.appendChild(p);
+                }
+
+                let connection_container = outer_accordion.getElementsByClassName("size_connection")[0];
+                if (connection.length > 0) {
+                    connection.forEach((d) => {
+                        let row = connection_container.firstElementChild.cloneNode(true);
+                        row.getElementsByClassName("connection_name")[0].innerHTML = d.name;
+                        row.getElementsByClassName("size_connection_count")[0].dataset.id = d.id;
+                        row.style.display = "";
+                        box_container.appendChild(row);
+                    });
+                } else {
+                    let p = document.createElement("p");
+                    p.innerHTML = "No connection found";
+                    connection_container.appendChild(p);
+                }
+
+                outer_accordion.getElementsByClassName("size_quantity")[0].setAttribute("size_count", accordion_count);
+                outer_accordion.getElementsByClassName("size_quantity")[0].oninput = size_default_quantity;
+
+                outer_accordion.style.display = "";
+                document.getElementById("item_size_body-1").appendChild(outer_accordion);
+                document.getElementById("size-" + accordion_count + "-0-0").innerHTML = "0 : 0 : 0";
+
+                document.getElementById("size_sizes-" + accordion_count + "-X").oninput = build_name;
+                document.getElementById("size_sizes-" + accordion_count + "-Y").oninput = build_name;
+                document.getElementById("size_sizes-" + accordion_count + "-Z").oninput = build_name;
             });
         });
     });
+    accordion_count += 1;
+}
+
+function size_default_quantity(element) {
+    document.getElementById("size_default_outer_box-" + element.target.getAttribute("size_count")).value = element.target.value;
+}
+
+function build_name(element) {
+    let size_count = parseInt(element.target.id.substring(element.target.id.toString().indexOf("s-") + 2, element.target.id.toString().lastIndexOf("-")));
+    let x = document.getElementById("size_sizes-" + size_count + "-X");
+    let y = document.getElementById("size_sizes-" + size_count + "-Y");
+    let z = document.getElementById("size_sizes-" + size_count + "-Z");
+    let s = (x.value.length <= 0 ? x.placeholder : x.value);
+    s += " : ";
+    s += (y.value.length <= 0 ? y.placeholder : y.value);
+    s += " : ";
+    s += (z.value.length <= 0 ? z.placeholder : z.value);
+    document.getElementById("size-" + size_count + "-0-0").innerHTML = s;
 }
 
 function getinstructions() {
-    var instructions_get = false;
     var ip = location.host;
     var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
     socket.once('connect', () => {
-        socket.once('getinstructions', (data) => {
-            if (!instructions_get) {
-                data.forEach(function (values) {
-                    let parent = document.getElementById("instructions_select");
-                    let option = document.createElement("option");
-                    parent.appendChild(option);
-                    option.value = values.id;
-                    option.innerHTML = values.name;
-                });
-                data.forEach(function (values) {
-                    let parent = document.getElementById("instructions_select_box");
-                    let option = document.createElement("option");
-                    parent.appendChild(option);
-                    option.value = values.id;
-                    option.innerHTML = values.name;
-                });
-                instructions_get = true;
-            }
+        socket.once('getinstructions', (instruction) => {
+            instruction.forEach(function (values) {
+                let parent = document.getElementById("item_instruction");
+                let option = document.createElement("option");
+                parent.appendChild(option);
+                option.value = values.id;
+                option.innerHTML = values.name;
+            });
+            instruction.forEach(function (values) {
+                let parent = document.getElementById("box_instruction");
+                let option = document.createElement("option");
+                parent.appendChild(option);
+                option.value = values.id;
+                option.innerHTML = values.name;
+            });
         })
     });
 }
 
 function getbox() {
-    var box_get = false;
     var ip = location.host;
     var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
     socket.once('connect', () => {
-        socket.once('getouterbox', (data) => {
-            if (!box_get) {
-                data.forEach(function (values) {
-                    let parent = document.getElementById("outer_box_select");
-                    let option = document.createElement("option");
-                    parent.appendChild(option);
-                    option.value = values.id;
-                    option.innerHTML = values.name;
+        socket.once('getouter_box', (box) => {
+            box.forEach((values) => {
+                let parent = document.getElementById("box_outer_box");
+                let option = document.createElement("option");
+                parent.appendChild(option);
+                option.value = values.id;
+                option.innerHTML = values.name;
+            });
+            let box_container = document.getElementById("instruction_box_body");
+            if (box.length > 0) {
+                box.forEach((d) => {
+                    let row = box_container.firstElementChild.cloneNode(true);
+                    row.getElementsByClassName("instruction_box_name")[0].innerHTML = d.name;
+                    row.getElementsByClassName("instruction_box_checkbox")[0].dataset.id = d.id;
+                    row.style.display = "";
+                    box_container.appendChild(row);
                 });
-                data.forEach(function (values) {
-                    let parent = document.getElementById("box_select");
-                    let option = document.createElement("option");
-                    parent.appendChild(option);
-                    option.value = values.id;
-                    option.innerHTML = values.name;
-                });
-                document.getElementById("box_select").value = 1;
-                document.getElementById("outer_box_select").value = 1;
-                box_get = true;
+            } else {
+                let p = document.createElement("p");
+                p.innerHTML = "No item found";
+                box_container.appendChild(p);
             }
         })
+    });
+}
+
+function resetrangeinput(e) {
+    e.target.value = 0;
+    e.target.nextSibling.nextSibling.innerHTML = e.target.value;
+}
+
+function rangeupdatehandle(e) {
+    e.target.nextSibling.nextSibling.innerHTML = e.target.value;
+}
+
+function getitem() {
+    var ip = location.host;
+    var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
+    socket.once('connect', () => {
+        socket.once('unused_getitem', (item) => {
+            // console.log(item);
+            let item_container = document.getElementById("box_item_body");
+            if (item.length > 0) {
+                item.forEach((d) => {
+                    // console.log(d);
+                    let row = item_container.firstElementChild.cloneNode(true);
+                    row.getElementsByClassName("box_item_name")[0].innerHTML = d.name;
+                    let range = row.getElementsByClassName("box_outer_item_count")[0];
+                    range.dataset.id = d.id;
+                    range.addEventListener('dblclick', function (e) { resetrangeinput(e) });
+                    range.addEventListener("input", function (e) { rangeupdatehandle(e); });
+                    range.addEventListener("change", function (e) { rangeupdatehandle(e); });
+                    range.max = d.quantity;
+                    range.min = 0;
+                    range.value = 0;
+                    row.style.display = "";
+                    item_container.appendChild(row);
+                });
+            } else {
+                let p = document.createElement("p");
+                p.innerHTML = "No item found";
+                item_container.appendChild(p);
+            }
+        });
+        socket.once('getitem', (item) => {
+            let item_container = document.getElementById("instruction_item_body");
+            if (item.length > 0) {
+                item.forEach((d) => {
+                    let row = item_container.firstElementChild.cloneNode(true);
+                    row.getElementsByClassName("instruction_item_name")[0].innerHTML = d.name;
+                    row.getElementsByClassName("instruction_item_checkbox")[0].dataset.id = d.id;
+                    row.style.display = "";
+                    item_container.appendChild(row);
+                });
+            } else {
+                let p = document.createElement("p");
+                p.innerHTML = "No item found";
+                item_container.appendChild(p);
+            }
+        });
     });
 }
 
 function getinnerbox() {
-    var inner_box_get = false;
     var ip = location.host;
     var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
     socket.once('connect', () => {
-        socket.once('getinnerbox', (data) => {
-            if (!inner_box_get) {
-                console.log(data);
-                let container = document.getElementById("inner_box_container1");
-                data.forEach(function (values) {
-                    let row_container = document.createElement("div");
-                    row_container.classList.add("row");
-                    container.appendChild(row_container);
-                    let col_lg_12 = document.createElement("div");
-                    col_lg_12.classList.add("col-lg-12");
-                    row_container.appendChild(col_lg_12);
-
-                    let row1 = document.createElement("div");
-                    row1.classList.add("row");
-                    row1.style.marginTop = "1rem";
-                    row1.style.marginBottom = "1rem";
-                    col_lg_12.appendChild(row1);
-
-
-                    let col_lg_6 = document.createElement("div");
-                    col_lg_6.classList.add("col-lg-6");
-                    row1.appendChild(col_lg_6);
-                    let p = document.createElement("p");
-                    p.innerHTML = values.name;
-                    col_lg_6.appendChild(p);
-
-
-                    col_lg_6 = document.createElement("div");
-                    col_lg_6.classList.add("col-lg-6");
-                    row1.appendChild(col_lg_6);
-                    let row2 = document.createElement("div");
-                    row2.classList.add("row");
-                    col_lg_6.appendChild(row2);
-                    col_lg_12 = document.createElement("div");
-                    col_lg_12.classList.add("col-lg-12");
-                    row2.appendChild(col_lg_12);
-
-                    let input = document.createElement("div");
-                    input.classList.add("input-group");
-                    col_lg_12.appendChild(input);
-                    let row3 = document.createElement("div");
-                    row3.classList.add("row");
-                    input.appendChild(row3);
-
-                    col_lg_6 = document.createElement("div");
-                    col_lg_6.classList.add("col-lg-6");
-                    row3.appendChild(col_lg_6);
-
-                    input = document.createElement("input");
-                    input.classList.add("input-check-field");
-                    input.classList.add("field_box");
-                    input.setAttribute("data-id", values.id);
-                    input.type = "checkbox";
-                    input.id = values.id;
-                    input.value = values.name;
-                    input.name = values.name;
-                    input.checked = false;
-                    input.title = "checked:" + input.checked;
-                    col_lg_6.appendChild(input);
+        socket.once('getinnerbox', (box) => {
+            let box_container = document.getElementById("box_inner_body");
+            if (box.length > 0) {
+                box.forEach((d) => {
+                    let row = box_container.firstElementChild.cloneNode(true);
+                    row.getElementsByClassName("box_inner_box_name")[0].innerHTML = d.name;
+                    row.getElementsByClassName("box_inner_box_checkbox")[0].dataset.id = d.id;
+                    row.style.display = "";
+                    box_container.appendChild(row);
                 });
-                inner_box_get = true;
+            } else {
+                let p = document.createElement("p");
+                p.innerHTML = "No item found";
+                box_container.appendChild(p);
             }
-        })
+        });
     });
 }
 
-function getitem_node(a, b) {
-    let item_getnode = false;
+
+function getconnection() {
     var ip = location.host;
     var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
     socket.once('connect', () => {
-        if (a == b) {
-            socket.emit("in_use_box_node", b);
-        }
-        socket.once("" + b, (data) => {
-            console.log(1);
-            console.log(data);
-            console.log(a + ", " + b);
-            if (!item_getnode) {
-                data.forEach(function (values) {
-                    let container = document.getElementById(a);
-                    let row_container = document.createElement("div");
-                    row_container.classList.add("row");
-                    container.appendChild(row_container);
-                    let col_lg_12 = document.createElement("div");
-                    col_lg_12.classList.add("col-lg-12");
-                    row_container.appendChild(col_lg_12);
-
-                    let row1 = document.createElement("div");
-                    row1.classList.add("row");
-                    row1.style.marginTop = "1rem";
-                    row1.style.marginBottom = "1rem";
-                    col_lg_12.appendChild(row1);
-
-
-                    let col_lg_6 = document.createElement("div");
-                    col_lg_6.classList.add("col-lg-6");
-                    row1.appendChild(col_lg_6);
-                    let p = document.createElement("p");
-                    p.innerHTML = values.name;
-                    col_lg_6.appendChild(p);
-
-
-                    col_lg_6 = document.createElement("div");
-                    col_lg_6.classList.add("col-lg-6");
-                    row1.appendChild(col_lg_6);
-                    let row2 = document.createElement("div");
-                    row2.classList.add("row");
-                    col_lg_6.appendChild(row2);
-                    col_lg_12 = document.createElement("div");
-                    col_lg_12.classList.add("col-lg-12");
-                    row2.appendChild(col_lg_12);
-
-                    let input = document.createElement("div");
-                    input.classList.add("input-group");
-                    input.classList.add("plus-minus-input");
-                    col_lg_12.appendChild(input);
-                    let row3 = document.createElement("div");
-                    row3.classList.add("row");
-                    input.appendChild(row3);
-
-                    col_lg_6 = document.createElement("div");
-                    col_lg_6.classList.add("col-lg-6");
-                    row3.appendChild(col_lg_6);
-                    let conts = "box_container1" + " " + "item_container2";
-                    if (conts.indexOf(a) == -1) {
-                        input = document.createElement("input");
-                        input.classList.add("input-group-field");
-                        input.classList.add("field_item");
-                        input.type = "number";
-                        input.name = values.name;
-                        input.value = "0";
-                        input.placeholder = "0";
-                        input.title = "value";
-                        if (a == "item_container1") {
-                            var max = values.total_quantity;
-                            var min = 0;
-                            socket.emit("sql_read", "SELECT * FROM item_box WHERE item_id='" + values.id + "'");
-                            socket.on("sql_r" + "SELECT * FROM item_box WHERE item_id='" + values.id + "' AND NOT box_id='1'", (data) => { data.forEach((dat) => { max -= parseInt(dat.quantity); }); });
-                            input.setAttribute("data-max", max);
-                            input.setAttribute("data-min", min);
-                            input.addEventListener('change', () => { if (parseInt(input.value) > max) { input.value = max } if (parseInt(input.value) < min) { input.value = min } });
-                        }
-                        input.setAttribute("data-id", values.id);
-                        input.style.width = "16rem";
-                        input.style.height = "3rem";
-                        input.style.alignSelf = "center";
-                        col_lg_6.appendChild(input);
-                    } else {
-                        input = document.createElement("input");
-                        input.classList.add("field_item");
-                        input.setAttribute("data-id", values.id);
-                        input.type = "checkbox";
-                        input.id = values.id;
-                        input.value = values.name;
-                        input.name = values.name;
-                        input.checked = false;
-                        col_lg_6.appendChild(input);
-                    }
+        socket.once('getconnection', (connection) => {
+            let connection_container = document.getElementById("instruction_connection_body");
+            if (connection.length > 0) {
+                connection.forEach((d) => {
+                    let row = connection_container.firstElementChild.cloneNode(true);
+                    row.getElementsByClassName("Instruction_connection_name")[0].innerHTML = d.name;
+                    row.getElementsByClassName("instruction_connection_checkbox")[0].dataset.id = d.id;
+                    row.style.display = "";
+                    connection_container.appendChild(row);
                 });
-                item_getnode = true;
+            } else {
+                let p = document.createElement("p");
+                p.innerHTML = "No item found";
+                connection_container.appendChild(p);
             }
-        })
+        });
     });
 }
 
-function getbox_node(a, b) {
-    let box_getnode = false;
+function getitembox() {
     var ip = location.host;
     var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
     socket.once('connect', () => {
-        socket.once(b, (data) => {
-            console.log(data);
-            if (!box_getnode) {
-                data.forEach((values) => {
-                    let parent = document.getElementById(a);
-                    let div = document.createElement("div");
-                    div.classList.add("col-lg-12");
-                    parent.appendChild(div);
-                    let button = document.createElement("button");
-                    button.type = "button";
-                    button.classList.add("collapsible");
-                    button.classList.add("boxes");
-                    button.innerHTML = values.name;
-                    div.appendChild(button);
-                    let div2 = document.createElement("div");
-                    div2.classList.add("content");
-                    div2.id = values.id;
-                    div2.style.display = "none";
-                    div.appendChild(div2);
-                    getitem_node(values.id, values.id);
-                });
-                box_getnode = true;
-                init_collapse();
-            }
-        })
-    });
-}
+        socket.once('unused_getitem', (dat) => {
+            dat.forEach((item) => {
+                console.log(item);
+                // console.log(data);
+                let outer_accordion = document.getElementById("in_use-x-0");
+                outer_accordion = outer_accordion.cloneNode(true);
+                outer_accordion.id = "size-" + accordion_count + "-0";
+                let elements = outer_accordion.getElementsByClassName("in_use_selecter");
 
-function getUnit() {
-    var unit_get_size = false;
-    var unit_get_weight = false;
-    var ip = location.host;
-    var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
-    socket.once('connect', () => {
-        socket.once('getsize_Unit', (data) => {
-            if (!unit_get_size) {
-                data.forEach(function (values) {
-                    let parent = document.getElementById("unit_size");
-                    let option = document.createElement("option");
-                    parent.appendChild(option);
-                    option.value = values.name;
-                    option.innerHTML = values.name;
-                });
-                unit_get_size = true;
-            }
-        })
-        socket.once('getweight_Unit', (data) => {
-            if (!unit_get_weight) {
-                data.forEach(function (values) {
-                    let parent1 = document.getElementById("unit_weight");
-                    let parent2 = document.getElementById("unit_box_weight");
-                    let option1 = document.createElement("option");
-                    parent1.appendChild(option1);
-                    option1.value = values.name;
-                    option1.innerHTML = values.name;
-                    let option2 = document.createElement("option");
-                    parent2.appendChild(option2);
-                    option2.value = values.name;
-                    option2.innerHTML = values.name;
-                });
-                unit_get_weight = true;
-            }
-        })
+                elements[0].id = "size-" + accordion_count + "-" + 0 + "-" + 0;
+                elements[0].dataset.bsTarget = "#size-" + accordion_count + "-" + 0 + " .item-1";
+                elements[0].setAttribute("aria-controls", "size-" + accordion_count + "-" + 0 + " .item-1");
+                elements[1].id = "size-" + accordion_count + "-" + 0 + "-" + 1;
+                elements[1].setAttribute("data-bs-parent", "#size-" + accordion_count + "-" + 0);
+                elements[1].classList.add("item-1");
+
+                elements[2].id = "size-" + accordion_count + "-" + 1;
+                elements[3].id = "size-" + accordion_count + "-" + 1 + "-" + 0;
+                elements[3].dataset.bsTarget = "#size-" + accordion_count + "-" + 1 + " .item-2";
+                elements[3].setAttribute("aria-controls", "size-" + accordion_count + "-" + 1 + " .item-2");
+                elements[4].id = "size-" + accordion_count + "-" + 1 + "-" + 1;
+                elements[4].setAttribute("data-bs-parent", "#size-" + accordion_count + "-" + 1);
+                elements[4].classList.add("item-2");
+
+                outer_accordion.getElementsByClassName("in_use_item_name")[0].innerHTML = item.name;
+                outer_accordion.getElementsByClassName("in_use_item_size")[0].innerHTML = item.sizeX + " : " + item.sizeY + " : " + item.sizeZ;
+                // outer_accordion.getElementsByClassName("in_use_box_name")[0].innerHTML = item.box.name;
+                outer_accordion.style.display = "";
+                console.log(outer_accordion);
+                document.getElementById("in_use_items_body-1").appendChild(outer_accordion);
+            });
+        });
     });
+    accordion_count += 1;
 }
 
 function refresh() {
@@ -331,94 +332,103 @@ function additem() {
     let name = document.getElementById("item_name").value;
     document.getElementById("item_name").value = "";
     let instructions = parseInt(document.getElementById("item_instruction").value);
-    document.getElementById("item_instruction").value = "Instruction";
     let color = document.getElementById("item_color").value;
     document.getElementById("item_color").value = "#FFFFFF";
     let pictures = document.getElementById("item_picture").files;
 
     let size_count = document.getElementsByClassName("item_size_count").length;
     let size_sizesX = [];
-    document.getElementsByClassName("size_sizesX").forEach((sizex) => {
+    Array.prototype.forEach.call(document.getElementsByClassName("size_sizesX"), (sizex) => {
         if (sizex.value == null || sizex.value.length == 0 || sizex.value == "") {
             size_sizesX = [...size_sizesX, sizex.placeholder];
         } else {
             size_sizesX = [...size_sizesX, sizex.value];
         }
     });
+    size_sizesX = size_sizesX.slice(1);
     let size_sizesY = [];
-    document.getElementsByClassName("size_sizesY").forEach((sizey) => {
+    Array.prototype.forEach.call(document.getElementsByClassName("size_sizesY"), (sizey) => {
         if (sizey.value == null || sizey.value.length == 0 || sizey.value == "") {
             size_sizesY = [...size_sizesY, sizey.placeholder];
         } else {
             size_sizesY = [...size_sizesY, sizey.value];
         }
-        size_sizesY = [...size_sizesY, sizey.value];
     });
+    size_sizesY = size_sizesY.slice(1);
     let size_sizesZ = [];
-    document.getElementsByClassName("size_sizesZ").forEach((sizez) => {
+    Array.prototype.forEach.call(document.getElementsByClassName("size_sizesZ"), (sizez) => {
         if (sizez.value == null || sizez.value.length == 0 || sizez.value == "") {
             size_sizesZ = [...size_sizesZ, sizez.placeholder];
         } else {
             size_sizesZ = [...size_sizesZ, sizez.value];
         }
     });
+    size_sizesZ = size_sizesZ.slice(1);
     let size_quantity = [];
-    document.getElementsByClassName("size_quantity").forEach((quantity) => {
+    Array.prototype.forEach.call(document.getElementsByClassName("size_quantity"), (quantity) => {
         if (quantity.value == null || quantity.value.length == 0 || quantity.value == "") {
             size_quantity = [...size_quantity, quantity.placeholder];
         } else {
             size_quantity = [...size_quantity, quantity.value];
         }
     });
+    size_quantity = size_quantity.slice(1);
     let size_weight = [];
-    document.getElementsByClassName("size_weight").forEach((weight) => {
+    Array.prototype.forEach.call(document.getElementsByClassName("size_weight"), (weight) => {
         if (weight.value == null || weight.value.length == 0 || weight.value == "") {
             size_weight = [...size_weight, weight.placeholder];
         } else {
             size_weight = [...size_weight, weight.value];
         }
     });
+    size_weight = size_weight.slice(1);
     let size_price = [];
-    document.getElementsByClassName("size_price").forEach((price) => {
+    Array.prototype.forEach.call(document.getElementsByClassName("size_price"), (price) => {
         if (price.value == null || price.value.length == 0 || price.value == "") {
             size_price = [...size_price, price.placeholder];
         } else {
             size_price = [...size_price, price.value];
         }
     });
+    size_price = size_price.slice(1);
     let size_ip = [];
-    document.getElementsByClassName("size_ip").forEach((ip) => {
+    Array.prototype.forEach.call(document.getElementsByClassName("size_ip"), (ip) => {
         if (ip.value == null || ip.value.length == 0 || ip.value == "") {
             size_ip = [...size_ip, ip.placeholder];
         } else {
             size_ip = [...size_ip, ip.value];
         }
     });
+    size_ip = size_ip.slice(1);
     let size_connection = [];
-    document.getElementsByClassName("size_connection").forEach((connection) => {
+    Array.prototype.forEach.call(document.getElementsByClassName("size_connection"), (connection) => {
         let save = [];
-        connection.innerHTML.getElementsByClassName("size_connection_count").forEach((connection_count) => {
+        Array.prototype.forEach.call(connection.getElementsByClassName("size_connection_count"), (connection_count) => {
             if (connection_count.value == null || connection_count.value.length == 0 || connection_count.value == "") {
-                save = [...save, [connection_count.getAttribute('data-id'), connection_count.placeholder]];
+                save = [...save, [parseInt(connection_count.getAttribute('data-id')), parseInt(connection_count.placeholder)]];
             } else {
-                save = [...save, [connection_count.getAttribute('data-id'), connection_count.value]];
+                save = [...save, [parseInt(connection_count.getAttribute('data-id')), parseInt(connection_count.value)]];
             }
         });
+        save = save.slice(1);
         size_connection = [...size_connection, save];
     });
-
+    size_connection = size_connection.slice(1);
     let size_outer_Box = [];
-    document.getElementsByClassName("size_outer_box").forEach((connection) => {
+    Array.prototype.forEach.call(document.getElementsByClassName("size_outer_box"), (connection) => {
         let save = [];
-        connection.innerHTML.getElementsByClassName("outer_box_count").forEach((outer_box_count) => {
+        Array.prototype.forEach.call(connection.getElementsByClassName("outer_box_count"), (outer_box_count) => {
             if (outer_box_count.value == null || outer_box_count.value.length == 0 || outer_box_count.value == "") {
-                save = [...save, [outer_box_count.getAttribute('data-id'), outer_box_count.placeholder]];
+                save = [...save, [parseInt(outer_box_count.getAttribute('data-id')), parseInt(outer_box_count.placeholder)]];
             } else {
-                save = [...save, [outer_box_count.getAttribute('data-id'), outer_box_count.value]];
+                save = [...save, [parseInt(outer_box_count.getAttribute('data-id')), parseInt(outer_box_count.value)]];
             }
         });
+        save = save.slice(1);
         size_outer_Box = [...size_outer_Box, save];
     });
+    size_outer_Box = size_outer_Box.slice(1);
+    console.log(size_outer_Box);
     if (name != "") {
         var ip = location.host;
         var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
@@ -456,114 +466,115 @@ function additem() {
     }
 }
 
-function addbox(a) {
-    console.log(location);
-    var name = document.getElementById("box_name").value;
+function addbox() {
+    let name = document.getElementById("box_name").value;
     document.getElementById("box_name").value = "";
-    var outer_box = document.getElementById("outer_box_select").value;
-    document.getElementById("outer_box_select").value = 1;
-    var weight = parseFloat(document.getElementById("box_weight").value);
-    document.getElementById("box_weight").value = "";
-    var unit_weight = document.getElementById("unit_box_weight").value;
-    document.getElementById("unit_box_weight").value = "g";
-    var parent = document.getElementById(a);
-    var items = parent.getElementsByClassName("field_item");
-    var boxs = parent.getElementsByClassName("field_box");
-    var color = document.getElementById("box_color").value;
+    let outer_box = parseInt(document.getElementById("box_outer_box").value);
+    let color = document.getElementById("box_color").value;
     document.getElementById("box_color").value = "#FFFFFF";
-    var pic = document.getElementById("box_pic").files;
-    var location_name = document.getElementById("location_name").value;
-    document.getElementById("location_name").value = "";
-    var itemlist = [];
+    let weight = document.getElementById("box_weight").value;
+    document.getElementById("box_weight").value = 0;
+    let instructions = parseInt(document.getElementById("box_instruction").value);
+    let location = document.getElementById("box_location").value;
+    let pictures = document.getElementById("box_picture").files;
+    let Items = [];
+    Array.prototype.forEach.call(document.getElementsByClassName("range-slider__range"), (count) => {
+        if (count.value == null || count.value.length == 0 || count.value == "") {
+            Items = [...Items, [parseInt(count.getAttribute('data-id')), parseInt(count.placeholder)]];
+        } else {
+            Items = [...Items, [parseInt(count.getAttribute('data-id')), parseInt(count.value)]];
+        }
+    });
+    let inner_box = [];
+    Array.prototype.forEach.call(document.getElementsByClassName("box_inner_box_checkbox"), (check) => {
+        inner_box = [...inner_box, [parseInt(check.getAttribute('data-id')), check.checked]];
+    });
     if (name != "") {
-        Array.prototype.forEach.call(items, function (values) {
-            let value = values.value;
-            values.value = 0;
-            let id = values.getAttribute("data-id");
-            let min = values.getAttribute("data-min");
-            let max = values.getAttribute("data-max");
-            var b = false;
-            if (min != "") {
-                if (parseInt(min) <= value) {
-                    if (max != "") {
-                        if (parseInt(max) >= value) {
-                            b = true;
-                        }
-                    } else {
-                        b = true;
-                    }
-                }
-            } else if (max != "") {
-                if (parseInt(max) >= value) {
-                    b = true;
-                }
-            } else {
-                b = true;
-            }
-            if (b) {
-                itemlist = [...itemlist, id, value];
-            }
-        });
-        var boxlist = [];
-        Array.prototype.forEach.call(boxs, function (values) {
-            let id = values.getAttribute("data-id");
-            if (values.checked) {
-                boxlist = [...boxlist, id];
-            }
-        });
-        console.log(location);
-        console.log(location.host);
         var ip = location.host;
-        console.log(ip);
         var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
         socket.once('connect', () => {
-            socket.once('getweight_Unit', (dat) => {
-                dat.forEach((values) => {
-                    if (unit_weight === values.name) {
-                        weight = weight * parseFloat(values.multiplicator);
+            socket.emit('box_data', [name, outer_box, color, weight, instructions, location, Items, inner_box]);
+            socket.once("successi", (data) => {
+                for (let e = 0; e < pictures.length; e++) {
+                    let r = new FileReader();
+                    r.addEventListener("loadend", function () {
+                        let picres = r.result;
+                        socket.emit('setboxpic', [data, name, picres.length, e]);
+                        socket.on("pready" + data + "&" + name + "&" + e, (datas) => {
+                            socket.emit("pback" + data + "&" + name + "&" + e, [datas, picres.slice(0 + (datas * 9900), 9900 * (datas + 1))]);
+                            if (datas + 1 >= picres.size / 9900) {
+                                console.log("allsended");
+                            }
+                        });
+                        socket.once("ptransferred" + data + false + "&" + name + "&" + e, (datas) => {
+                            if (datas === false) {
+                                socket.emit("ptransferred" + data + true + "&" + name + "&" + e, true);
+                                socket.removeAllListeners("pready" + data + "&" + name + "&" + e);
+                            }
+                        });
+                    });
+                    r.readAsDataURL(pic[e]);
+                }
+                socket.once("pfin" + data + "&" + name, (dat) => {
+                    if (dat >= pictures.length) {
+                        document.getElementById("item_picture").reset();
+                        location.reload();
                     }
-                });
-                socket.emit('box_data', [name, outer_box, boxlist, itemlist, color, weight, location_name]);
-                socket.once("successb", (data) => {
-                    for (let e = 0; e < pic.length; e++) {
-                        let packag_parts = pic[e].match(/.{1,9900}(\s|$)/g);
-                        socket.emit('setboxpic', [data, name, packag_parts.length]);
-                        for (let i = 0; i < packag_parts.length; i++) {
-                            socket.once("pready" + data + "&" + name, (datas) => {
-                                socket.emit("pback" + data + "&" + name, [datas[0], datas[1], packag_parts[datas[1]]]);
-                            });
-                        }
-                    }
-                    document.getElementById("box_pic_f").reset();
                 });
             });
-        })
+        });
     }
 }
 
-function addinstructions(a) {
-    var name = document.getElementById("instructions_name").value;
-    document.getElementById("instructions_name").value = "";
-    var file = document.getElementById("instruction_file").files;
-    var items;
-    var parent = document.getElementById(a);
-    items = parent.getElementsByClassName("field");
-
-    var itemlist = [];
-    if (name != "" && items.length > 0) {
-        Array.prototype.forEach.call(items, function (values) {
-            let checked = values.checked;
-            values.checked = false;
-            if (checked) {
-                let id = values.getAttribute("data-id");
-                itemlist = [...itemlist, id];
-            }
-        });
+function addinstruction() {
+    let name = document.getElementById("instruction_name").value;
+    document.getElementById("instruction_name").value = "";
+    let pdf = document.getElementById("instruction_pdf").files[0];
+    let Items = [];
+    Array.prototype.forEach.call(document.getElementsByClassName("instruction_item_checkbox"), (check) => {
+        Items = [...Items, [parseInt(check.getAttribute('data-id')), check.checked]];
+    });
+    let box = [];
+    Array.prototype.forEach.call(document.getElementsByClassName("instruction_box_checkbox"), (check) => {
+        box = [...box, [parseInt(check.getAttribute('data-id')), check.checked]];
+    });
+    let connection = [];
+    Array.prototype.forEach.call(document.getElementsByClassName("instruction_connection_checkbox"), (check) => {
+        connection = [...connection, [parseInt(check.getAttribute('data-id')), check.checked]];
+    });
+    let text = document.getElementById("instruction_text").value;
+    document.getElementById("instruction_text").value = null;
+    if (name != "") {
         var ip = location.host;
         var socket = io('http://' + ip, { transports: ["websocket"] }); // connect to server
         socket.once('connect', () => {
-            socket.emit('instruction_data', [name, itemlist, file, file.length]);
-            socket.once("successinst", (data) => { document.getElementById("instructions_f").reset(); location.reload(); });
+            socket.emit('instruction_data', [name, Items, box, connection, text]);
+            socket.once("successi", (data) => {
+                let r = new FileReader();
+                r.addEventListener("loadend", function () {
+                    let picres = r.result;
+                    socket.emit('setinstpdf', [data, name, picres.length, e]);
+                    socket.on("pdready" + data + "&" + name + "&" + e, (datas) => {
+                        socket.emit("pdback" + data + "&" + name + "&" + e, [datas, picres.slice(0 + (datas * 9900), 9900 * (datas + 1))]);
+                        if (datas + 1 >= picres.size / 9900) {
+                            console.log("allsended");
+                        }
+                    });
+                    socket.once("pdtransferred" + data + false + "&" + name + "&" + e, (datas) => {
+                        if (datas === false) {
+                            socket.emit("pdtransferred" + data + true + "&" + name + "&" + e, true);
+                            socket.removeAllListeners("pdready" + data + "&" + name + "&" + e);
+                        }
+                    });
+                });
+                r.readAsDataURL(pic[e]);
+                socket.once("pdfin" + data + "&" + name, (dat) => {
+                    if (dat >= pictures.length) {
+                        document.getElementById("item_picture").reset();
+                        location.reload();
+                    }
+                });
+            });
         });
     }
 }
